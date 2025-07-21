@@ -1,4 +1,4 @@
-package com.example.mseventseating.controller;
+package com.ticketly.mseventseating.controller;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -23,7 +23,8 @@ public class TestController {
         return Map.of(
             "message", "Protected endpoint - Hello!",
             "username", jwt.getClaimAsString("preferred_username"),
-            "scope", jwt.getClaimAsString("scope")
+            "scope", jwt.getClaimAsString("scope"),
+                "uid", jwt.getClaimAsString("sub")
         );
     }
 }

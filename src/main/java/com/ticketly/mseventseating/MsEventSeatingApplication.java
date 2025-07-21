@@ -9,5 +9,4 @@ public class MsEventSeatingApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(MsEventSeatingApplication.class, args);
 	}
-
 }
