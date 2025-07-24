@@ -32,6 +32,7 @@ public class Event {
     private String overview;
 
     private LocalDateTime startTime;
+
     private LocalDateTime endTime;
 
     private boolean isOnline;
@@ -59,7 +60,7 @@ public class Event {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<SeatMap> seatMaps;
 
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     // getters and setters
