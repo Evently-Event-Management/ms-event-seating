@@ -1,15 +1,21 @@
 package com.ticketly.mseventseating.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Event {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
@@ -50,9 +56,8 @@ public class Event {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<Tier> tiers;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "seat_map_id")
-    private SeatMap seatMap;
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    private List<SeatMap> seatMaps;
 
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

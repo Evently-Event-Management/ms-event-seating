@@ -1,10 +1,16 @@
 package com.ticketly.mseventseating.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 import java.util.UUID;
 
 @Entity
 @Table(name = "seat_map")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class SeatMap {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
