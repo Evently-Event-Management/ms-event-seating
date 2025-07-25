@@ -42,7 +42,7 @@ public class Event {
     private String locationDescription;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(20) check (status in ('PENDING', 'APPROVED', 'REJECTED'))")
+    @Column(columnDefinition = "varchar(20)")
     private EventStatus status = EventStatus.PENDING;
 
     private String rejectionReason;
