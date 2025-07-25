@@ -27,5 +27,6 @@ public class SeatMap {
     private Tier tier;
 
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(20) check (status in ('AVAILABLE', 'RESERVED', 'BOOKED'))")
     private SeatStatus status; // AVAILABLE, RESERVED, BOOKED
 }
