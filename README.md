@@ -1,132 +1,73 @@
 # Event Seating Microservice
 
-This microservice is part of a larger Event Ticketing and Management Platform. It handles event creation, venues, seating layouts, and real-time seat statuses.
+This microservice handles event seating management for the Ticketly platform.
 
-## Overview
-
-The Events & Seating Service:
-- Manages event creation, updates, and deletion
-- Stores event metadata, venues, and seating layouts
-- Provides customizable seating layouts (arcs, blocks, tables)
-- Delivers seat charts to frontend applications
-- Emits domain events (e.g., event-created, event-published)
-- Tracks real-time seat statuses
-
-## Technology Stack
-
-- **Framework**: Spring Boot
-- **Security**: OAuth2 with Keycloak
-- **Database**: PostgreSQL
-- **Migration Tool**: Flyway
-- **Containerization**: Docker & Docker Compose
-- **API Documentation**: Swagger/OpenAPI
-
-## Getting Started
+## Development Setup
 
 ### Prerequisites
-
-- Java 17+
-- Docker and Docker Compose
+- Java 21
 - Maven
+- Docker and Docker Compose
 
-### Development Environment Setup
+### Running Development Environment
 
-1. **Clone the repository**
-   ```bash
-   git clone [your-repository-url]
-   cd ms-event-seating
-   ```
-
-2. **Run the development database using Docker Compose**
+1. Start the required services (PostgreSQL and LocalStack) using Docker Compose:
    ```bash
    docker-compose up -d
    ```
-   This will start PostgreSQL on port 5433 and create the `event_seating` database.
 
-3. **Build the application**
+2. After the first run, initialize the S3 bucket in LocalStack:
    ```bash
-   ./mvnw clean install
+   aws --endpoint-url=http://localhost:4566 s3 mb s3://ticketly-dev-uploads
    ```
 
-4. **Run the application**
+3. Run the application with the dev profile:
    ```bash
-   ./mvnw spring-boot:run
+   ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
    ```
 
-   The service will be available at: http://localhost:8081
+### Database Migrations
 
-### Database Migrations with Flyway
+The project uses Flyway for database migrations:
 
-This project uses Flyway for database migrations.
+1. To create a new migration file in IntelliJ:
+   - Navigate to `src/main/resources/db/migration`
+   - Create a new file following the naming convention: `V{version}__{description}.sql`
+   - Example: `V3__add_user_preferences.sql`
 
-#### Creating New Migrations
+2. Run migrations manually with Maven:
+   ```bash
+   ./mvnw flyway:migrate
+   ```
 
-1. **Using IntelliJ IDEA**:
-   - Right-click on `src/main/resources/db/migration`
-   - Select "New" → "File"
-   - Name the file using Flyway's naming convention: `V{version}__{description}.sql`
-   - Example: `V2__add_seat_sections.sql`
+3. Migrations run automatically on application startup
 
-2. **Writing Migration SQL**:
-   - Add your SQL statements to create or modify database objects
-   - Follow best practices for idempotent migrations
+### Authentication
 
-#### Running Migrations
+The application uses Keycloak for authentication and authorization:
 
-Migrations run automatically when the application starts.
+- Default issuer URL: http://localhost:8080/realms/event-ticketing
+- JWK Set URI: http://localhost:8080/realms/event-ticketing/protocol/openid-connect/certs
 
-To run migrations manually using IntelliJ's Flyway integration:
+### Environment Variables
 
-1. Do changes in the model
-2. Move to `src/main/resources/db/migration`
-3. Right click and select `Flyway Migration`
-4. On left select whole project or specific module
-5. On right select `Database` and choose the database connection
-6. Generate migration file under `src/main/resources/db/migration` with correct Version (Eg. `V2__add_seat_sections.sql`)
-7. Generate the file and run the application to apply the migration
+The following environment variables can be set:
 
-#### Troubleshooting Migrations
+| Variable | Description | Default Value |
+|----------|-------------|---------------|
+| SERVER_PORT | Application port | 8081 |
+| JWT_ISSUER_URI | Keycloak issuer URI | http://localhost:8080/realms/event-ticketing |
+| JWT_JWK_SET_URI | Keycloak JWK set URI | http://localhost:8080/realms/event-ticketing/protocol/openid-connect/certs |
+| DATABASE_URL | Database URL | Development: jdbc:postgresql://localhost:5433/event_seating |
+| DATABASE_USERNAME | Database username | Development: postgres |
+| DATABASE_PASSWORD | Database password | Development: postgres |
+| AWS_ACCESS_KEY | AWS access key | Development: test |
+| AWS_SECRET_KEY | AWS secret key | Development: test |
 
-If you encounter issues with migrations:
+## Production Deployment
 
-- Set `spring.flyway.validate-on-migrate: false` temporarily in application.yml
-- Check that the migration files follow the correct naming pattern
-- Verify SQL syntax against the PostgreSQL version being used
+For production, set the appropriate environment variables and use the prod profile:
 
-## API Documentation
-
-Once the application is running, access the API documentation at:
-- http://localhost:8081/swagger-ui.html
-
-## Configuration
-
-The main configuration is in `application.yml`. Key settings include:
-
-- Server port: 8081
-- Database connection details
-- OAuth2/JWT configuration
-- Flyway migration settings
-
-## Security
-
-This service is configured as an OAuth2 Resource Server, using Keycloak for authentication and authorization.
-
-JWT tokens are verified independently by this service using Keycloak's JWK endpoint.
-
-## Development Guidelines
-
-- Follow the existing package structure
-- Write unit tests for all new functionality
-- Document APIs using OpenAPI annotations
-- Use the provided Flyway migration patterns for database changes
-
-## Docker Support
-
-The service is containerized and can be deployed in various environments:
-
-- Development: Use `docker-compose.yml` for local development dependencies
-- Production: The service is designed to run in Kubernetes with proper configurations
-
-## Contact
-
-For questions or issues, contact the project maintainers.
+```bash
+java -jar ms-event-seating.jar --spring.profiles.active=prod
+```

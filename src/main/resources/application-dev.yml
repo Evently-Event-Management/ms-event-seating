@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/event_seating
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+s3:
+  endpoint: http://localhost:4566
+  region: us-east-1
+  bucket: ticketly-dev-uploads
+  access-key: test
+  secret-key: test
+  use-path-style: true

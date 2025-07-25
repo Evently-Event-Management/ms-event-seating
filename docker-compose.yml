@@ -1,16 +1,33 @@
 version: '3.8'
+
 services:
   postgres:
-    image: postgres:17
-    container_name: event-seating-db
+    image: postgres:16
+    container_name: event-seating-postgres
+    ports:
+      - "5433:5432"
     environment:
       POSTGRES_DB: event_seating
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    ports:
-      - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
+  localstack:
+    image: localstack/localstack:latest
+    container_name: event-seating-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+      - AWS_DEFAULT_REGION=us-east-1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - localstack-data:/tmp/localstack
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
 volumes:
   postgres-data:
+  localstack-data:
