@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: ${SERVER_PORT:8081}
 
 spring:
   application:
@@ -8,12 +8,12 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/event-ticketing
-          jwk-set-uri: http://localhost:8080/realms/event-ticketing/protocol/openid-connect/certs
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/event-ticketing}
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8080/realms/event-ticketing/protocol/openid-connect/certs}
   datasource:
-    url: jdbc:postgresql://localhost:5433/event_seating
-    username: postgres
-    password: postgres
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/event_seating}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
