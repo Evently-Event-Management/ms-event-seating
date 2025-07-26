@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/v1")
 public class TestController {
 
     @GetMapping("/public/hello")
