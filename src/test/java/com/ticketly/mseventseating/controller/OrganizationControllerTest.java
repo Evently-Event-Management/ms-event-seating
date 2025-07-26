@@ -165,16 +165,4 @@ class OrganizationControllerTest {
                 .andExpect(status().isNoContent());
     }
 
-//    @Configuration
-//    static class TestConfig {
-//        @Bean
-//        public OrganizationService organizationService() {
-//            return mock(OrganizationService.class);
-//        }
-//
-//        @Bean
-//        public JwtDecoder jwtDecoder() {
-//            return mock(JwtDecoder.class);
-//        }
-//    }
 }
