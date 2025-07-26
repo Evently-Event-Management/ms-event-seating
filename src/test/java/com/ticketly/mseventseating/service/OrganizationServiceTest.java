@@ -19,15 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,7 +72,7 @@ class OrganizationServiceTest {
     @Test
     void getAllOrganizationsForUser_ShouldReturnListOfOrganizations() {
         // Arrange
-        List<Organization> organizations = Arrays.asList(testOrganization);
+        List<Organization> organizations = Collections.singletonList(testOrganization);
         when(organizationRepository.findByUserId(USER_ID)).thenReturn(organizations);
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
 
@@ -87,10 +81,10 @@ class OrganizationServiceTest {
 
         // Assert
         assertEquals(1, result.size());
-        assertEquals(ORG_ID, result.get(0).getId());
-        assertEquals(ORG_NAME, result.get(0).getName());
-        assertEquals(ORG_WEBSITE, result.get(0).getWebsite());
-        assertEquals(PRESIGNED_URL, result.get(0).getLogoUrl());
+        assertEquals(ORG_ID, result.getFirst().getId());
+        assertEquals(ORG_NAME, result.getFirst().getName());
+        assertEquals(ORG_WEBSITE, result.getFirst().getWebsite());
+        assertEquals(PRESIGNED_URL, result.getFirst().getLogoUrl());
         
         verify(organizationRepository).findByUserId(USER_ID);
         verify(s3StorageService).generatePresignedUrl(LOGO_URL, 60);
