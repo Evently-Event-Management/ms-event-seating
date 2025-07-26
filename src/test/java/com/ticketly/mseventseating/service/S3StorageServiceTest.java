@@ -113,7 +113,9 @@ class S3StorageServiceTest {
     void deleteFile_ShouldCallS3ClientWithCorrectParameters() {
         // Arrange
         DeleteObjectResponse mockResponse = mock(DeleteObjectResponse.class);
-        // FIX: Use a matcher for the Consumer lambda, not the Request object.
+        // FIX: The deleteObject method in the AWS SDK for Java uses a lambda-based Consumer pattern
+        // to configure the DeleteObjectRequest.Builder. Therefore, a matcher for Consumer is required
+        // instead of a direct DeleteObjectRequest parameter.
         when(s3Client.deleteObject(any(java.util.function.Consumer.class))).thenReturn(mockResponse);
 
         // Act
