@@ -2,10 +2,15 @@ package com.ticketly.mseventseating.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
@@ -27,6 +32,35 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         log.error("Type mismatch exception: parameter '{}' with value '{}'", ex.getName(), ex.getValue(), ex);
         return buildResponse(HttpStatus.BAD_REQUEST, "Invalid parameter type: " + ex.getName());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        log.error("Validation error: {}", ex.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
+        ValidationErrorResponse validationErrorResponse = ValidationErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message("Validation failed")
+                .errors(errors)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(validationErrorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxSizeException(MaxUploadSizeExceededException ex) {
+        log.error("File size limit exceeded: {}", ex.getMessage());
+        String message = "File upload size exceeds the limit. Maximum allowed size is "
+                + (ex.getMaxUploadSize() / (1024 * 1024)) + "MB";
+        return buildResponse(HttpStatus.PAYLOAD_TOO_LARGE, message);
     }
 
     @ExceptionHandler(Exception.class)
