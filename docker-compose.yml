@@ -28,7 +28,7 @@ services:
       - '4566-4583:4566-4583'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./script/localstack/s3/init-s3-bucket.sh:/docker-entrypoint-initaws.d/init-s3-bucket.sh
+      - ./script/localstack/s3/init-s3-bucket.sh:/etc/localstack/init/ready.d/init-s3-bucket.sh
 
 volumes:
   postgres-data:

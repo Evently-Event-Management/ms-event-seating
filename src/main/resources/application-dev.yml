@@ -7,8 +7,8 @@ spring:
 
 aws:
   s3:
-    endpoint: http://localhost:4566
     region: us-east-1
+    endpoint: http://localhost:4566
     bucket-name: event-seating-uploads
     access-key: test
     secret-key: test
