@@ -16,18 +16,20 @@ services:
   localstack:
     image: localstack/localstack:latest
     container_name: event-seating-localstack
-    ports:
-      - "4566:4566"
     environment:
-      - SERVICES=s3
       - DEBUG=1
-      - DATA_DIR=/tmp/localstack/data
-      - AWS_DEFAULT_REGION=us-east-1
+      - USE_SSL=0
+      - AWS_CBOR_DISABLE=1
       - DOCKER_HOST=unix:///var/run/docker.sock
+      - HOSTNAME=localstack
+      - SERVICES=s3
+      - AWS_DEFAULT_REGION=us-east-1
+    ports:
+      - '4566-4583:4566-4583'
     volumes:
-      - localstack-data:/tmp/localstack
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - ${TEMPDIR:-/tmp/localstack}:/tmp/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./script/localstack/s3/init-s3-bucket.sh:/docker-entrypoint-initaws.d/init-s3-bucket.sh
 
 volumes:
   postgres-data:
-  localstack-data:
