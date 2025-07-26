@@ -5,10 +5,10 @@ spring:
     password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
-s3:
-  endpoint: https://s3.amazonaws.com
-  region: ap-south-1
-  bucket: ticketly-prod-uploads
-  access-key: ${AWS_ACCESS_KEY}
-  secret-key: ${AWS_SECRET_KEY}
-  use-path-style: false
+#s3:
+#  endpoint: https://s3.amazonaws.com
+#  region: ap-south-1
+#  bucket: ticketly-prod-uploads
+#  access-key: ${AWS_ACCESS_KEY}
+#  secret-key: ${AWS_SECRET_KEY}
+#  use-path-style: false
