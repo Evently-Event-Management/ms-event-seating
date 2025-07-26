@@ -29,6 +29,12 @@ public class S3StorageService {
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
+    @Value("${aws.s3.endpoint:#{null}}")
+    private String endpointUrl;
+
+    @Value("${spring.profiles.active:dev}")
+    private String activeProfile;
+
     /**
      * Upload a file to S3
      * @param file The file to upload
@@ -61,6 +67,13 @@ public class S3StorageService {
      * @return A presigned URL for the file
      */
     public String generatePresignedUrl(String objectKey, int expirationInMinutes) {
+        // For LocalStack in dev environment, construct the URL directly
+        if ("dev".equals(activeProfile) && endpointUrl != null && !endpointUrl.isEmpty()) {
+            log.info("Using direct URL construction for LocalStack in dev environment");
+            return String.format("%s/%s/%s", endpointUrl, bucketName, objectKey);
+        }
+
+        // For production or when not using LocalStack, use presigned URLs
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucketName)
                 .key(objectKey)
