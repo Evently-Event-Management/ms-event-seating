@@ -110,9 +110,10 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.2.5</version> <configuration>
-				<argLine>--enable-preview -XX:+EnableDynamicAgentLoading</argLine>
-			</configuration>
+				<version>3.2.5</version>
+				<configuration>
+					<argLine>--enable-preview -XX:+EnableDynamicAgentLoading</argLine>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
