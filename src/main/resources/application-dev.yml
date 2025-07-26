@@ -5,7 +5,6 @@ spring:
     password: postgres
     driver-class-name: org.postgresql.Driver
 
-# AWS S3 Configuration for LocalStack
 aws:
   s3:
     endpoint: http://localhost:4566
