@@ -112,7 +112,7 @@ public class CategoryService {
                     .orElseThrow(() -> new ResourceNotFoundException("Parent category not found with id: " + request.getParentId()));
 
             // Check if the new parent is a descendant of the current category (which would create a cycle)
-            if (isDescendant(newParent, existingCategory)) {
+            if (isDescendant(existingCategory, newParent)) {
                 throw new BadRequestException("Cannot set a subcategory as the parent (creates a cycle)");
             }
 
@@ -137,15 +137,38 @@ public class CategoryService {
     }
 
     /**
-     * Check if potentialChild is a descendant of parent
+     * Check if potentialDescendant is a descendant of the ancestor category
+     * 
+     * @param ancestor The category that should be the ancestor
+     * @param potentialDescendant The category to check if it's a descendant
+     * @return true if potentialDescendant is a descendant of ancestor, false otherwise
      */
-    private boolean isDescendant(Category potentialChild, Category parent) {
-        if (potentialChild == null || potentialChild.getSubCategories() == null || potentialChild.getSubCategories().isEmpty()) {
+    private boolean isDescendant(Category ancestor, Category potentialDescendant) {
+        if (potentialDescendant == null) {
             return false;
         }
-
-        return potentialChild.getSubCategories().contains(parent) ||
-               potentialChild.getSubCategories().stream().anyMatch(subCategory -> isDescendant(subCategory, parent));
+        
+        // Use a set to keep track of visited categories to avoid infinite loops
+        Set<UUID> visited = new HashSet<>();
+        return isDescendantHelper(ancestor, potentialDescendant, visited);
+    }
+    
+    private boolean isDescendantHelper(Category ancestor, Category current, Set<UUID> visited) {
+        // Base case: if we've already visited this category or it's null
+        if (current == null || visited.contains(current.getId())) {
+            return false;
+        }
+        
+        // Mark as visited
+        visited.add(current.getId());
+        
+        // Check if the current category is the ancestor
+        if (current.getId().equals(ancestor.getId())) {
+            return true;
+        }
+        
+        // Recursively check parent
+        return isDescendantHelper(ancestor, current.getParent(), visited);
     }
 
     /**
