@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAuthorizationDenied(AuthorizationDeniedException ex) {
         log.error("Authorization denied: {}", ex.getMessage());
-        return buildResponse(HttpStatus.UNAUTHORIZED, "Access denied. You do not have permission to perform this action.");
+        return buildResponse(HttpStatus.FORBIDDEN, "Access denied. You do not have permission to perform this action.");
     }
 
     @ExceptionHandler(AuthenticationException.class)

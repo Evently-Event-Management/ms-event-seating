@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // Add this annotation to enable @PreAuthorize
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
