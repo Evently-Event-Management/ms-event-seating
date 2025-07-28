@@ -290,10 +290,6 @@ class OrganizationServiceTest {
                 new byte[3 * 1024 * 1024] // 3MB
         );
 
-        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
-        // This mock setup is necessary to ensure the uploadLogo method can retrieve the organization
-        // before performing file size validation. Without it, the method might throw a NullPointerException.
-
         // Act & Assert
         assertThrows(BadRequestException.class, () ->
                 organizationService.uploadLogo(ORG_ID, logoFile, USER_ID)

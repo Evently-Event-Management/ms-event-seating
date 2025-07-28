@@ -2,6 +2,8 @@ package com.ticketly.mseventseating.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -67,6 +69,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
         log.error("Unhandled exception occurred", ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred. Please try again later or contact support if the problem persists.");
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationDenied(AuthorizationDeniedException ex) {
+        log.error("Authorization denied: {}", ex.getMessage());
+        return buildResponse(HttpStatus.FORBIDDEN, "Access denied. You do not have permission to perform this action.");
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex) {
+        log.error("Authentication exception: {}", ex.getMessage());
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Authentication failed. Please check your credentials and try again.");
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String message) {
