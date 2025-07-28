@@ -59,9 +59,6 @@ public class Event {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<Tier> tiers;
 
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
-    private List<SeatMap> seatMaps;
-
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -73,4 +70,8 @@ public class Event {
     )
     private Set<Category> categories;
 
+    // REMOVED: The @OneToMany List<SeatMap> seatMaps relationship.
+    // NEXT STEP: You will create an 'EventSeatingMap' entity and link it here:
+    // @OneToOne(mappedBy = "event", cascade = CascadeType.ALL)
+    // private EventSeatingMap eventSeatingMap;
 }
