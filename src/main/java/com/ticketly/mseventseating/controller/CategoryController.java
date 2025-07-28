@@ -70,8 +70,6 @@ public class CategoryController {
             @PathVariable UUID id,
             @Valid @RequestBody CategoryRequest request) {
         log.info("Updating category with id: {}", id);
-        // Debug role
-        log.debug("User roles: {}", org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getAuthorities());
         return ResponseEntity.ok(categoryService.updateCategory(id, request));
     }
 
