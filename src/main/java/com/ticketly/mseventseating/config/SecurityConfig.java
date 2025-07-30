@@ -28,7 +28,6 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults()) // Applies the `corsConfigurationSource` bean
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        // ✅ FIX: Allow all pre-flight OPTIONS requests to pass through security
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/v1/public/**").permitAll()
                         .anyRequest().authenticated()
@@ -67,7 +66,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // Define the allowed origins (your frontend URLs)
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000"));
+        configuration.setAllowedOrigins(List.of("http://localhost:8090"));
         // Define the allowed HTTP methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         // Define the allowed headers from the client
