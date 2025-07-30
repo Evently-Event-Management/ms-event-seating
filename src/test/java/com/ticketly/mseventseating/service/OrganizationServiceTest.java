@@ -327,4 +327,67 @@ class OrganizationServiceTest {
         verify(s3StorageService, never()).deleteFile(anyString());
         verify(organizationRepository).delete(testOrganization);
     }
+
+    @Test
+    void removeLogo_ShouldDeleteLogoAndUpdateOrganization() {
+        // Arrange
+        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
+        when(organizationRepository.save(any(Organization.class))).thenReturn(testOrganization);
+
+        // Act
+        organizationService.removeLogo(ORG_ID, USER_ID);
+
+        // Assert
+        verify(s3StorageService).deleteFile(LOGO_URL);
+
+        ArgumentCaptor<Organization> organizationCaptor = ArgumentCaptor.forClass(Organization.class);
+        verify(organizationRepository).save(organizationCaptor.capture());
+
+        Organization capturedOrg = organizationCaptor.getValue();
+        assertNull(capturedOrg.getLogoUrl());
+    }
+
+    @Test
+    void removeLogo_ShouldNotCallS3Delete_WhenLogoDoesNotExist() {
+        // Arrange
+        Organization orgWithoutLogo = testOrganization.toBuilder().logoUrl(null).build();
+        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(orgWithoutLogo));
+
+        // Act
+        organizationService.removeLogo(ORG_ID, USER_ID);
+
+        // Assert
+        verify(s3StorageService, never()).deleteFile(anyString());
+        // This verification is correct and should remain
+        verify(organizationRepository, never()).save(any(Organization.class));
+    }
+
+    @Test
+    void removeLogo_ShouldThrowException_WhenUserIsNotOwner() {
+        // Arrange
+        String differentUserId = "different-user-id";
+        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
+
+        // Act & Assert
+        assertThrows(AuthorizationDeniedException.class, () ->
+                organizationService.removeLogo(ORG_ID, differentUserId)
+        );
+
+        verify(s3StorageService, never()).deleteFile(anyString());
+        verify(organizationRepository, never()).save(any());
+    }
+
+    @Test
+    void removeLogo_ShouldThrowException_WhenOrganizationNotFound() {
+        // Arrange
+        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(AuthorizationDeniedException.class, () ->
+                organizationService.removeLogo(ORG_ID, USER_ID)
+        );
+
+        verify(s3StorageService, never()).deleteFile(anyString());
+        verify(organizationRepository, never()).save(any());
+    }
 }

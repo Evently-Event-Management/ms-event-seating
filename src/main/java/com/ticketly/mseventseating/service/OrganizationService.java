@@ -6,8 +6,6 @@ import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.repository.OrganizationRepository;
 import org.springframework.security.authorization.AuthorizationDeniedException;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,9 +32,6 @@ public class OrganizationService {
 
     @Value("${app.organization.max-logo-size}")
     private long maxLogoSize;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     /**
      * Get all organizations for the current user
@@ -151,6 +146,25 @@ public class OrganizationService {
 
         return mapToDto(updatedOrganization);
     }
+
+    /**
+     * Remove the logo for an organization
+     *
+     * @param id     the organization ID
+     * @param userId the ID of the current user
+     */
+    @Transactional
+    public void removeLogo(UUID id, String userId) {
+        Organization organization = findOrganizationByIdAndUser(id, userId);
+
+        if (organization.getLogoUrl() != null) {
+            s3StorageService.deleteFile(organization.getLogoUrl());
+            organization.setLogoUrl(null);
+            organizationRepository.save(organization);
+            log.info("Removed logo for organization with ID: {}", id);
+        }
+    }
+
 
     /**
      * Delete an organization

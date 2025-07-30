@@ -165,4 +165,19 @@ class OrganizationControllerTest {
                 .andExpect(status().isNoContent());
     }
 
+    @Test
+    void removeLogo_ShouldRemoveLogoAndReturnNoContent() throws Exception {
+        // Arrange
+        doNothing().when(organizationService).removeLogo(ORG_ID, USER_ID);
+
+        // Act & Assert
+        mockMvc.perform(MockMvcRequestBuilders.delete("/v1/organizations/{id}/logo", ORG_ID)
+                .with(jwt().jwt(builder -> builder.subject(USER_ID)))
+                .with(csrf()))
+                .andExpect(status().isNoContent());
+
+        // Verify service method was called with correct parameters
+        verify(organizationService, times(1)).removeLogo(ORG_ID, USER_ID);
+    }
+
 }
