@@ -1,0 +1,30 @@
+{
+  "blocks": [
+    {
+      "id": "blk_a1b2c3d4",
+      "name": "Orchestra Center",
+      "type": "seated_grid",
+      "rows": [
+        {
+          "id": "row_A",
+          "label": "A",
+          "seats": [
+            { "id": "A1", "label": "1" },
+            { "id": "A2", "label": "2" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blk_e5f6g7h8",
+      "name": "General Admission Pit",
+      "type": "standing_capacity",
+      "capacity": 250
+    },
+    {
+      "id": "blk_i9j0k1l2",
+      "name": "Stage",
+      "type": "non_sellable"
+    }
+  ]
+}
