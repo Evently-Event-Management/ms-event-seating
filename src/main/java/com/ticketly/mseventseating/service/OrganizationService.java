@@ -3,11 +3,9 @@ package com.ticketly.mseventseating.service;
 import com.ticketly.mseventseating.dto.OrganizationRequest;
 import com.ticketly.mseventseating.dto.OrganizationResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
-import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.repository.OrganizationRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,9 +33,6 @@ public class OrganizationService {
     @Value("${app.organization.max-logo-size}")
     private long maxLogoSize;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
     /**
      * Get all organizations for the current user
      *
@@ -56,7 +51,7 @@ public class OrganizationService {
      * @param id     the organization ID
      * @param userId the ID of the requesting user
      * @return the organization response
-     * @throws ResourceNotFoundException if the organization does not exist or user is not owner
+     * @throws AuthorizationDeniedException if the organization does not exist or user is not owner
      */
     public OrganizationResponse getOrganizationById(UUID id, String userId) {
         Organization organization = findOrganizationByIdAndUser(id, userId);
@@ -99,7 +94,7 @@ public class OrganizationService {
      * @param request the updated organization details
      * @param userId  the ID of the current user
      * @return the updated organization response
-     * @throws ResourceNotFoundException if the organization does not exist or user is not owner
+     * @throws AuthorizationDeniedException if the organization does not exist or user is not owner
      */
     @Transactional
     public OrganizationResponse updateOrganization(UUID id, OrganizationRequest request, String userId) {
@@ -120,7 +115,7 @@ public class OrganizationService {
      * @param logoFile the logo file to upload
      * @param userId   the ID of the current user
      * @return the updated organization response
-     * @throws ResourceNotFoundException if the organization does not exist or user is not owner
+     * @throws AuthorizationDeniedException if the organization does not exist or user is not owner
      * @throws IOException               if there is an error handling the file
      */
     @Transactional
@@ -153,11 +148,30 @@ public class OrganizationService {
     }
 
     /**
+     * Remove the logo for an organization
+     *
+     * @param id     the organization ID
+     * @param userId the ID of the current user
+     */
+    @Transactional
+    public void removeLogo(UUID id, String userId) {
+        Organization organization = findOrganizationByIdAndUser(id, userId);
+
+        if (organization.getLogoUrl() != null) {
+            s3StorageService.deleteFile(organization.getLogoUrl());
+            organization.setLogoUrl(null);
+            organizationRepository.save(organization);
+            log.info("Removed logo for organization with ID: {}", id);
+        }
+    }
+
+
+    /**
      * Delete an organization
      *
      * @param id     the organization ID
      * @param userId the ID of the current user
-     * @throws ResourceNotFoundException if the organization does not exist or user is not owner
+     * @throws AuthorizationDeniedException if the organization does not exist or user is not owner
      */
     @Transactional
     public void deleteOrganization(UUID id, String userId) {
@@ -178,12 +192,12 @@ public class OrganizationService {
      * @param id     the organization ID
      * @param userId the ID of the current user
      * @return the organization entity
-     * @throws ResourceNotFoundException if the organization does not exist or user is not owner
+     * @throws AuthorizationDeniedException if the organization does not exist or user is not owner
      */
     private Organization findOrganizationByIdAndUser(UUID id, String userId) {
         return organizationRepository.findById(id)
                 .filter(org -> org.getUserId().equals(userId))
-                .orElseThrow(() -> new ResourceNotFoundException("Organization not found or you don't have permission to access it"));
+                .orElseThrow(() -> new AuthorizationDeniedException("Organization not found or you don't have permission to access it"));
     }
 
     /**

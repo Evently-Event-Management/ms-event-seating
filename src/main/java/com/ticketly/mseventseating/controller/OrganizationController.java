@@ -72,6 +72,16 @@ public class OrganizationController {
         return ResponseEntity.ok(organizationService.uploadLogo(id, file, userId));
     }
 
+    @DeleteMapping("/{id}/logo")
+    public ResponseEntity<Void> removeLogo(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
+        log.info("Removing logo for organization with ID: {} for user: {}", id, userId);
+        organizationService.removeLogo(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrganization(
             @PathVariable UUID id,

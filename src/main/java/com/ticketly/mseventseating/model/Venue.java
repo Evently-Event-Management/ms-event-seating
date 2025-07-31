@@ -20,18 +20,22 @@ public class Venue {
     @Column(nullable = false)
     private String name;
 
+    private String address; // Added for completeness
+
     private Double latitude;
     private Double longitude;
-    private Integer capacity;
 
-    private boolean hasSeats;
+    private Integer capacity;
 
     @ElementCollection
     @CollectionTable(name = "venue_facilities", joinColumns = @JoinColumn(name = "venue_id"))
     private List<String> facilities;
 
-    @Lob
-    @Column(name = "layout_json", columnDefinition = "jsonb")
-    private String layoutJson;
+    // An organization owns the venue
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id", nullable = false)
+    private Organization organization;
 
+    // REMOVED: hasSeats
+    // REMOVED: layoutJson
 }

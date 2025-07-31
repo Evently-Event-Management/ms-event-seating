@@ -3,7 +3,7 @@ package com.ticketly.mseventseating.service;
 import com.ticketly.mseventseating.dto.OrganizationRequest;
 import com.ticketly.mseventseating.dto.OrganizationResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
-import com.ticketly.mseventseating.exception.ResourceNotFoundException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.repository.OrganizationRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +42,7 @@ class OrganizationServiceTest {
     private final String ORG_WEBSITE = "https://test-org.com";
     private final String LOGO_URL = "organization-logos/logo-uuid.jpg";
     private final String PRESIGNED_URL = "https://bucket.s3.amazonaws.com/organization-logos/logo-uuid.jpg";
-    
+
     private Organization testOrganization;
     private OrganizationRequest testRequest;
 
@@ -51,7 +51,7 @@ class OrganizationServiceTest {
         // Configure service properties
         ReflectionTestUtils.setField(organizationService, "maxOrganizationsPerUser", 3);
         ReflectionTestUtils.setField(organizationService, "maxLogoSize", 2 * 1024 * 1024); // 2MB
-        
+
         // Set up test data
         testOrganization = Organization.builder()
                 .id(ORG_ID)
@@ -62,7 +62,7 @@ class OrganizationServiceTest {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-        
+
         testRequest = OrganizationRequest.builder()
                 .name(ORG_NAME)
                 .website(ORG_WEBSITE)
@@ -85,7 +85,7 @@ class OrganizationServiceTest {
         assertEquals(ORG_NAME, result.getFirst().getName());
         assertEquals(ORG_WEBSITE, result.getFirst().getWebsite());
         assertEquals(PRESIGNED_URL, result.getFirst().getLogoUrl());
-        
+
         verify(organizationRepository).findByUserId(USER_ID);
         verify(s3StorageService).generatePresignedUrl(LOGO_URL, 60);
     }
@@ -103,7 +103,7 @@ class OrganizationServiceTest {
         assertEquals(ORG_ID, result.getId());
         assertEquals(ORG_NAME, result.getName());
         assertEquals(PRESIGNED_URL, result.getLogoUrl());
-        
+
         verify(organizationRepository).findById(ORG_ID);
     }
 
@@ -113,10 +113,10 @@ class OrganizationServiceTest {
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(ResourceNotFoundException.class, () -> 
-            organizationService.getOrganizationById(ORG_ID, USER_ID)
+        assertThrows(AuthorizationDeniedException.class, () ->
+                organizationService.getOrganizationById(ORG_ID, USER_ID)
         );
-        
+
         verify(organizationRepository).findById(ORG_ID);
     }
 
@@ -126,10 +126,10 @@ class OrganizationServiceTest {
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
 
         // Act & Assert
-        assertThrows(ResourceNotFoundException.class, () -> 
-            organizationService.getOrganizationById(ORG_ID, "different-user-id")
+        assertThrows(AuthorizationDeniedException.class, () ->
+                organizationService.getOrganizationById(ORG_ID, "different-user-id")
         );
-        
+
         verify(organizationRepository).findById(ORG_ID);
     }
 
@@ -147,10 +147,10 @@ class OrganizationServiceTest {
         // Assert
         assertEquals(ORG_NAME, result.getName());
         assertEquals(ORG_WEBSITE, result.getWebsite());
-        
+
         ArgumentCaptor<Organization> organizationCaptor = ArgumentCaptor.forClass(Organization.class);
         verify(organizationRepository).save(organizationCaptor.capture());
-        
+
         Organization capturedOrg = organizationCaptor.getValue();
         assertEquals(ORG_NAME, capturedOrg.getName());
         assertEquals(ORG_WEBSITE, capturedOrg.getWebsite());
@@ -163,10 +163,10 @@ class OrganizationServiceTest {
         when(organizationRepository.countByUserId(USER_ID)).thenReturn(3L);
 
         // Act & Assert
-        assertThrows(BadRequestException.class, () -> 
-            organizationService.createOrganization(testRequest, USER_ID)
+        assertThrows(BadRequestException.class, () ->
+                organizationService.createOrganization(testRequest, USER_ID)
         );
-        
+
         verify(organizationRepository).countByUserId(USER_ID);
         verify(organizationRepository, never()).save(any());
     }
@@ -176,12 +176,12 @@ class OrganizationServiceTest {
         // Arrange
         String updatedName = "Updated Organization";
         String updatedWebsite = "https://updated-org.com";
-        
+
         OrganizationRequest updateRequest = OrganizationRequest.builder()
                 .name(updatedName)
                 .website(updatedWebsite)
                 .build();
-        
+
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
         when(organizationRepository.save(any(Organization.class))).thenReturn(
                 Organization.builder()
@@ -202,10 +202,10 @@ class OrganizationServiceTest {
         // Assert
         assertEquals(updatedName, result.getName());
         assertEquals(updatedWebsite, result.getWebsite());
-        
+
         ArgumentCaptor<Organization> organizationCaptor = ArgumentCaptor.forClass(Organization.class);
         verify(organizationRepository).save(organizationCaptor.capture());
-        
+
         Organization capturedOrg = organizationCaptor.getValue();
         assertEquals(updatedName, capturedOrg.getName());
         assertEquals(updatedWebsite, capturedOrg.getWebsite());
@@ -220,7 +220,7 @@ class OrganizationServiceTest {
                 "image/jpeg",
                 "test logo content".getBytes()
         );
-        
+
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
         when(s3StorageService.uploadFile(any(MultipartFile.class), eq("organization-logos"))).thenReturn(LOGO_URL);
         when(organizationRepository.save(any(Organization.class))).thenReturn(testOrganization);
@@ -231,7 +231,7 @@ class OrganizationServiceTest {
 
         // Assert
         assertEquals(PRESIGNED_URL, result.getLogoUrl());
-        
+
         verify(s3StorageService).uploadFile(any(MultipartFile.class), eq("organization-logos"));
         verify(organizationRepository).save(any(Organization.class));
     }
@@ -241,14 +241,14 @@ class OrganizationServiceTest {
         // Arrange
         String oldLogoUrl = "organization-logos/old-logo.jpg";
         testOrganization.setLogoUrl(oldLogoUrl);
-        
+
         MockMultipartFile logoFile = new MockMultipartFile(
                 "logo",
                 "logo.jpg",
                 "image/jpeg",
                 "test logo content".getBytes()
         );
-        
+
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
         when(s3StorageService.uploadFile(any(MultipartFile.class), eq("organization-logos"))).thenReturn(LOGO_URL);
         when(organizationRepository.save(any(Organization.class))).thenReturn(testOrganization);
@@ -312,7 +312,7 @@ class OrganizationServiceTest {
         verify(s3StorageService).deleteFile(LOGO_URL);
         verify(organizationRepository).delete(testOrganization);
     }
-    
+
     @Test
     void deleteOrganization_ShouldNotDeleteLogoIfNotExists() {
         // Arrange
@@ -326,5 +326,68 @@ class OrganizationServiceTest {
         // Assert
         verify(s3StorageService, never()).deleteFile(anyString());
         verify(organizationRepository).delete(testOrganization);
+    }
+
+    @Test
+    void removeLogo_ShouldDeleteLogoAndUpdateOrganization() {
+        // Arrange
+        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
+        when(organizationRepository.save(any(Organization.class))).thenReturn(testOrganization);
+
+        // Act
+        organizationService.removeLogo(ORG_ID, USER_ID);
+
+        // Assert
+        verify(s3StorageService).deleteFile(LOGO_URL);
+
+        ArgumentCaptor<Organization> organizationCaptor = ArgumentCaptor.forClass(Organization.class);
+        verify(organizationRepository).save(organizationCaptor.capture());
+
+        Organization capturedOrg = organizationCaptor.getValue();
+        assertNull(capturedOrg.getLogoUrl());
+    }
+
+    @Test
+    void removeLogo_ShouldNotCallS3Delete_WhenLogoDoesNotExist() {
+        // Arrange
+        Organization orgWithoutLogo = testOrganization.toBuilder().logoUrl(null).build();
+        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(orgWithoutLogo));
+
+        // Act
+        organizationService.removeLogo(ORG_ID, USER_ID);
+
+        // Assert
+        verify(s3StorageService, never()).deleteFile(anyString());
+        // This verification is correct and should remain
+        verify(organizationRepository, never()).save(any(Organization.class));
+    }
+
+    @Test
+    void removeLogo_ShouldThrowException_WhenUserIsNotOwner() {
+        // Arrange
+        String differentUserId = "different-user-id";
+        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
+
+        // Act & Assert
+        assertThrows(AuthorizationDeniedException.class, () ->
+                organizationService.removeLogo(ORG_ID, differentUserId)
+        );
+
+        verify(s3StorageService, never()).deleteFile(anyString());
+        verify(organizationRepository, never()).save(any());
+    }
+
+    @Test
+    void removeLogo_ShouldThrowException_WhenOrganizationNotFound() {
+        // Arrange
+        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(AuthorizationDeniedException.class, () ->
+                organizationService.removeLogo(ORG_ID, USER_ID)
+        );
+
+        verify(s3StorageService, never()).deleteFile(anyString());
+        verify(organizationRepository, never()).save(any());
     }
 }
