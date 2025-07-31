@@ -2,12 +2,15 @@ package com.ticketly.mseventseating.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
+@Table(name = "events")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,48 +22,59 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id", nullable = false)
+    private Organization organization;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "venue_id")
+    private Venue venue;
+
     @Column(nullable = false)
     private String title;
 
-    @Column(length = 2048)
+    @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(columnDefinition = "TEXT")
+    private String overview;
 
     @ElementCollection
     @CollectionTable(name = "event_cover_photos", joinColumns = @JoinColumn(name = "event_id"))
+    @Column(name = "photo_url")
     private List<String> coverPhotos;
 
-    @Column(length = 4096)
-    private String overview;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EventStatus status = EventStatus.PENDING;
 
-    private LocalDateTime startTime;
+    private String rejectionReason;
 
-    private LocalDateTime endTime;
-
-    private boolean isOnline;
+    @Column(nullable = false)
+    private boolean isOnline = false;
 
     private String onlineLink;
 
     private String locationDescription;
 
+    // --- Rolling Sales Window Rules ---
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(20)")
-    private EventStatus status = EventStatus.PENDING;
+    @Column(nullable = false)
+    private SalesStartRuleType salesStartRuleType = SalesStartRuleType.IMMEDIATE;
 
-    private String rejectionReason;
+    @Column(name = "sales_start_days_before")
+    private Integer salesStartDaysBefore;
 
-    @ManyToOne
-    @JoinColumn(name = "organization_id", nullable = false)
-    private Organization organization;
+    @Column(name = "sales_start_fixed_datetime")
+    private LocalDateTime salesStartFixedDatetime;
+    // --- End of Sales Window Rules ---
 
-    @ManyToOne
-    @JoinColumn(name = "venue_id")
-    private Venue venue;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tier> tiers;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -70,8 +84,9 @@ public class Event {
     )
     private Set<Category> categories;
 
-    // REMOVED: The @OneToMany List<SeatMap> seatMaps relationship.
-    // NEXT STEP: You will create an 'EventSeatingMap' entity and link it here:
-    // @OneToOne(mappedBy = "event", cascade = CascadeType.ALL)
-    // private EventSeatingMap eventSeatingMap;
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EventSession> sessions;
+
+    @OneToOne(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private EventSeatingMap eventSeatingMap;
 }
