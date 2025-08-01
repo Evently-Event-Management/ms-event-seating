@@ -4,6 +4,10 @@ spring:
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
+  data:
+    redis:
+        host: localhost
+        port: 6379
 
 aws:
   s3:

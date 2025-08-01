@@ -41,6 +41,11 @@ spring:
     locations: classpath:db/migration
     validate-on-migrate: true
 
+  cache:
+    redis:
+      time-to-live: 3600
+      key-prefix: "event-seating-ms::"
+
 logging:
   level:
     root: INFO

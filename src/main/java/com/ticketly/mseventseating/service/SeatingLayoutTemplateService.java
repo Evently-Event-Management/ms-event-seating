@@ -28,37 +28,52 @@ public class SeatingLayoutTemplateService {
     private final SeatingLayoutTemplateRepository seatingLayoutTemplateRepository;
     private final OrganizationRepository organizationRepository;
     private final ObjectMapper objectMapper;
+    private final OrganizationOwnershipService ownershipService;
 
+    /**
+     * Get all templates for an organization with caching
+     *
+     * @param organizationId the organization ID
+     * @param userId the ID of the current user
+     * @return list of seating layout template DTOs
+     */
     @Transactional(readOnly = true)
     public List<SeatingLayoutTemplateDTO> getAllTemplatesByOrganizationId(UUID organizationId, String userId) {
-        // Verify organization exists and user has access to it
-        findOrganizationByIdAndVerifyAccess(organizationId, userId);
+        // It still uses the cached ownership check for authorization.
+        verifyUserAccess(organizationId, userId);
 
+        log.info("Fetching all templates for organization {} (DB query)", organizationId);
         return seatingLayoutTemplateRepository.findByOrganizationId(organizationId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Get a template by ID
+     *
+     * @param id the template ID
+     * @param userId the ID of the current user
+     * @return the seating layout template DTO
+     */
     @Transactional(readOnly = true)
     public SeatingLayoutTemplateDTO getTemplateById(UUID id, String userId) {
-        SeatingLayoutTemplate template = seatingLayoutTemplateRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Seating layout template not found with ID: " + id));
-        
-        // Verify user has access to the organization that owns this template
-        verifyUserAccess(template.getOrganization(), userId);
-        
+        SeatingLayoutTemplate template = findTemplateById(id);
+        verifyUserAccess(template.getOrganization().getId(), userId);
         return convertToDTO(template);
     }
 
+    /**
+     * Create a new template
+     *
+     * @param request the create template request
+     * @param userId the ID of the current user
+     * @return the created seating layout template DTO
+     */
     @Transactional
     public SeatingLayoutTemplateDTO createTemplate(SeatingLayoutTemplateRequest request, String userId) {
-        // Verify organization exists and user has access to it
         Organization organization = findOrganizationByIdAndVerifyAccess(request.getOrganizationId(), userId);
-
-        // Process layout data - normalize coordinates and replace IDs
         LayoutDataDTO normalizedLayout = normalizeLayoutData(request.getLayoutData());
 
-        // Convert to entity and save
         SeatingLayoutTemplate template = new SeatingLayoutTemplate();
         template.setName(request.getName());
         template.setOrganization(organization);
@@ -71,29 +86,31 @@ public class SeatingLayoutTemplateService {
         }
 
         SeatingLayoutTemplate saved = seatingLayoutTemplateRepository.save(template);
+        log.debug("Created seating layout template with ID: {} for organization: {}",
+                saved.getId(), organization.getId());
+
         return convertToDTO(saved);
     }
 
+    /**
+     * Update an existing template
+     *
+     * @param id the template ID
+     * @param request the update template request
+     * @param userId the ID of the current user
+     * @return the updated seating layout template DTO
+     */
     @Transactional
     public SeatingLayoutTemplateDTO updateTemplate(UUID id, SeatingLayoutTemplateRequest request, String userId) {
-        // Verify template exists
-        SeatingLayoutTemplate template = seatingLayoutTemplateRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Seating layout template not found with ID: " + id));
-
-        // Verify user has access to the organization that owns this template
-        verifyUserAccess(template.getOrganization(), userId);
-
-        // Verify organization exists and user has access to it
+        SeatingLayoutTemplate template = findTemplateById(id);
+        verifyUserAccess(template.getOrganization().getId(), userId);
         Organization organization = findOrganizationByIdAndVerifyAccess(request.getOrganizationId(), userId);
 
         if (!template.getOrganization().getId().equals(organization.getId())) {
             throw new IllegalArgumentException("Cannot change the organization of an existing template");
         }
 
-        // Process layout data - normalize coordinates and replace IDs
         LayoutDataDTO normalizedLayout = normalizeLayoutData(request.getLayoutData());
-
-        // Update template
         template.setName(request.getName());
 
         try {
@@ -104,22 +121,27 @@ public class SeatingLayoutTemplateService {
         }
 
         SeatingLayoutTemplate saved = seatingLayoutTemplateRepository.save(template);
+        log.debug("Updated seating layout template with ID: {}", saved.getId());
+
         return convertToDTO(saved);
     }
 
+    /**
+     * Delete a template
+     *
+     * @param id the template ID
+     * @param userId the ID of the current user
+     */
     @Transactional
     public void deleteTemplate(UUID id, String userId) {
-        SeatingLayoutTemplate template = seatingLayoutTemplateRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Seating layout template not found with ID: " + id));
-        
-        // Verify user has access to the organization that owns this template
-        verifyUserAccess(template.getOrganization(), userId);
-        
-        seatingLayoutTemplateRepository.deleteById(id);
+        SeatingLayoutTemplate template = findTemplateById(id);
+        verifyUserAccess(template.getOrganization().getId(), userId);
+        seatingLayoutTemplateRepository.delete(template);
     }
 
     /**
      * Helper method to find an organization by ID and verify the user has access to it
+     * This method uses cached ownership check to improve performance
      *
      * @param organizationId the organization ID
      * @param userId the ID of the current user
@@ -128,24 +150,32 @@ public class SeatingLayoutTemplateService {
      * @throws AuthorizationDeniedException if user does not have access to the organization
      */
     private Organization findOrganizationByIdAndVerifyAccess(UUID organizationId, String userId) {
-        Organization organization = organizationRepository.findById(organizationId)
+        // Use cached ownership check first
+        if (ownershipService.isOrganizationOwnedByUser(userId, organizationId)) {
+            throw new AuthorizationDeniedException("Organization not found or you don't have permission to access it");
+        }
+
+        // If ownership check passes, retrieve the organization
+        return organizationRepository.findById(organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found with ID: " + organizationId));
-        
-        verifyUserAccess(organization, userId);
-        return organization;
     }
-    
+
     /**
-     * Verify that the user has access to the organization
+     * Verify that the user has access to the organization using cached check
      *
-     * @param organization the organization to check
+     * @param organizationId the organization to check
      * @param userId the ID of the current user
      * @throws AuthorizationDeniedException if user does not have access to the organization
      */
-    private void verifyUserAccess(Organization organization, String userId) {
-        if (!organization.getUserId().equals(userId)) {
+    private void verifyUserAccess(UUID organizationId, String userId) {
+        if (!ownershipService.isOrganizationOwnedByUser(userId, organizationId)) {
             throw new AuthorizationDeniedException("You do not have permission to access this resource");
         }
+    }
+
+    private SeatingLayoutTemplate findTemplateById(UUID id) {
+        return seatingLayoutTemplateRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Seating layout template not found with ID: " + id));
     }
 
     /**
