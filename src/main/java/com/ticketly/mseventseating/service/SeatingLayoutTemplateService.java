@@ -151,7 +151,7 @@ public class SeatingLayoutTemplateService {
      */
     private Organization findOrganizationByIdAndVerifyAccess(UUID organizationId, String userId) {
         // Use cached ownership check first
-        if (ownershipService.isOrganizationOwnedByUser(userId, organizationId)) {
+        if (!ownershipService.isOrganizationOwnedByUser(userId, organizationId)) {
             throw new AuthorizationDeniedException("Organization not found or you don't have permission to access it");
         }
 
