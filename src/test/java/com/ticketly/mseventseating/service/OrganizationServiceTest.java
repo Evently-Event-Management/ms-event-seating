@@ -33,6 +33,9 @@ class OrganizationServiceTest {
     @Mock
     private S3StorageService s3StorageService;
 
+    @Mock
+    private OrganizationOwnershipService ownershipService;
+
     @InjectMocks
     private OrganizationService organizationService;
 
@@ -93,6 +96,7 @@ class OrganizationServiceTest {
     @Test
     void getOrganizationById_ShouldReturnOrganization_WhenFound() {
         // Arrange
+        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
 
@@ -104,33 +108,22 @@ class OrganizationServiceTest {
         assertEquals(ORG_NAME, result.getName());
         assertEquals(PRESIGNED_URL, result.getLogoUrl());
 
+        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
         verify(organizationRepository).findById(ORG_ID);
     }
 
     @Test
-    void getOrganizationById_ShouldThrowException_WhenNotFound() {
+    void getOrganizationById_ShouldThrowException_WhenNotOwned() {
         // Arrange
-        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.empty());
+        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(false);
 
         // Act & Assert
         assertThrows(AuthorizationDeniedException.class, () ->
                 organizationService.getOrganizationById(ORG_ID, USER_ID)
         );
 
-        verify(organizationRepository).findById(ORG_ID);
-    }
-
-    @Test
-    void getOrganizationById_ShouldThrowException_WhenUserDoesNotMatch() {
-        // Arrange
-        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
-
-        // Act & Assert
-        assertThrows(AuthorizationDeniedException.class, () ->
-                organizationService.getOrganizationById(ORG_ID, "different-user-id")
-        );
-
-        verify(organizationRepository).findById(ORG_ID);
+        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
+        verify(organizationRepository, never()).findById(ORG_ID);
     }
 
     @Test
@@ -182,6 +175,7 @@ class OrganizationServiceTest {
                 .website(updatedWebsite)
                 .build();
 
+        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
         when(organizationRepository.save(any(Organization.class))).thenReturn(
                 Organization.builder()
@@ -203,6 +197,8 @@ class OrganizationServiceTest {
         assertEquals(updatedName, result.getName());
         assertEquals(updatedWebsite, result.getWebsite());
 
+        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
+
         ArgumentCaptor<Organization> organizationCaptor = ArgumentCaptor.forClass(Organization.class);
         verify(organizationRepository).save(organizationCaptor.capture());
 
@@ -221,6 +217,7 @@ class OrganizationServiceTest {
                 "test logo content".getBytes()
         );
 
+        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
         when(s3StorageService.uploadFile(any(MultipartFile.class), eq("organization-logos"))).thenReturn(LOGO_URL);
         when(organizationRepository.save(any(Organization.class))).thenReturn(testOrganization);
@@ -232,6 +229,7 @@ class OrganizationServiceTest {
         // Assert
         assertEquals(PRESIGNED_URL, result.getLogoUrl());
 
+        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
         verify(s3StorageService).uploadFile(any(MultipartFile.class), eq("organization-logos"));
         verify(organizationRepository).save(any(Organization.class));
     }
@@ -249,6 +247,7 @@ class OrganizationServiceTest {
                 "test logo content".getBytes()
         );
 
+        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
         when(s3StorageService.uploadFile(any(MultipartFile.class), eq("organization-logos"))).thenReturn(LOGO_URL);
         when(organizationRepository.save(any(Organization.class))).thenReturn(testOrganization);
@@ -258,6 +257,7 @@ class OrganizationServiceTest {
         organizationService.uploadLogo(ORG_ID, logoFile, USER_ID);
 
         // Assert
+        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
         verify(s3StorageService).deleteFile(oldLogoUrl);
     }
 
@@ -302,6 +302,7 @@ class OrganizationServiceTest {
     @Test
     void deleteOrganization_ShouldDeleteOrganization() {
         // Arrange
+        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
         doNothing().when(organizationRepository).delete(any(Organization.class));
 
@@ -309,6 +310,8 @@ class OrganizationServiceTest {
         organizationService.deleteOrganization(ORG_ID, USER_ID);
 
         // Assert
+        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
+        verify(ownershipService).evictAllOrganizationOwnershipCache();
         verify(s3StorageService).deleteFile(LOGO_URL);
         verify(organizationRepository).delete(testOrganization);
     }
@@ -317,6 +320,7 @@ class OrganizationServiceTest {
     void deleteOrganization_ShouldNotDeleteLogoIfNotExists() {
         // Arrange
         testOrganization.setLogoUrl(null);
+        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
         doNothing().when(organizationRepository).delete(any(Organization.class));
 
@@ -324,6 +328,8 @@ class OrganizationServiceTest {
         organizationService.deleteOrganization(ORG_ID, USER_ID);
 
         // Assert
+        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
+        verify(ownershipService).evictAllOrganizationOwnershipCache();
         verify(s3StorageService, never()).deleteFile(anyString());
         verify(organizationRepository).delete(testOrganization);
     }
@@ -331,6 +337,7 @@ class OrganizationServiceTest {
     @Test
     void removeLogo_ShouldDeleteLogoAndUpdateOrganization() {
         // Arrange
+        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
         when(organizationRepository.save(any(Organization.class))).thenReturn(testOrganization);
 
@@ -338,6 +345,7 @@ class OrganizationServiceTest {
         organizationService.removeLogo(ORG_ID, USER_ID);
 
         // Assert
+        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
         verify(s3StorageService).deleteFile(LOGO_URL);
 
         ArgumentCaptor<Organization> organizationCaptor = ArgumentCaptor.forClass(Organization.class);
@@ -351,42 +359,29 @@ class OrganizationServiceTest {
     void removeLogo_ShouldNotCallS3Delete_WhenLogoDoesNotExist() {
         // Arrange
         Organization orgWithoutLogo = testOrganization.toBuilder().logoUrl(null).build();
+        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(orgWithoutLogo));
 
         // Act
         organizationService.removeLogo(ORG_ID, USER_ID);
 
         // Assert
+        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
         verify(s3StorageService, never()).deleteFile(anyString());
-        // This verification is correct and should remain
         verify(organizationRepository, never()).save(any(Organization.class));
     }
 
     @Test
     void removeLogo_ShouldThrowException_WhenUserIsNotOwner() {
         // Arrange
-        String differentUserId = "different-user-id";
-        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
-
-        // Act & Assert
-        assertThrows(AuthorizationDeniedException.class, () ->
-                organizationService.removeLogo(ORG_ID, differentUserId)
-        );
-
-        verify(s3StorageService, never()).deleteFile(anyString());
-        verify(organizationRepository, never()).save(any());
-    }
-
-    @Test
-    void removeLogo_ShouldThrowException_WhenOrganizationNotFound() {
-        // Arrange
-        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.empty());
+        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(false);
 
         // Act & Assert
         assertThrows(AuthorizationDeniedException.class, () ->
                 organizationService.removeLogo(ORG_ID, USER_ID)
         );
 
+        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
         verify(s3StorageService, never()).deleteFile(anyString());
         verify(organizationRepository, never()).save(any());
     }

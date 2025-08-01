@@ -3,6 +3,7 @@ package com.ticketly.mseventseating.service;
 import com.ticketly.mseventseating.dto.OrganizationRequest;
 import com.ticketly.mseventseating.dto.OrganizationResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
+import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.repository.OrganizationRepository;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -26,6 +27,7 @@ public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
     private final S3StorageService s3StorageService;
+    private final OrganizationOwnershipService ownershipService;
 
     @Value("${app.organization.max-per-user:3}")
     private int maxOrganizationsPerUser;
@@ -104,6 +106,9 @@ public class OrganizationService {
         organization.setWebsite(request.getWebsite());
 
         Organization updatedOrganization = organizationRepository.save(organization);
+
+        // Remember to evict the cache if ownership changes
+
         log.info("Updated organization with ID: {}", updatedOrganization.getId());
         return mapToDto(updatedOrganization);
     }
@@ -116,7 +121,7 @@ public class OrganizationService {
      * @param userId   the ID of the current user
      * @return the updated organization response
      * @throws AuthorizationDeniedException if the organization does not exist or user is not owner
-     * @throws IOException               if there is an error handling the file
+     * @throws IOException                  if there is an error handling the file
      */
     @Transactional
     public OrganizationResponse uploadLogo(UUID id, MultipartFile logoFile, String userId) throws IOException {
@@ -177,12 +182,14 @@ public class OrganizationService {
     public void deleteOrganization(UUID id, String userId) {
         Organization organization = findOrganizationByIdAndUser(id, userId);
 
-        // Delete logo from S3 if it exists
         if (organization.getLogoUrl() != null) {
             s3StorageService.deleteFile(organization.getLogoUrl());
         }
 
         organizationRepository.delete(organization);
+
+        ownershipService.evictOrganizationOwnershipCache(userId, id);
+
         log.info("Deleted organization with ID: {}", id);
     }
 
@@ -195,9 +202,13 @@ public class OrganizationService {
      * @throws AuthorizationDeniedException if the organization does not exist or user is not owner
      */
     private Organization findOrganizationByIdAndUser(UUID id, String userId) {
+        if (!ownershipService.isOrganizationOwnedByUser(userId, id)) {
+            throw new AuthorizationDeniedException("Organization not found or you don't have permission to access it");
+        }
+
+        // Since we know the user is authorized, we can safely fetch the entity.
         return organizationRepository.findById(id)
-                .filter(org -> org.getUserId().equals(userId))
-                .orElseThrow(() -> new AuthorizationDeniedException("Organization not found or you don't have permission to access it"));
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found with ID: " + id));
     }
 
     /**
