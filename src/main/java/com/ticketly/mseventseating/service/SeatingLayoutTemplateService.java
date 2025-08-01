@@ -42,14 +42,14 @@ public class SeatingLayoutTemplateService {
         // It still uses the cached ownership check for authorization.
         verifyUserAccess(organizationId, userId);
 
-        log.debug("Fetching all templates for organization {} (DB query)", organizationId);
+        log.info("Fetching all templates for organization {} (DB query)", organizationId);
         return seatingLayoutTemplateRepository.findByOrganizationId(organizationId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Get a template by ID with cached organization ownership check
+     * Get a template by ID
      *
      * @param id the template ID
      * @param userId the ID of the current user
@@ -63,7 +63,7 @@ public class SeatingLayoutTemplateService {
     }
 
     /**
-     * Create a new template with cache invalidation
+     * Create a new template
      *
      * @param request the create template request
      * @param userId the ID of the current user
@@ -93,7 +93,7 @@ public class SeatingLayoutTemplateService {
     }
 
     /**
-     * Update an existing template with cache invalidation
+     * Update an existing template
      *
      * @param id the template ID
      * @param request the update template request
@@ -127,7 +127,7 @@ public class SeatingLayoutTemplateService {
     }
 
     /**
-     * Delete a template with cache invalidation
+     * Delete a template
      *
      * @param id the template ID
      * @param userId the ID of the current user
