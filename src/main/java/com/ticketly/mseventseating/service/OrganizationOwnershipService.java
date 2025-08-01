@@ -43,6 +43,23 @@ public class OrganizationOwnershipService {
     }
 
     /**
+     * Evict all organization ownership cache entries for a user
+     */
+    @CacheEvict(value = "organizationOwnership", key = "'ownership_' + #userId + '_*'")
+    public void evictAllUserOrganizationOwnershipCache(String userId) {
+        log.info("Evicting all organization ownership cache entries for user {}", userId);
+    }
+
+    /**
+     * Evict all organization ownership cache entries for a specific organization
+     */
+    @CacheEvict(value = "organizationOwnership", key = "'ownership_*_' + #organizationId")
+    public void evictOrganizationOwnershipCacheByOrganization(UUID organizationId) {
+        log.info("Evicting all organization ownership cache entries for organization {}", organizationId);
+    }
+
+
+    /**
      * Evict all organization ownership cache entries for an organization
      */
     @CacheEvict(value = "organizationOwnership", allEntries = true)
