@@ -188,7 +188,7 @@ public class OrganizationService {
 
         organizationRepository.delete(organization);
 
-        ownershipService.evictOrganizationOwnershipCacheByOrganization(id);
+        ownershipService.evictAllOwnershipByOrganization(id);
 
         log.info("Deleted organization with ID: {}", id);
     }
