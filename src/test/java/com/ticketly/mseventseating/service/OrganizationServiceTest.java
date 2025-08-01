@@ -311,7 +311,7 @@ class OrganizationServiceTest {
 
         // Assert
         verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
-        verify(ownershipService).evictAllOrganizationOwnershipCache();
+        verify(ownershipService).evictAllOwnershipByOrganization(ORG_ID);
         verify(s3StorageService).deleteFile(LOGO_URL);
         verify(organizationRepository).delete(testOrganization);
     }
@@ -329,7 +329,7 @@ class OrganizationServiceTest {
 
         // Assert
         verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
-        verify(ownershipService).evictAllOrganizationOwnershipCache();
+        verify(ownershipService).evictAllOwnershipByOrganization(ORG_ID);
         verify(s3StorageService, never()).deleteFile(anyString());
         verify(organizationRepository).delete(testOrganization);
     }
