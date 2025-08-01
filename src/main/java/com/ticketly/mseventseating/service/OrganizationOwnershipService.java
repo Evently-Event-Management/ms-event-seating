@@ -30,7 +30,7 @@ public class OrganizationOwnershipService {
         boolean result = organizationRepository.findById(organizationId)
                 .map(organization -> organization.getUserId().equals(userId))
                 .orElse(false);
-        log.info("--- Cache miss result for {} and {}: {} ---", userId, organizationId, result);
+        log.debug("--- Cache miss result for {} and {}: {} ---", userId, organizationId, result);
         return result;
     }
 
