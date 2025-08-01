@@ -1,30 +1,82 @@
 {
-  "blocks": [
-    {
-      "id": "blk_a1b2c3d4",
-      "name": "Orchestra Center",
-      "type": "seated_grid",
-      "rows": [
-        {
-          "id": "row_A",
-          "label": "A",
-          "seats": [
-            { "id": "A1", "label": "1" },
-            { "id": "A2", "label": "2" }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "blk_e5f6g7h8",
-      "name": "General Admission Pit",
-      "type": "standing_capacity",
-      "capacity": 250
-    },
-    {
-      "id": "blk_i9j0k1l2",
-      "name": "Stage",
-      "type": "non_sellable"
-    }
-  ]
+  "name": "Untitled Layout",
+  "layout": {
+    "blocks": [
+      {
+        "id": "blk_1754026177329",
+        "name": "New seated grid",
+        "type": "seated_grid",
+        "position": {
+          "x": 2.933349609375,
+          "y": 114.00002034505208
+        },
+        "rows": 5,
+        "columns": 10,
+        "startRowLabel": "A",
+        "startColumnLabel": 1
+      },
+      {
+        "id": "blk_1754026207625",
+        "name": "New seated grid",
+        "type": "seated_grid",
+        "position": {
+          "x": 3.733306884765625,
+          "y": 370.8000233968099
+        },
+        "rows": 5,
+        "columns": 10,
+        "startRowLabel": "F",
+        "startColumnLabel": 1
+      },
+      {
+        "id": "blk_1754026242963",
+        "name": "New seated grid",
+        "type": "seated_grid",
+        "position": {
+          "x": 373.93326568603516,
+          "y": 111.0000041325887
+        },
+        "rows": 5,
+        "columns": 10,
+        "startRowLabel": "A",
+        "startColumnLabel": 11
+      },
+      {
+        "id": "blk_1754026265757",
+        "name": "New seated grid",
+        "type": "seated_grid",
+        "position": {
+          "x": 375.9332504272461,
+          "y": 363.99993260701496
+        },
+        "rows": 5,
+        "columns": 11,
+        "startRowLabel": "F",
+        "startColumnLabel": 1
+      },
+      {
+        "id": "blk_1754026799875",
+        "name": "Stage",
+        "type": "non_sellable",
+        "position": {
+          "x": 60.53332519531244,
+          "y": 0
+        },
+        "width": 568,
+        "height": 70
+      },
+      {
+        "id": "blk_1754026819378",
+        "name": "New standing capacity",
+        "type": "standing_capacity",
+        "position": {
+          "x": 0,
+          "y": 598.0000991821288
+        },
+        "capacity": 100,
+        "width": 707,
+        "height": 397.60003662109375
+      }
+    ]
+  }
 }
