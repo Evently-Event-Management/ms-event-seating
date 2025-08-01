@@ -26,7 +26,7 @@ public class OrganizationOwnershipService {
      */
     @Cacheable(value = "organizationOwnership", key = "'ownership_' + #userId + '_' + #organizationId")
     public boolean isOrganizationOwnedByUser(String userId, UUID organizationId) {
-        log.info("--- DATABASE HIT: Checking ownership for org {} and user {} ---", organizationId, userId);
+        log.debug("--- DATABASE HIT: Checking ownership for org {} and user {} ---", organizationId, userId);
         boolean result = organizationRepository.findById(organizationId)
                 .map(organization -> organization.getUserId().equals(userId))
                 .orElse(false);
