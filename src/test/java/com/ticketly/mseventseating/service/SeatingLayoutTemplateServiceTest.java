@@ -1,4 +1,5 @@
 package com.ticketly.mseventseating.service;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.LayoutDataDTO;
 import com.ticketly.mseventseating.dto.SeatingLayoutTemplateDTO;
@@ -15,6 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -63,9 +68,8 @@ class SeatingLayoutTemplateServiceTest {
         organization.setName("Test Organization");
         organization.setUserId(userId);
 
-        // Load sample layout data from JSON file
         String jsonContent = new String(Files.readAllBytes(
-                Paths.get("src/main/java/com/ticketly/mseventseating/model/seating_layout.json")));
+                Paths.get("src/test/resources/seating_layout.json")));
         sampleLayoutData = objectMapper.readValue(jsonContent, LayoutDataDTO.class);
 
         template = new SeatingLayoutTemplate();
@@ -73,23 +77,30 @@ class SeatingLayoutTemplateServiceTest {
         template.setName("Test Template");
         template.setOrganization(organization);
         template.setLayoutData(objectMapper.writeValueAsString(sampleLayoutData));
+
+        // Set default page size for the service
+        ReflectionTestUtils.setField(seatingLayoutTemplateService, "defaultPageSize", 6);
     }
 
     @Test
-    void getAllTemplatesByOrganizationId_ShouldReturnTemplates_WhenUserHasAccess() {
+    void getAllTemplatesByOrganizationId_ShouldReturnPaginatedTemplates_WhenUserHasAccess() {
         // Given
+        int page = 0;
+        int size = 10;
         List<SeatingLayoutTemplate> templates = Collections.singletonList(template);
+        Page<SeatingLayoutTemplate> templatePage = new PageImpl<>(templates, PageRequest.of(page, size), templates.size());
+
         when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(true);
-        when(seatingLayoutTemplateRepository.findByOrganizationId(organizationId)).thenReturn(templates);
+        when(seatingLayoutTemplateRepository.findByOrganizationId(eq(organizationId), any(Pageable.class))).thenReturn(templatePage);
 
         // When
-        List<SeatingLayoutTemplateDTO> result = seatingLayoutTemplateService.getAllTemplatesByOrganizationId(organizationId, userId);
+        Page<SeatingLayoutTemplateDTO> result = seatingLayoutTemplateService.getAllTemplatesByOrganizationId(organizationId, userId, page, size);
 
         // Then
-        assertEquals(1, result.size());
-        assertEquals(templateId, result.getFirst().getId());
-        assertEquals("Test Template", result.getFirst().getName());
-        assertEquals(organizationId, result.getFirst().getOrganizationId());
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(1, result.getContent().size());
+        assertEquals(templateId, result.getContent().getFirst().getId());
         verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
     }
 
@@ -99,10 +110,11 @@ class SeatingLayoutTemplateServiceTest {
         when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(false);
 
         // When/Then
-        assertThrows(AuthorizationDeniedException.class, 
-            () -> seatingLayoutTemplateService.getAllTemplatesByOrganizationId(organizationId, userId));
+        assertThrows(AuthorizationDeniedException.class,
+                () -> seatingLayoutTemplateService.getAllTemplatesByOrganizationId(organizationId, userId, 0, 10));
         verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
-        verify(seatingLayoutTemplateRepository, never()).findByOrganizationId(any());
+        // Verify repository is never called
+        verify(seatingLayoutTemplateRepository, never()).findByOrganizationId(any(UUID.class), any(Pageable.class));
     }
 
     @Test

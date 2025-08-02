@@ -6,13 +6,12 @@ import com.ticketly.mseventseating.service.SeatingLayoutTemplateService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -24,12 +23,15 @@ public class SeatingLayoutTemplateController {
     private final SeatingLayoutTemplateService seatingLayoutTemplateService;
 
     @GetMapping("/organization/{organizationId}")
-    public ResponseEntity<List<SeatingLayoutTemplateDTO>> getAllTemplatesByOrganization(
+    public ResponseEntity<Page<SeatingLayoutTemplateDTO>> getAllTemplatesByOrganization(
             @PathVariable UUID organizationId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size,
             @AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getSubject();
-        log.info("Getting all templates for organization ID: {} by user: {}", organizationId, userId);
-        return ResponseEntity.ok(seatingLayoutTemplateService.getAllTemplatesByOrganizationId(organizationId, userId));
+        log.info("Getting paginated templates for organization ID: {} by user: {} (page: {}, size: {})",
+                organizationId, userId, page, size);
+        return ResponseEntity.ok(seatingLayoutTemplateService.getAllTemplatesByOrganizationId(organizationId, userId, page, size));
     }
 
     @GetMapping("/{id}")
@@ -46,7 +48,7 @@ public class SeatingLayoutTemplateController {
             @Valid @RequestBody SeatingLayoutTemplateRequest request,
             @AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getSubject();
-        log.info("Creating new template for organization ID: {} by user: {}", 
+        log.info("Creating new template for organization ID: {} by user: {}",
                 request.getOrganizationId(), userId);
         SeatingLayoutTemplateDTO created = seatingLayoutTemplateService.createTemplate(request, userId);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
@@ -54,7 +56,7 @@ public class SeatingLayoutTemplateController {
 
     @PutMapping("/{id}")
     public ResponseEntity<SeatingLayoutTemplateDTO> updateTemplate(
-            @PathVariable UUID id, 
+            @PathVariable UUID id,
             @Valid @RequestBody SeatingLayoutTemplateRequest request,
             @AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getSubject();
