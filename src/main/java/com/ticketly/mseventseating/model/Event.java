@@ -46,11 +46,13 @@ public class Event {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private EventStatus status = EventStatus.PENDING;
 
     private String rejectionReason;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isOnline = false;
 
     private String onlineLink;
@@ -60,6 +62,7 @@ public class Event {
     // --- Rolling Sales Window Rules ---
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private SalesStartRuleType salesStartRuleType = SalesStartRuleType.IMMEDIATE;
 
     @Column(name = "sales_start_days_before")

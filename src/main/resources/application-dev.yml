@@ -6,8 +6,12 @@ spring:
     driver-class-name: org.postgresql.Driver
   data:
     redis:
-        host: localhost
-        port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+#      password: ${REDIS_PASSWORD:} # Leave empty if no password
+      timeout: 2000
+      # Uncomment if using Redis SSL
+      # ssl: true
 
 aws:
   s3:

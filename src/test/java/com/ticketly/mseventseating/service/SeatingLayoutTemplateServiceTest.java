@@ -80,7 +80,6 @@ class SeatingLayoutTemplateServiceTest {
         // Given
         List<SeatingLayoutTemplate> templates = Collections.singletonList(template);
         when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(true);
-        when(organizationRepository.findById(organizationId)).thenReturn(Optional.of(organization));
         when(seatingLayoutTemplateRepository.findByOrganizationId(organizationId)).thenReturn(templates);
 
         // When
@@ -257,7 +256,7 @@ class SeatingLayoutTemplateServiceTest {
 
         // Then
         verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
-        verify(seatingLayoutTemplateRepository).deleteById(templateId);
+        verify(seatingLayoutTemplateRepository).delete(template);
     }
 
     @Test

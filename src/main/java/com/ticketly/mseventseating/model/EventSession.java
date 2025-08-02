@@ -31,5 +31,6 @@ public class EventSession {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private SessionStatus status = SessionStatus.SCHEDULED;
 }
