@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
+@Getter
 enum Tier {
     FREE(0),
     PRO(1),
