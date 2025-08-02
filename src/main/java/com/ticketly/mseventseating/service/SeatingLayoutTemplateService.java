@@ -253,6 +253,7 @@ public class SeatingLayoutTemplateService {
         dto.setId(template.getId());
         dto.setName(template.getName());
         dto.setOrganizationId(template.getOrganization().getId());
+        dto.setUpdatedAt(template.getUpdatedAt());
 
         try {
             LayoutDataDTO layoutData = objectMapper.readValue(template.getLayoutData(), LayoutDataDTO.class);

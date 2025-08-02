@@ -3,8 +3,10 @@ package com.ticketly.mseventseating.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -26,6 +28,9 @@ public class SeatingLayoutTemplate {
 
     @Column(nullable = false)
     private String name;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "layout_data", columnDefinition = "jsonb")
