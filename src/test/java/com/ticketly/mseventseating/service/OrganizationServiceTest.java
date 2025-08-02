@@ -18,7 +18,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -62,8 +62,8 @@ class OrganizationServiceTest {
                 .website(ORG_WEBSITE)
                 .userId(USER_ID)
                 .logoUrl(LOGO_URL)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(OffsetDateTime.now())
+                .updatedAt(OffsetDateTime.now())
                 .build();
 
         testRequest = OrganizationRequest.builder()
@@ -184,8 +184,8 @@ class OrganizationServiceTest {
                         .website(updatedWebsite)
                         .userId(USER_ID)
                         .logoUrl(LOGO_URL)
-                        .createdAt(LocalDateTime.now())
-                        .updatedAt(LocalDateTime.now())
+                        .createdAt(OffsetDateTime.now())
+                        .updatedAt(OffsetDateTime.now())
                         .build()
         );
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);

@@ -13,6 +13,10 @@ import com.ticketly.mseventseating.repository.SeatingLayoutTemplateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,22 +38,37 @@ public class SeatingLayoutTemplateService {
     @Value("${app.seating_layout.default-gap:25}")
     private int gap;
 
+    @Value("${app.pagination.default-size:6}")
+    private int defaultPageSize;
+
     /**
-     * Get all templates for an organization with caching
+     * Get all templates for an organization with caching and pagination
      *
      * @param organizationId the organization ID
      * @param userId the ID of the current user
-     * @return list of seating layout template DTOs
+     * @param page the page number (0-based)
+     * @param size the page size
+     * @return paginated list of seating layout template DTOs
      */
     @Transactional(readOnly = true)
-    public List<SeatingLayoutTemplateDTO> getAllTemplatesByOrganizationId(UUID organizationId, String userId) {
+    public Page<SeatingLayoutTemplateDTO> getAllTemplatesByOrganizationId(
+            UUID organizationId,
+            String userId,
+            int page,
+            int size) {
         // It still uses the cached ownership check for authorization.
         verifyUserAccess(organizationId, userId);
 
-        log.info("Fetching all templates for organization {} (DB query)", organizationId);
-        return seatingLayoutTemplateRepository.findByOrganizationId(organizationId).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        // Use default page size if 0 or negative size is provided
+        if (size <= 0) {
+            size = defaultPageSize;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("updatedAt").descending());
+
+        log.info("Fetching templates for organization {} (page: {}, size: {})", organizationId, page, size);
+        return seatingLayoutTemplateRepository.findByOrganizationId(organizationId, pageable)
+                .map(this::convertToDTO);
     }
 
     /**
@@ -253,6 +272,7 @@ public class SeatingLayoutTemplateService {
         dto.setId(template.getId());
         dto.setName(template.getName());
         dto.setOrganizationId(template.getOrganization().getId());
+        dto.setUpdatedAt(template.getUpdatedAt());
 
         try {
             LayoutDataDTO layoutData = objectMapper.readValue(template.getLayoutData(), LayoutDataDTO.class);
