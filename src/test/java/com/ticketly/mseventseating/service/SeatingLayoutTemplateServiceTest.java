@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.LayoutDataDTO;
 import com.ticketly.mseventseating.dto.SeatingLayoutTemplateDTO;
 import com.ticketly.mseventseating.dto.SeatingLayoutTemplateRequest;
+import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.model.SeatingLayoutTemplate;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
@@ -43,6 +45,12 @@ class SeatingLayoutTemplateServiceTest {
 
     @Mock
     private OrganizationOwnershipService ownershipService;
+
+    @Mock
+    private TierService tierService;
+
+    @Mock
+    private Jwt mockJwt;
 
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -157,7 +165,7 @@ class SeatingLayoutTemplateServiceTest {
     }
 
     @Test
-    void createTemplate_ShouldCreateAndReturnTemplate_WhenUserHasAccess() {
+    void createTemplate_ShouldCreateAndReturnTemplate_WhenUserHasAccessAndUnderLimit() {
         // Given
         SeatingLayoutTemplateRequest request = new SeatingLayoutTemplateRequest();
         request.setName("New Template");
@@ -166,6 +174,8 @@ class SeatingLayoutTemplateServiceTest {
 
         when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(true);
         when(organizationRepository.findById(organizationId)).thenReturn(Optional.of(organization));
+        when(seatingLayoutTemplateRepository.countByOrganizationId(organizationId)).thenReturn(2L);
+        when(tierService.getMaxSeatingLayoutsForOrg(mockJwt)).thenReturn(5);
         when(seatingLayoutTemplateRepository.save(any(SeatingLayoutTemplate.class))).thenAnswer(invocation -> {
             SeatingLayoutTemplate savedTemplate = invocation.getArgument(0);
             savedTemplate.setId(UUID.randomUUID());
@@ -173,7 +183,7 @@ class SeatingLayoutTemplateServiceTest {
         });
 
         // When
-        SeatingLayoutTemplateDTO result = seatingLayoutTemplateService.createTemplate(request, userId);
+        SeatingLayoutTemplateDTO result = seatingLayoutTemplateService.createTemplate(request, userId, mockJwt);
 
         // Then
         assertNotNull(result);
@@ -181,7 +191,32 @@ class SeatingLayoutTemplateServiceTest {
         assertEquals(organizationId, result.getOrganizationId());
         assertNotNull(result.getLayoutData());
         verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
+        verify(tierService).getMaxSeatingLayoutsForOrg(mockJwt);
+        verify(seatingLayoutTemplateRepository).countByOrganizationId(organizationId);
         verify(seatingLayoutTemplateRepository).save(any(SeatingLayoutTemplate.class));
+    }
+
+    @Test
+    void createTemplate_ShouldThrowException_WhenUserExceedsTierLimit() {
+        // Given
+        SeatingLayoutTemplateRequest request = new SeatingLayoutTemplateRequest();
+        request.setName("New Template");
+        request.setOrganizationId(organizationId);
+        request.setLayoutData(sampleLayoutData);
+
+        when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(true);
+        when(organizationRepository.findById(organizationId)).thenReturn(Optional.of(organization));
+        when(seatingLayoutTemplateRepository.countByOrganizationId(organizationId)).thenReturn(5L);
+        when(tierService.getMaxSeatingLayoutsForOrg(mockJwt)).thenReturn(5);
+
+        // When/Then
+        assertThrows(BadRequestException.class,
+            () -> seatingLayoutTemplateService.createTemplate(request, userId, mockJwt));
+
+        verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
+        verify(tierService).getMaxSeatingLayoutsForOrg(mockJwt);
+        verify(seatingLayoutTemplateRepository).countByOrganizationId(organizationId);
+        verify(seatingLayoutTemplateRepository, never()).save(any(SeatingLayoutTemplate.class));
     }
 
     @Test
@@ -196,9 +231,10 @@ class SeatingLayoutTemplateServiceTest {
 
         // When/Then
         assertThrows(AuthorizationDeniedException.class, 
-            () -> seatingLayoutTemplateService.createTemplate(request, userId));
+            () -> seatingLayoutTemplateService.createTemplate(request, userId, mockJwt));
         verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
         verify(seatingLayoutTemplateRepository, never()).save(any(SeatingLayoutTemplate.class));
+        verify(tierService, never()).getMaxSeatingLayoutsForOrg(any());
     }
 
     @Test

@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,6 +36,9 @@ class OrganizationServiceTest {
 
     @Mock
     private OrganizationOwnershipService ownershipService;
+    
+    @Mock
+    private TierService tierService;
 
     @InjectMocks
     private OrganizationService organizationService;
@@ -48,11 +52,11 @@ class OrganizationServiceTest {
 
     private Organization testOrganization;
     private OrganizationRequest testRequest;
+    private Jwt mockJwt;
 
     @BeforeEach
     void setUp() {
         // Configure service properties
-        ReflectionTestUtils.setField(organizationService, "maxOrganizationsPerUser", 3);
         ReflectionTestUtils.setField(organizationService, "maxLogoSize", 2 * 1024 * 1024); // 2MB
 
         // Set up test data
@@ -70,6 +74,9 @@ class OrganizationServiceTest {
                 .name(ORG_NAME)
                 .website(ORG_WEBSITE)
                 .build();
+                
+        // Mock JWT
+        mockJwt = mock(Jwt.class);
     }
 
     @Test
@@ -131,11 +138,12 @@ class OrganizationServiceTest {
         // Arrange
         Organization savedOrganization = testOrganization;
         when(organizationRepository.countByUserId(USER_ID)).thenReturn(2L);
+        when(tierService.getMaxOrganizationsForUser(mockJwt)).thenReturn(3);
         when(organizationRepository.save(any(Organization.class))).thenReturn(savedOrganization);
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
 
         // Act
-        OrganizationResponse result = organizationService.createOrganization(testRequest, USER_ID);
+        OrganizationResponse result = organizationService.createOrganization(testRequest, USER_ID, mockJwt);
 
         // Assert
         assertEquals(ORG_NAME, result.getName());
@@ -154,14 +162,35 @@ class OrganizationServiceTest {
     void createOrganization_ShouldThrowException_WhenUserExceedsLimit() {
         // Arrange
         when(organizationRepository.countByUserId(USER_ID)).thenReturn(3L);
+        when(tierService.getMaxOrganizationsForUser(mockJwt)).thenReturn(3);
 
         // Act & Assert
         assertThrows(BadRequestException.class, () ->
-                organizationService.createOrganization(testRequest, USER_ID)
+                organizationService.createOrganization(testRequest, USER_ID, mockJwt)
         );
 
         verify(organizationRepository).countByUserId(USER_ID);
         verify(organizationRepository, never()).save(any());
+    }
+    
+    @Test
+    void createOrganization_ShouldAllowDifferentLimitsBasedOnTier() {
+        // Arrange
+        Organization savedOrganization = testOrganization;
+        when(organizationRepository.countByUserId(USER_ID)).thenReturn(5L);
+        when(tierService.getMaxOrganizationsForUser(mockJwt)).thenReturn(10); // Higher tier limit
+        when(organizationRepository.save(any(Organization.class))).thenReturn(savedOrganization);
+        when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
+
+        // Act
+        OrganizationResponse result = organizationService.createOrganization(testRequest, USER_ID, mockJwt);
+
+        // Assert
+        assertEquals(ORG_NAME, result.getName());
+        assertEquals(ORG_WEBSITE, result.getWebsite());
+        
+        // Verify the tier service was called
+        verify(tierService).getMaxOrganizationsForUser(mockJwt);
     }
 
     @Test

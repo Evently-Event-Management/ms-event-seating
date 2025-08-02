@@ -115,7 +115,7 @@ class SeatingLayoutTemplateControllerTest {
     @Test
     void createTemplate_ShouldCreateAndReturnTemplate() throws Exception {
         // Arrange
-        when(seatingLayoutTemplateService.createTemplate(any(SeatingLayoutTemplateRequest.class), eq(USER_ID)))
+        when(seatingLayoutTemplateService.createTemplate(any(SeatingLayoutTemplateRequest.class), eq(USER_ID), any()))
                 .thenReturn(testResponse);
 
         // Act & Assert
@@ -126,7 +126,7 @@ class SeatingLayoutTemplateControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(TEMPLATE_ID.toString())));
 
-        verify(seatingLayoutTemplateService).createTemplate(any(SeatingLayoutTemplateRequest.class), eq(USER_ID));
+        verify(seatingLayoutTemplateService).createTemplate(any(SeatingLayoutTemplateRequest.class), eq(USER_ID), any());
     }
 
     @Test

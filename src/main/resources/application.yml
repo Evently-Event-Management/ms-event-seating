@@ -3,29 +3,23 @@ server:
   servlet:
     context-path: ${SERVER_SERVLET_CONTEXT_PATH:/api/event-seating}
 
-
 spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
-
   application:
     name: ms-event-seating
-
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/event-ticketing}
           jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8080/realms/event-ticketing/protocol/openid-connect/certs}
-
-  # Configure multipart file upload limits and other servlet properties
   servlet:
     multipart:
       enabled: true
       max-file-size: ${MAX_FILE_SIZE:5MB}
       max-request-size: ${MAX_REQUEST_SIZE:15MB}
       file-size-threshold: 2KB
-
   jpa:
     hibernate:
       ddl-auto: validate
@@ -34,13 +28,11 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
-
   flyway:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
     validate-on-migrate: true
-
   cache:
     redis:
       time-to-live: 3600
@@ -53,9 +45,22 @@ logging:
 
 # Application specific configurations
 app:
-  organization:
-    max-per-user: 3
-    max-logo-size: 1048576
+  tier:
+    limits:
+      # ✅ Corrected Structure: Limits are nested under the tier name
+      FREE:
+        max-organizations-per-user: 3
+        max-seating-layouts-per-org: 5
+      PRO:
+        max-organizations-per-user: 10
+        max-seating-layouts-per-org: 25
+      ENTERPRISE:
+        max-organizations-per-user: 100
+        max-seating-layouts-per-org: 200
+
+  # General app config
   seating_layout:
     default-page-size: 6
     default-gap: 25
+  organization:
+    max-logo-size: 1048576 # 1MB

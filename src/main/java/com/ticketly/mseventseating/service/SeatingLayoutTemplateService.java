@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.LayoutDataDTO;
 import com.ticketly.mseventseating.dto.SeatingLayoutTemplateDTO;
 import com.ticketly.mseventseating.dto.SeatingLayoutTemplateRequest;
+import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.model.SeatingLayoutTemplate;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,7 @@ public class SeatingLayoutTemplateService {
     private final OrganizationRepository organizationRepository;
     private final ObjectMapper objectMapper;
     private final OrganizationOwnershipService ownershipService;
+    private final TierService tierService;
 
     @Value("${app.seating_layout.default-gap:25}")
     private int gap;
@@ -90,11 +93,24 @@ public class SeatingLayoutTemplateService {
      *
      * @param request the create template request
      * @param userId  the ID of the current user
+     * @param jwt     the JWT token of the current user
      * @return the created seating layout template DTO
      */
     @Transactional
-    public SeatingLayoutTemplateDTO createTemplate(SeatingLayoutTemplateRequest request, String userId) {
+    public SeatingLayoutTemplateDTO createTemplate(SeatingLayoutTemplateRequest request, String userId, Jwt jwt) {
         Organization organization = findOrganizationByIdAndVerifyAccess(request.getOrganizationId(), userId);
+        
+        // Check if creating a new template would exceed the user's tier limit
+        long currentTemplateCount = seatingLayoutTemplateRepository.countByOrganizationId(organization.getId());
+        int maxTemplates = tierService.getMaxSeatingLayoutsForOrg(jwt);
+        
+        if (currentTemplateCount >= maxTemplates) {
+            throw new BadRequestException(String.format(
+                "Cannot create more than %d seating layout templates. Please upgrade your plan to create more.", 
+                maxTemplates
+            ));
+        }
+        
         LayoutDataDTO normalizedLayout = normalizeLayoutData(request.getLayoutData());
 
         SeatingLayoutTemplate template = new SeatingLayoutTemplate();
