@@ -10,6 +10,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,9 +29,7 @@ public class OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final S3StorageService s3StorageService;
     private final OrganizationOwnershipService ownershipService;
-
-    @Value("${app.organization.max-per-user:3}")
-    private int maxOrganizationsPerUser;
+    private final TierService tierService;
 
     @Value("${app.organization.max-logo-size:1048576}") // 1MB
     private long maxLogoSize;
@@ -69,12 +68,13 @@ public class OrganizationService {
      * @throws BadRequestException if the user has reached the maximum organization limit
      */
     @Transactional
-    public OrganizationResponse createOrganization(OrganizationRequest request, String userId) {
+    public OrganizationResponse createOrganization(OrganizationRequest request, String userId, Jwt jwt) {
         // Check if user has reached the max organization limit
         long userOrganizationCount = organizationRepository.countByUserId(userId);
-        if (userOrganizationCount >= maxOrganizationsPerUser) {
+        int maxOrganizations = tierService.getMaxOrganizationsForUser(jwt);
+        if (userOrganizationCount >= maxOrganizations) {
             throw new BadRequestException("You have reached the maximum limit of " +
-                    maxOrganizationsPerUser + " organizations per user");
+                    maxOrganizations + " organizations for your tier.");
         }
 
         Organization organization = Organization.builder()

@@ -48,7 +48,7 @@ public class OrganizationController {
             @AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getSubject();
         log.info("Creating new organization for user: {}", userId);
-        OrganizationResponse createdOrg = organizationService.createOrganization(request, userId);
+        OrganizationResponse createdOrg = organizationService.createOrganization(request, userId, jwt);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrg);
     }
 

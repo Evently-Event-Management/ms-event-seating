@@ -50,7 +50,7 @@ public class SeatingLayoutTemplateController {
         String userId = jwt.getSubject();
         log.info("Creating new template for organization ID: {} by user: {}",
                 request.getOrganizationId(), userId);
-        SeatingLayoutTemplateDTO created = seatingLayoutTemplateService.createTemplate(request, userId);
+        SeatingLayoutTemplateDTO created = seatingLayoutTemplateService.createTemplate(request, userId, jwt);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
