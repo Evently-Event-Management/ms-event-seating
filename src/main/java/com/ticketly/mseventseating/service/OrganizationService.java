@@ -32,7 +32,7 @@ public class OrganizationService {
     @Value("${app.organization.max-per-user:3}")
     private int maxOrganizationsPerUser;
 
-    @Value("${app.organization.max-logo-size}")
+    @Value("${app.organization.max-logo-size:1048576}") // 1MB
     private long maxLogoSize;
 
     /**

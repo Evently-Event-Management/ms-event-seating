@@ -12,6 +12,7 @@ import com.ticketly.mseventseating.repository.OrganizationRepository;
 import com.ticketly.mseventseating.repository.SeatingLayoutTemplateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,9 @@ public class SeatingLayoutTemplateService {
     private final OrganizationRepository organizationRepository;
     private final ObjectMapper objectMapper;
     private final OrganizationOwnershipService ownershipService;
+
+    @Value("${app.seating_layout.default-gap:25}")
+    private int gap;
 
     /**
      * Get all templates for an organization with caching
@@ -181,10 +185,10 @@ public class SeatingLayoutTemplateService {
     /**
      * Normalizes the layout data by:
      * 1. Replacing all block IDs with UUIDs
-     * 2. Normalizing coordinates so that leftmost x is 0 and topmost y is 0
+     * 2. Normalizing coordinates so that the layout starts near the top-left corner with a small margin.
      */
     private LayoutDataDTO normalizeLayoutData(LayoutDataDTO layoutData) {
-        if (layoutData == null || layoutData.getLayout() == null || layoutData.getLayout().getBlocks() == null) {
+        if (layoutData == null || layoutData.getLayout() == null || layoutData.getLayout().getBlocks() == null || layoutData.getLayout().getBlocks().isEmpty()) {
             return layoutData;
         }
 
@@ -215,8 +219,8 @@ public class SeatingLayoutTemplateService {
 
                     // Normalize position
                     LayoutDataDTO.Position normalizedPosition = new LayoutDataDTO.Position();
-                    normalizedPosition.setX(block.getPosition().getX() - minX);
-                    normalizedPosition.setY(block.getPosition().getY() - minY);
+                    normalizedPosition.setX(block.getPosition().getX() - minX + gap);
+                    normalizedPosition.setY(block.getPosition().getY() - minY + gap);
                     newBlock.setPosition(normalizedPosition);
 
                     // Copy other properties based on block type

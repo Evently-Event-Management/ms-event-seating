@@ -54,5 +54,7 @@ logging:
 # Application specific configurations
 app:
   organization:
-    max-per-user: ${MAX_ORGS_PER_USER:3}
-    max-logo-size: ${MAX_ORG_LOGO_SIZE:1048576} # 1 MB
+    max-per-user: 3
+    max-logo-size: 1048576
+  seating_layout:
+    default-gap: 25
