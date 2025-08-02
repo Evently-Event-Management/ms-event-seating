@@ -38,16 +38,16 @@ public class SeatingLayoutTemplateService {
     @Value("${app.seating_layout.default-gap:25}")
     private int gap;
 
-    @Value("${app.pagination.default-size:6}")
+    @Value("${app.seating_layout.default-page-size:6}")
     private int defaultPageSize;
 
     /**
      * Get all templates for an organization with caching and pagination
      *
      * @param organizationId the organization ID
-     * @param userId the ID of the current user
-     * @param page the page number (0-based)
-     * @param size the page size
+     * @param userId         the ID of the current user
+     * @param page           the page number (0-based)
+     * @param size           the page size
      * @return paginated list of seating layout template DTOs
      */
     @Transactional(readOnly = true)
@@ -74,7 +74,7 @@ public class SeatingLayoutTemplateService {
     /**
      * Get a template by ID
      *
-     * @param id the template ID
+     * @param id     the template ID
      * @param userId the ID of the current user
      * @return the seating layout template DTO
      */
@@ -89,7 +89,7 @@ public class SeatingLayoutTemplateService {
      * Create a new template
      *
      * @param request the create template request
-     * @param userId the ID of the current user
+     * @param userId  the ID of the current user
      * @return the created seating layout template DTO
      */
     @Transactional
@@ -118,9 +118,9 @@ public class SeatingLayoutTemplateService {
     /**
      * Update an existing template
      *
-     * @param id the template ID
+     * @param id      the template ID
      * @param request the update template request
-     * @param userId the ID of the current user
+     * @param userId  the ID of the current user
      * @return the updated seating layout template DTO
      */
     @Transactional
@@ -152,7 +152,7 @@ public class SeatingLayoutTemplateService {
     /**
      * Delete a template
      *
-     * @param id the template ID
+     * @param id     the template ID
      * @param userId the ID of the current user
      */
     @Transactional
@@ -167,9 +167,9 @@ public class SeatingLayoutTemplateService {
      * This method uses cached ownership check to improve performance
      *
      * @param organizationId the organization ID
-     * @param userId the ID of the current user
+     * @param userId         the ID of the current user
      * @return the organization entity
-     * @throws ResourceNotFoundException if organization not found
+     * @throws ResourceNotFoundException    if organization not found
      * @throws AuthorizationDeniedException if user does not have access to the organization
      */
     private Organization findOrganizationByIdAndVerifyAccess(UUID organizationId, String userId) {
@@ -187,7 +187,7 @@ public class SeatingLayoutTemplateService {
      * Verify that the user has access to the organization using cached check
      *
      * @param organizationId the organization to check
-     * @param userId the ID of the current user
+     * @param userId         the ID of the current user
      * @throws AuthorizationDeniedException if user does not have access to the organization
      */
     private void verifyUserAccess(UUID organizationId, String userId) {

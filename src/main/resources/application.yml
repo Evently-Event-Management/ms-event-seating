@@ -57,4 +57,5 @@ app:
     max-per-user: 3
     max-logo-size: 1048576
   seating_layout:
+    default-page-size: 6
     default-gap: 25
