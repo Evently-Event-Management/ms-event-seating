@@ -5,8 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
-
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
@@ -30,7 +29,7 @@ public class SeatingLayoutTemplate {
     private String name;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    private OffsetDateTime updatedAt;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "layout_data", columnDefinition = "jsonb")
