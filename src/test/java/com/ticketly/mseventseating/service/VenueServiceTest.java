@@ -5,7 +5,6 @@ import com.ticketly.mseventseating.dto.VenueResponse;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.model.Venue;
-import com.ticketly.mseventseating.repository.OrganizationRepository;
 import com.ticketly.mseventseating.repository.VenueRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,9 +34,9 @@ class VenueServiceTest {
     // Mocking the dependencies
     @Mock
     private VenueRepository venueRepository;
-
+    
     @Mock
-    private OrganizationRepository organizationRepository;
+    private OrganizationOwnershipService ownershipService;
 
     // Reusable test data
     private Organization organization;
@@ -72,6 +71,7 @@ class VenueServiceTest {
     void getVenueById_WhenVenueExistsAndUserIsOwner_ShouldReturnVenueResponse() {
         // Arrange: Configure mocks to return our test data
         when(venueRepository.findById(venue.getId())).thenReturn(Optional.of(venue));
+        when(ownershipService.verifyOwnershipAndGetOrganization(organization.getId(), userId)).thenReturn(organization);
 
         // Act: Call the method being tested
         VenueResponse response = venueService.getVenueById(venue.getId(), userId);
@@ -80,6 +80,9 @@ class VenueServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getId()).isEqualTo(venue.getId());
         assertThat(response.getName()).isEqualTo(venue.getName());
+
+        // Verify the ownership service was called
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organization.getId(), userId);
     }
 
     @Test
@@ -89,21 +92,27 @@ class VenueServiceTest {
         when(venueRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(ResourceNotFoundException.class, () -> {
-            venueService.getVenueById(nonExistentId, userId);
-        });
+        assertThrows(ResourceNotFoundException.class, () -> venueService.getVenueById(nonExistentId, userId));
+
+        // Verify ownership service was never called
+        verify(ownershipService, never()).verifyOwnershipAndGetOrganization(any(), any());
     }
 
     @Test
     void getVenueById_WhenUserIsNotOwner_ShouldThrowAuthorizationDeniedException() {
         // Arrange
         when(venueRepository.findById(venue.getId())).thenReturn(Optional.of(venue));
+        when(ownershipService.verifyOwnershipAndGetOrganization(organization.getId(), otherUserId))
+                .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // Act & Assert
         assertThrows(AuthorizationDeniedException.class, () -> {
             // Use a different user ID to simulate an unauthorized user
             venueService.getVenueById(venue.getId(), otherUserId);
         });
+
+        // Verify the ownership service was called
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organization.getId(), otherUserId);
     }
 
     // --- Tests for createVenue ---
@@ -117,8 +126,7 @@ class VenueServiceTest {
         request.setCapacity(1000);
         request.setOrganizationId(organization.getId());
 
-        when(organizationRepository.findById(organization.getId())).thenReturn(Optional.of(organization));
-        // Use `any(Venue.class)` because the venue object passed to save will be a new instance
+        when(ownershipService.verifyOwnershipAndGetOrganization(organization.getId(), userId)).thenReturn(organization);
         when(venueRepository.save(any(Venue.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
@@ -129,19 +137,7 @@ class VenueServiceTest {
         assertThat(response.getName()).isEqualTo(request.getName());
         assertThat(response.getOrganizationId()).isEqualTo(organization.getId());
         verify(venueRepository, times(1)).save(any(Venue.class)); // Verify save was called once
-    }
-
-    @Test
-    void createVenue_WhenOrganizationNotFound_ShouldThrowResourceNotFoundException() {
-        // Arrange
-        VenueRequest request = new VenueRequest();
-        request.setOrganizationId(UUID.randomUUID()); // A non-existent organization
-        when(organizationRepository.findById(request.getOrganizationId())).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(ResourceNotFoundException.class, () -> {
-            venueService.createVenue(request, userId);
-        });
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organization.getId(), userId);
     }
 
     @Test
@@ -149,13 +145,17 @@ class VenueServiceTest {
         // Arrange
         VenueRequest request = new VenueRequest();
         request.setOrganizationId(organization.getId());
-        when(organizationRepository.findById(organization.getId())).thenReturn(Optional.of(organization));
+        when(ownershipService.verifyOwnershipAndGetOrganization(organization.getId(), otherUserId))
+                .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // Act & Assert
         assertThrows(AuthorizationDeniedException.class, () -> {
             // Use the "other" user ID
             venueService.createVenue(request, otherUserId);
         });
+        
+        // Verify the repository was never called
+        verify(venueRepository, never()).save(any());
     }
 
     // --- Tests for updateVenue ---
@@ -170,6 +170,7 @@ class VenueServiceTest {
         request.setOrganizationId(organization.getId());
 
         when(venueRepository.findById(venue.getId())).thenReturn(Optional.of(venue));
+        when(ownershipService.verifyOwnershipAndGetOrganization(organization.getId(), userId)).thenReturn(organization);
         when(venueRepository.save(any(Venue.class))).thenReturn(venue); // Return the updated venue
 
         // Act
@@ -179,6 +180,7 @@ class VenueServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getName()).isEqualTo("Updated Venue Name");
         verify(venueRepository, times(1)).save(venue);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organization.getId(), userId);
     }
 
     @Test
@@ -189,11 +191,66 @@ class VenueServiceTest {
         request.setOrganizationId(organization.getId());
 
         when(venueRepository.findById(venue.getId())).thenReturn(Optional.of(venue));
+        when(ownershipService.verifyOwnershipAndGetOrganization(organization.getId(), otherUserId))
+                .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // Act & Assert
-        assertThrows(AuthorizationDeniedException.class, () -> {
-            venueService.updateVenue(venue.getId(), request, otherUserId);
-        });
+        assertThrows(AuthorizationDeniedException.class, () -> venueService.updateVenue(venue.getId(), request, otherUserId));
+        
+        // Verify save was never called
+        verify(venueRepository, never()).save(any());
+    }
+
+    @Test
+    void updateVenue_WhenChangingToNewOrganization_ShouldVerifyOwnershipOfNewOrg() {
+        // Arrange
+        UUID newOrgId = UUID.randomUUID();
+        Organization newOrg = Organization.builder()
+                .id(newOrgId)
+                .name("New Org")
+                .userId(userId)
+                .build();
+                
+        VenueRequest request = new VenueRequest();
+        request.setName("Updated Name");
+        request.setAddress(venue.getAddress());
+        request.setOrganizationId(newOrgId);  // Different from current organization
+
+        when(venueRepository.findById(venue.getId())).thenReturn(Optional.of(venue));
+        when(ownershipService.verifyOwnershipAndGetOrganization(organization.getId(), userId)).thenReturn(organization);
+        when(ownershipService.verifyOwnershipAndGetOrganization(newOrgId, userId)).thenReturn(newOrg);
+        when(venueRepository.save(any())).thenReturn(venue);
+
+        // Act
+        VenueResponse response = venueService.updateVenue(venue.getId(), request, userId);
+
+        // Assert
+        assertThat(response).isNotNull();
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organization.getId(), userId);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(newOrgId, userId);
+    }
+
+    @Test
+    void updateVenue_WhenUserNotOwnerOfNewOrg_ShouldThrowAuthorizationDeniedException() {
+        // Arrange
+        UUID newOrgId = UUID.randomUUID();
+        
+        VenueRequest request = new VenueRequest();
+        request.setName("Updated Name");
+        request.setOrganizationId(newOrgId);  // Different from current organization
+
+        when(venueRepository.findById(venue.getId())).thenReturn(Optional.of(venue));
+        when(ownershipService.verifyOwnershipAndGetOrganization(organization.getId(), userId)).thenReturn(organization);
+        when(ownershipService.verifyOwnershipAndGetOrganization(newOrgId, userId))
+                .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
+
+        // Act & Assert
+        assertThrows(AuthorizationDeniedException.class, () -> venueService.updateVenue(venue.getId(), request, userId));
+        
+        // Verify proper methods were called
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organization.getId(), userId);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(newOrgId, userId);
+        verify(venueRepository, never()).save(any());
     }
 
     // --- Tests for deleteVenue ---
@@ -202,6 +259,7 @@ class VenueServiceTest {
     void deleteVenue_WhenUserIsOwner_ShouldDeleteVenue() {
         // Arrange
         when(venueRepository.findById(venue.getId())).thenReturn(Optional.of(venue));
+        when(ownershipService.verifyOwnershipAndGetOrganization(organization.getId(), userId)).thenReturn(organization);
         // doNothing() is used for void methods
         doNothing().when(venueRepository).delete(venue);
 
@@ -211,17 +269,19 @@ class VenueServiceTest {
         // Assert
         // Verify that the delete method was called exactly once with the correct venue object
         verify(venueRepository, times(1)).delete(venue);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organization.getId(), userId);
     }
 
     @Test
     void deleteVenue_WhenUserIsNotOwner_ShouldThrowAuthorizationDeniedException() {
         // Arrange
         when(venueRepository.findById(venue.getId())).thenReturn(Optional.of(venue));
+        when(ownershipService.verifyOwnershipAndGetOrganization(organization.getId(), otherUserId))
+                .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // Act & Assert
-        assertThrows(AuthorizationDeniedException.class, () -> {
-            venueService.deleteVenue(venue.getId(), otherUserId);
-        });
+        assertThrows(AuthorizationDeniedException.class, () -> venueService.deleteVenue(venue.getId(), otherUserId));
+
         // Verify delete was never called
         verify(venueRepository, never()).delete(any(Venue.class));
     }
@@ -231,7 +291,7 @@ class VenueServiceTest {
     @Test
     void getAllVenuesByOrganization_WhenUserIsOwner_ShouldReturnVenueList() {
         // Arrange
-        when(organizationRepository.findById(organization.getId())).thenReturn(Optional.of(organization));
+        when(ownershipService.verifyOwnershipAndGetOrganization(organization.getId(), userId)).thenReturn(organization);
         when(venueRepository.findByOrganizationId(organization.getId())).thenReturn(Collections.singletonList(venue));
 
         // Act
@@ -240,18 +300,20 @@ class VenueServiceTest {
         // Assert
         assertThat(responses).isNotNull();
         assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).getId()).isEqualTo(venue.getId());
+        assertThat(responses.getFirst().getId()).isEqualTo(venue.getId());
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organization.getId(), userId);
     }
 
     @Test
     void getAllVenuesByOrganization_WhenUserIsNotOwner_ShouldThrowAuthorizationDeniedException() {
         // Arrange
-        when(organizationRepository.findById(organization.getId())).thenReturn(Optional.of(organization));
-        // No need to mock venueRepository as the check fails before it's called
+        when(ownershipService.verifyOwnershipAndGetOrganization(organization.getId(), otherUserId))
+                .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // Act & Assert
-        assertThrows(AuthorizationDeniedException.class, () -> {
-            venueService.getAllVenuesByOrganization(organization.getId(), otherUserId);
-        });
+        assertThrows(AuthorizationDeniedException.class, () -> venueService.getAllVenuesByOrganization(organization.getId(), otherUserId));
+
+        // Verify findByOrganizationId was never called
+        verify(venueRepository, never()).findByOrganizationId(any());
     }
 }

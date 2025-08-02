@@ -1,14 +1,14 @@
 package com.ticketly.mseventseating.service;
 
+import com.ticketly.mseventseating.exception.ResourceNotFoundException;
+import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.repository.OrganizationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -17,51 +17,32 @@ import java.util.UUID;
 public class OrganizationOwnershipService {
 
     private final OrganizationRepository organizationRepository;
-    // ✅ Inject the RedisTemplate to interact with Redis directly
-    private final RedisTemplate<String, Object> redisTemplate;
 
     /**
-     * Check if a user owns an organization, with the result cached.
-     * This method correctly caches a boolean value.
+     * Finds an organization by its ID and verifies that the given user is the owner.
+     * The result (the Organization object) is cached.
+     * Throws an exception if the organization is not found or if the user is not the owner.
+     *
+     * @param organizationId the organization ID
+     * @param userId         the user ID
+     * @return the Organization entity if checks pass
+     * @throws ResourceNotFoundException      if the organization does not exist
+     * @throws AuthorizationDeniedException if the user does not own the organization
      */
-    @Cacheable(value = "organizationOwnership", key = "'ownership_' + #userId + '_' + #organizationId")
-    public boolean isOrganizationOwnedByUser(String userId, UUID organizationId) {
-        log.debug("--- DATABASE HIT: Checking ownership for org {} and user {} ---", organizationId, userId);
-        return organizationRepository.findById(organizationId)
-                .map(organization -> organization.getUserId().equals(userId))
-                .orElse(false);
-    }
+    @Cacheable(value = "organizations", key = "#organizationId")
+    public Organization verifyOwnershipAndGetOrganization(UUID organizationId, String userId) {
+        log.info("--- DATABASE HIT: Verifying ownership and fetching org ID: {} ---", organizationId);
 
-    /**
-     * Evict a specific organization ownership cache entry.
-     * This works perfectly with the standard annotation.
-     */
-    @CacheEvict(value = "organizationOwnership", key = "'ownership_' + #userId + '_' + #organizationId")
-    public void evictOrganizationOwnershipCache(String userId, UUID organizationId) {
-        log.info("Evicting organization ownership cache for user {} and organization {}", userId, organizationId);
-    }
+        Organization organization = organizationRepository.findById(organizationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found with id: " + organizationId));
 
-    /**
-     * Evict all organization ownership cache entries for a specific organization.
-     * This requires direct Redis interaction.
-     */
-    public void evictAllOwnershipByOrganization(UUID organizationId) {
-        log.info("Evicting all ownership cache entries for organization {}", organizationId);
-        // ✅ Construct the pattern to match all keys for this organization
-        String pattern = "organizationOwnership::ownership_*_" + organizationId;
-        Set<String> keys = redisTemplate.keys(pattern);
-        if (!keys.isEmpty()) {
-            redisTemplate.delete(keys);
-            log.info("Evicted {} keys for pattern: {}", keys.size(), pattern);
+        if (!organization.getUserId().equals(userId)) {
+            throw new AuthorizationDeniedException("User does not have access to this organization");
         }
+
+        return organization;
     }
 
-    /**
-     * Evict all organization ownership cache entries.
-     * This is a powerful operation and should be used with care.
-     */
-    @CacheEvict(value = "organizationOwnership", allEntries = true)
-    public void evictAllOrganizationOwnershipCache() {
-        log.info("Evicting all organization ownership cache entries.");
-    }
+    // Note: The old isOrganizationOwnedByUser and eviction methods can now be removed or refactored
+    // as the main OrganizationService will handle eviction on the "organizations" cache.
 }

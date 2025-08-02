@@ -35,7 +35,7 @@ spring:
     validate-on-migrate: true
   cache:
     redis:
-      time-to-live: 3600
+      time-to-live: 3600s
       key-prefix: "event-seating-ms::"
 
 logging:

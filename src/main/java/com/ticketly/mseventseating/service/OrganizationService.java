@@ -3,13 +3,12 @@ package com.ticketly.mseventseating.service;
 import com.ticketly.mseventseating.dto.OrganizationRequest;
 import com.ticketly.mseventseating.dto.OrganizationResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
-import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.repository.OrganizationRepository;
-import org.springframework.security.authorization.AuthorizationDeniedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +34,12 @@ public class OrganizationService {
     private long maxLogoSize;
 
     /**
-     * Get all organizations for the current user
+     * Get all organizations for the current user.
      *
      * @param userId the ID of the current user
      * @return List of organization responses
      */
+    @Transactional(readOnly = true)
     public List<OrganizationResponse> getAllOrganizationsForUser(String userId) {
         return organizationRepository.findByUserId(userId).stream()
                 .map(this::mapToDto)
@@ -47,31 +47,31 @@ public class OrganizationService {
     }
 
     /**
-     * Get an organization by ID, ensuring the requesting user is the owner
+     * Get an organization by ID, ensuring the requesting user is the owner.
      *
      * @param id     the organization ID
      * @param userId the ID of the requesting user
      * @return the organization response
-     * @throws AuthorizationDeniedException if the organization does not exist or user is not owner
      */
+    @Transactional(readOnly = true)
     public OrganizationResponse getOrganizationById(UUID id, String userId) {
-        Organization organization = findOrganizationByIdAndUser(id, userId);
+        // A single, cached call for verification and retrieval.
+        Organization organization = ownershipService.verifyOwnershipAndGetOrganization(id, userId);
         return mapToDto(organization);
     }
 
     /**
-     * Create a new organization for the current user
+     * Create a new organization for the current user.
      *
      * @param request the organization request
      * @param userId  the ID of the current user
+     * @param jwt     the user's JWT for tier checking
      * @return the created organization response
-     * @throws BadRequestException if the user has reached the maximum organization limit
      */
     @Transactional
     public OrganizationResponse createOrganization(OrganizationRequest request, String userId, Jwt jwt) {
-        // Check if user has reached the max organization limit
-        long userOrganizationCount = organizationRepository.countByUserId(userId);
         int maxOrganizations = tierService.getMaxOrganizationsForUser(jwt);
+        long userOrganizationCount = organizationRepository.countByUserId(userId);
         if (userOrganizationCount >= maxOrganizations) {
             throw new BadRequestException("You have reached the maximum limit of " +
                     maxOrganizations + " organizations for your tier.");
@@ -85,82 +85,73 @@ public class OrganizationService {
 
         Organization savedOrganization = organizationRepository.save(organization);
         log.info("Created new organization with ID: {}", savedOrganization.getId());
-
         return mapToDto(savedOrganization);
     }
 
     /**
-     * Update an existing organization
+     * Update an existing organization. Evicts the cache for this organization.
      *
      * @param id      the organization ID
      * @param request the updated organization details
      * @param userId  the ID of the current user
      * @return the updated organization response
-     * @throws AuthorizationDeniedException if the organization does not exist or user is not owner
      */
     @Transactional
+    @CacheEvict(value = "organizations", key = "#id")
     public OrganizationResponse updateOrganization(UUID id, OrganizationRequest request, String userId) {
-        Organization organization = findOrganizationByIdAndUser(id, userId);
+        Organization organization = ownershipService.verifyOwnershipAndGetOrganization(id, userId);
 
         organization.setName(request.getName());
         organization.setWebsite(request.getWebsite());
 
         Organization updatedOrganization = organizationRepository.save(organization);
-
-        // Remember to evict the cache if ownership changes
-
         log.info("Updated organization with ID: {}", updatedOrganization.getId());
         return mapToDto(updatedOrganization);
     }
 
     /**
-     * Upload a logo for an organization
+     * Upload a logo for an organization. Evicts the cache for this organization.
      *
      * @param id       the organization ID
      * @param logoFile the logo file to upload
      * @param userId   the ID of the current user
      * @return the updated organization response
-     * @throws AuthorizationDeniedException if the organization does not exist or user is not owner
-     * @throws IOException                  if there is an error handling the file
      */
     @Transactional
+    @CacheEvict(value = "organizations", key = "#id")
     public OrganizationResponse uploadLogo(UUID id, MultipartFile logoFile, String userId) throws IOException {
-        // Validate file type
         if (logoFile.isEmpty() || !Objects.requireNonNull(logoFile.getContentType()).startsWith("image/")) {
             throw new BadRequestException("Invalid file type. Please upload an image file.");
         }
-        // Validate file size
         if (logoFile.getSize() > maxLogoSize) {
             throw new BadRequestException("File size exceeds the maximum allowed size of " +
                     (maxLogoSize / (1024 * 1024)) + "MB");
         }
 
-        Organization organization = findOrganizationByIdAndUser(id, userId);
+        Organization organization = ownershipService.verifyOwnershipAndGetOrganization(id, userId);
 
-        // Delete old logo if it exists
         if (organization.getLogoUrl() != null) {
             s3StorageService.deleteFile(organization.getLogoUrl());
         }
 
-        // Upload new logo
         String logoKey = s3StorageService.uploadFile(logoFile, "organization-logos");
         organization.setLogoUrl(logoKey);
 
         Organization updatedOrganization = organizationRepository.save(organization);
         log.info("Uploaded logo for organization with ID: {}", updatedOrganization.getId());
-
         return mapToDto(updatedOrganization);
     }
 
     /**
-     * Remove the logo for an organization
+     * Remove the logo for an organization. Evicts the cache for this organization.
      *
      * @param id     the organization ID
      * @param userId the ID of the current user
      */
     @Transactional
+    @CacheEvict(value = "organizations", key = "#id")
     public void removeLogo(UUID id, String userId) {
-        Organization organization = findOrganizationByIdAndUser(id, userId);
+        Organization organization = ownershipService.verifyOwnershipAndGetOrganization(id, userId);
 
         if (organization.getLogoUrl() != null) {
             s3StorageService.deleteFile(organization.getLogoUrl());
@@ -170,49 +161,27 @@ public class OrganizationService {
         }
     }
 
-
     /**
-     * Delete an organization
+     * Delete an organization. Evicts the cache for this organization.
      *
      * @param id     the organization ID
      * @param userId the ID of the current user
-     * @throws AuthorizationDeniedException if the organization does not exist or user is not owner
      */
     @Transactional
+    @CacheEvict(value = "organizations", key = "#id")
     public void deleteOrganization(UUID id, String userId) {
-        Organization organization = findOrganizationByIdAndUser(id, userId);
+        Organization organization = ownershipService.verifyOwnershipAndGetOrganization(id, userId);
 
         if (organization.getLogoUrl() != null) {
             s3StorageService.deleteFile(organization.getLogoUrl());
         }
 
         organizationRepository.delete(organization);
-
-        ownershipService.evictAllOwnershipByOrganization(id);
-
         log.info("Deleted organization with ID: {}", id);
     }
 
     /**
-     * Helper method to find an organization by ID and verify the user is the owner
-     *
-     * @param id     the organization ID
-     * @param userId the ID of the current user
-     * @return the organization entity
-     * @throws AuthorizationDeniedException if the organization does not exist or user is not owner
-     */
-    private Organization findOrganizationByIdAndUser(UUID id, String userId) {
-        if (!ownershipService.isOrganizationOwnedByUser(userId, id)) {
-            throw new AuthorizationDeniedException("Organization not found or you don't have permission to access it");
-        }
-
-        // Since we know the user is authorized, we can safely fetch the entity.
-        return organizationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Organization not found with ID: " + id));
-    }
-
-    /**
-     * Map organization entity to DTO
+     * Map organization entity to DTO, generating a presigned URL for the logo if it exists.
      *
      * @param organization the organization entity
      * @return the organization response DTO

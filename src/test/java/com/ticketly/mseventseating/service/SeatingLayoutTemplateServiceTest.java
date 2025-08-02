@@ -8,7 +8,6 @@ import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.model.SeatingLayoutTemplate;
-import com.ticketly.mseventseating.repository.OrganizationRepository;
 import com.ticketly.mseventseating.repository.SeatingLayoutTemplateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,9 +38,6 @@ class SeatingLayoutTemplateServiceTest {
 
     @Mock
     private SeatingLayoutTemplateRepository seatingLayoutTemplateRepository;
-
-    @Mock
-    private OrganizationRepository organizationRepository;
 
     @Mock
     private OrganizationOwnershipService ownershipService;
@@ -98,7 +94,7 @@ class SeatingLayoutTemplateServiceTest {
         List<SeatingLayoutTemplate> templates = Collections.singletonList(template);
         Page<SeatingLayoutTemplate> templatePage = new PageImpl<>(templates, PageRequest.of(page, size), templates.size());
 
-        when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(true);
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(seatingLayoutTemplateRepository.findByOrganizationId(eq(organizationId), any(Pageable.class))).thenReturn(templatePage);
 
         // When
@@ -109,18 +105,19 @@ class SeatingLayoutTemplateServiceTest {
         assertEquals(1, result.getTotalPages());
         assertEquals(1, result.getContent().size());
         assertEquals(templateId, result.getContent().getFirst().getId());
-        verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
     }
 
     @Test
-    void getAllTemplatesByOrganizationId_ShouldThrowException_WhenUserDoesNotHaveAccess() {
+    void getAllTemplatesByOrganizationId_ShouldPropagateException_WhenUserDoesNotHaveAccess() {
         // Given
-        when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(false);
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId))
+                .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // When/Then
         assertThrows(AuthorizationDeniedException.class,
                 () -> seatingLayoutTemplateService.getAllTemplatesByOrganizationId(organizationId, userId, 0, 10));
-        verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
         // Verify repository is never called
         verify(seatingLayoutTemplateRepository, never()).findByOrganizationId(any(UUID.class), any(Pageable.class));
     }
@@ -129,7 +126,7 @@ class SeatingLayoutTemplateServiceTest {
     void getTemplateById_ShouldReturnTemplate_WhenUserHasAccess() {
         // Given
         when(seatingLayoutTemplateRepository.findById(templateId)).thenReturn(Optional.of(template));
-        when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(true);
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
 
         // When
         SeatingLayoutTemplateDTO result = seatingLayoutTemplateService.getTemplateById(templateId, userId);
@@ -138,7 +135,7 @@ class SeatingLayoutTemplateServiceTest {
         assertEquals(templateId, result.getId());
         assertEquals("Test Template", result.getName());
         assertEquals(organizationId, result.getOrganizationId());
-        verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
     }
 
     @Test
@@ -149,19 +146,20 @@ class SeatingLayoutTemplateServiceTest {
         // When/Then
         assertThrows(ResourceNotFoundException.class, 
             () -> seatingLayoutTemplateService.getTemplateById(templateId, userId));
-        verify(ownershipService, never()).isOrganizationOwnedByUser(any(), any());
+        verify(ownershipService, never()).verifyOwnershipAndGetOrganization(any(), any());
     }
 
     @Test
-    void getTemplateById_ShouldThrowException_WhenUserDoesNotHaveAccess() {
+    void getTemplateById_ShouldPropagateException_WhenUserDoesNotHaveAccess() {
         // Given
         when(seatingLayoutTemplateRepository.findById(templateId)).thenReturn(Optional.of(template));
-        when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(false);
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId))
+                .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // When/Then
         assertThrows(AuthorizationDeniedException.class, 
             () -> seatingLayoutTemplateService.getTemplateById(templateId, userId));
-        verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
     }
 
     @Test
@@ -172,8 +170,7 @@ class SeatingLayoutTemplateServiceTest {
         request.setOrganizationId(organizationId);
         request.setLayoutData(sampleLayoutData);
 
-        when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(true);
-        when(organizationRepository.findById(organizationId)).thenReturn(Optional.of(organization));
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(seatingLayoutTemplateRepository.countByOrganizationId(organizationId)).thenReturn(2L);
         when(tierService.getMaxSeatingLayoutsForOrg(mockJwt)).thenReturn(5);
         when(seatingLayoutTemplateRepository.save(any(SeatingLayoutTemplate.class))).thenAnswer(invocation -> {
@@ -190,7 +187,7 @@ class SeatingLayoutTemplateServiceTest {
         assertEquals("New Template", result.getName());
         assertEquals(organizationId, result.getOrganizationId());
         assertNotNull(result.getLayoutData());
-        verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(tierService).getMaxSeatingLayoutsForOrg(mockJwt);
         verify(seatingLayoutTemplateRepository).countByOrganizationId(organizationId);
         verify(seatingLayoutTemplateRepository).save(any(SeatingLayoutTemplate.class));
@@ -204,8 +201,7 @@ class SeatingLayoutTemplateServiceTest {
         request.setOrganizationId(organizationId);
         request.setLayoutData(sampleLayoutData);
 
-        when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(true);
-        when(organizationRepository.findById(organizationId)).thenReturn(Optional.of(organization));
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(seatingLayoutTemplateRepository.countByOrganizationId(organizationId)).thenReturn(5L);
         when(tierService.getMaxSeatingLayoutsForOrg(mockJwt)).thenReturn(5);
 
@@ -213,26 +209,27 @@ class SeatingLayoutTemplateServiceTest {
         assertThrows(BadRequestException.class,
             () -> seatingLayoutTemplateService.createTemplate(request, userId, mockJwt));
 
-        verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(tierService).getMaxSeatingLayoutsForOrg(mockJwt);
         verify(seatingLayoutTemplateRepository).countByOrganizationId(organizationId);
         verify(seatingLayoutTemplateRepository, never()).save(any(SeatingLayoutTemplate.class));
     }
 
     @Test
-    void createTemplate_ShouldThrowException_WhenUserDoesNotHaveAccess() {
+    void createTemplate_ShouldPropagateException_WhenUserDoesNotHaveAccess() {
         // Given
         SeatingLayoutTemplateRequest request = new SeatingLayoutTemplateRequest();
         request.setName("New Template");
         request.setOrganizationId(organizationId);
         request.setLayoutData(sampleLayoutData);
 
-        when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(false);
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId))
+                .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // When/Then
         assertThrows(AuthorizationDeniedException.class, 
             () -> seatingLayoutTemplateService.createTemplate(request, userId, mockJwt));
-        verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(seatingLayoutTemplateRepository, never()).save(any(SeatingLayoutTemplate.class));
         verify(tierService, never()).getMaxSeatingLayoutsForOrg(any());
     }
@@ -246,8 +243,7 @@ class SeatingLayoutTemplateServiceTest {
         request.setLayoutData(sampleLayoutData);
 
         when(seatingLayoutTemplateRepository.findById(templateId)).thenReturn(Optional.of(template));
-        when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(true);
-        when(organizationRepository.findById(organizationId)).thenReturn(Optional.of(organization));
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(seatingLayoutTemplateRepository.save(any(SeatingLayoutTemplate.class))).thenReturn(template);
 
         // When
@@ -257,7 +253,7 @@ class SeatingLayoutTemplateServiceTest {
         assertNotNull(result);
         assertEquals("Updated Template", template.getName());
         assertEquals(organizationId, result.getOrganizationId());
-        verify(ownershipService, times(2)).isOrganizationOwnedByUser(userId, organizationId);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(seatingLayoutTemplateRepository).save(template);
     }
 
@@ -277,19 +273,20 @@ class SeatingLayoutTemplateServiceTest {
     }
 
     @Test
-    void updateTemplate_ShouldThrowException_WhenUserDoesNotHaveAccess() {
+    void updateTemplate_ShouldPropagateException_WhenUserDoesNotHaveAccess() {
         // Given
         SeatingLayoutTemplateRequest request = new SeatingLayoutTemplateRequest();
         request.setName("Updated Template");
         request.setOrganizationId(organizationId);
 
         when(seatingLayoutTemplateRepository.findById(templateId)).thenReturn(Optional.of(template));
-        when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(false);
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId))
+                .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // When/Then
         assertThrows(AuthorizationDeniedException.class, 
             () -> seatingLayoutTemplateService.updateTemplate(templateId, request, userId));
-        verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(seatingLayoutTemplateRepository, never()).save(any(SeatingLayoutTemplate.class));
     }
 
@@ -297,13 +294,13 @@ class SeatingLayoutTemplateServiceTest {
     void deleteTemplate_ShouldDeleteTemplate_WhenUserHasAccess() {
         // Given
         when(seatingLayoutTemplateRepository.findById(templateId)).thenReturn(Optional.of(template));
-        when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(true);
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
 
         // When
         seatingLayoutTemplateService.deleteTemplate(templateId, userId);
 
         // Then
-        verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(seatingLayoutTemplateRepository).delete(template);
     }
 
@@ -315,20 +312,21 @@ class SeatingLayoutTemplateServiceTest {
         // When/Then
         assertThrows(ResourceNotFoundException.class, 
             () -> seatingLayoutTemplateService.deleteTemplate(templateId, userId));
-        verify(ownershipService, never()).isOrganizationOwnedByUser(any(), any());
+        verify(ownershipService, never()).verifyOwnershipAndGetOrganization(any(), any());
         verify(seatingLayoutTemplateRepository, never()).deleteById(any());
     }
 
     @Test
-    void deleteTemplate_ShouldThrowException_WhenUserDoesNotHaveAccess() {
+    void deleteTemplate_ShouldPropagateException_WhenUserDoesNotHaveAccess() {
         // Given
         when(seatingLayoutTemplateRepository.findById(templateId)).thenReturn(Optional.of(template));
-        when(ownershipService.isOrganizationOwnedByUser(userId, organizationId)).thenReturn(false);
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId))
+                .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // When/Then
         assertThrows(AuthorizationDeniedException.class, 
             () -> seatingLayoutTemplateService.deleteTemplate(templateId, userId));
-        verify(ownershipService).isOrganizationOwnedByUser(userId, organizationId);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(seatingLayoutTemplateRepository, never()).deleteById(any());
     }
 

@@ -1,5 +1,6 @@
 package com.ticketly.mseventseating.service;
 
+import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.repository.OrganizationRepository;
 import org.junit.jupiter.api.Test;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -24,7 +26,7 @@ class OrganizationOwnershipServiceTest {
     private OrganizationOwnershipService ownershipService;
 
     @Test
-    void isOrganizationOwnedByUser_ShouldReturnTrue_WhenUserIsOwner() {
+    void verifyOwnershipAndGetOrganization_ShouldReturnOrganization_WhenUserIsOwner() {
         // Arrange
         String userId = "owner-user-id";
         UUID orgId = UUID.randomUUID();
@@ -32,15 +34,17 @@ class OrganizationOwnershipServiceTest {
         when(organizationRepository.findById(orgId)).thenReturn(Optional.of(org));
 
         // Act
-        boolean result = ownershipService.isOrganizationOwnedByUser(userId, orgId);
+        Organization result = ownershipService.verifyOwnershipAndGetOrganization(orgId, userId);
 
         // Assert
-        assertTrue(result);
+        assertNotNull(result);
+        assertEquals(orgId, result.getId());
+        assertEquals(userId, result.getUserId());
         verify(organizationRepository, times(1)).findById(orgId);
     }
 
     @Test
-    void isOrganizationOwnedByUser_ShouldReturnFalse_WhenUserIsNotOwner() {
+    void verifyOwnershipAndGetOrganization_ShouldThrowAuthorizationDeniedException_WhenUserIsNotOwner() {
         // Arrange
         String ownerId = "owner-user-id";
         String requesterId = "different-user-id";
@@ -48,26 +52,22 @@ class OrganizationOwnershipServiceTest {
         Organization org = Organization.builder().id(orgId).userId(ownerId).build();
         when(organizationRepository.findById(orgId)).thenReturn(Optional.of(org));
 
-        // Act
-        boolean result = ownershipService.isOrganizationOwnedByUser(requesterId, orgId);
+        // Act & Assert
+        assertThrows(AuthorizationDeniedException.class, () -> ownershipService.verifyOwnershipAndGetOrganization(orgId, requesterId));
 
-        // Assert
-        assertFalse(result);
         verify(organizationRepository, times(1)).findById(orgId);
     }
 
     @Test
-    void isOrganizationOwnedByUser_ShouldReturnFalse_WhenOrganizationNotFound() {
+    void verifyOwnershipAndGetOrganization_ShouldThrowResourceNotFoundException_WhenOrganizationNotFound() {
         // Arrange
         String userId = "any-user-id";
         UUID orgId = UUID.randomUUID();
         when(organizationRepository.findById(orgId)).thenReturn(Optional.empty());
 
-        // Act
-        boolean result = ownershipService.isOrganizationOwnedByUser(userId, orgId);
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> ownershipService.verifyOwnershipAndGetOrganization(orgId, userId));
 
-        // Assert
-        assertFalse(result);
         verify(organizationRepository, times(1)).findById(orgId);
     }
 }

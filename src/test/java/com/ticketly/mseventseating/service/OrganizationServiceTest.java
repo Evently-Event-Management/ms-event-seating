@@ -103,8 +103,7 @@ class OrganizationServiceTest {
     @Test
     void getOrganizationById_ShouldReturnOrganization_WhenFound() {
         // Arrange
-        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
-        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
+        when(ownershipService.verifyOwnershipAndGetOrganization(ORG_ID, USER_ID)).thenReturn(testOrganization);
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
 
         // Act
@@ -115,22 +114,21 @@ class OrganizationServiceTest {
         assertEquals(ORG_NAME, result.getName());
         assertEquals(PRESIGNED_URL, result.getLogoUrl());
 
-        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
-        verify(organizationRepository).findById(ORG_ID);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(ORG_ID, USER_ID);
     }
 
     @Test
-    void getOrganizationById_ShouldThrowException_WhenNotOwned() {
+    void getOrganizationById_ShouldPropagateException_WhenNotOwned() {
         // Arrange
-        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(false);
+        when(ownershipService.verifyOwnershipAndGetOrganization(ORG_ID, USER_ID))
+                .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // Act & Assert
         assertThrows(AuthorizationDeniedException.class, () ->
                 organizationService.getOrganizationById(ORG_ID, USER_ID)
         );
 
-        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
-        verify(organizationRepository, never()).findById(ORG_ID);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(ORG_ID, USER_ID);
     }
 
     @Test
@@ -204,8 +202,7 @@ class OrganizationServiceTest {
                 .website(updatedWebsite)
                 .build();
 
-        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
-        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
+        when(ownershipService.verifyOwnershipAndGetOrganization(ORG_ID, USER_ID)).thenReturn(testOrganization);
         when(organizationRepository.save(any(Organization.class))).thenReturn(
                 Organization.builder()
                         .id(ORG_ID)
@@ -226,7 +223,7 @@ class OrganizationServiceTest {
         assertEquals(updatedName, result.getName());
         assertEquals(updatedWebsite, result.getWebsite());
 
-        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(ORG_ID, USER_ID);
 
         ArgumentCaptor<Organization> organizationCaptor = ArgumentCaptor.forClass(Organization.class);
         verify(organizationRepository).save(organizationCaptor.capture());
@@ -246,8 +243,7 @@ class OrganizationServiceTest {
                 "test logo content".getBytes()
         );
 
-        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
-        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
+        when(ownershipService.verifyOwnershipAndGetOrganization(ORG_ID, USER_ID)).thenReturn(testOrganization);
         when(s3StorageService.uploadFile(any(MultipartFile.class), eq("organization-logos"))).thenReturn(LOGO_URL);
         when(organizationRepository.save(any(Organization.class))).thenReturn(testOrganization);
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
@@ -258,7 +254,7 @@ class OrganizationServiceTest {
         // Assert
         assertEquals(PRESIGNED_URL, result.getLogoUrl());
 
-        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(ORG_ID, USER_ID);
         verify(s3StorageService).uploadFile(any(MultipartFile.class), eq("organization-logos"));
         verify(organizationRepository).save(any(Organization.class));
     }
@@ -276,8 +272,7 @@ class OrganizationServiceTest {
                 "test logo content".getBytes()
         );
 
-        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
-        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
+        when(ownershipService.verifyOwnershipAndGetOrganization(ORG_ID, USER_ID)).thenReturn(testOrganization);
         when(s3StorageService.uploadFile(any(MultipartFile.class), eq("organization-logos"))).thenReturn(LOGO_URL);
         when(organizationRepository.save(any(Organization.class))).thenReturn(testOrganization);
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
@@ -286,7 +281,7 @@ class OrganizationServiceTest {
         organizationService.uploadLogo(ORG_ID, logoFile, USER_ID);
 
         // Assert
-        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(ORG_ID, USER_ID);
         verify(s3StorageService).deleteFile(oldLogoUrl);
     }
 
@@ -331,16 +326,14 @@ class OrganizationServiceTest {
     @Test
     void deleteOrganization_ShouldDeleteOrganization() {
         // Arrange
-        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
-        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
+        when(ownershipService.verifyOwnershipAndGetOrganization(ORG_ID, USER_ID)).thenReturn(testOrganization);
         doNothing().when(organizationRepository).delete(any(Organization.class));
 
         // Act
         organizationService.deleteOrganization(ORG_ID, USER_ID);
 
         // Assert
-        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
-        verify(ownershipService).evictAllOwnershipByOrganization(ORG_ID);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(ORG_ID, USER_ID);
         verify(s3StorageService).deleteFile(LOGO_URL);
         verify(organizationRepository).delete(testOrganization);
     }
@@ -348,33 +341,30 @@ class OrganizationServiceTest {
     @Test
     void deleteOrganization_ShouldNotDeleteLogoIfNotExists() {
         // Arrange
-        testOrganization.setLogoUrl(null);
-        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
-        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
+        Organization orgWithoutLogo = testOrganization.toBuilder().logoUrl(null).build();
+        when(ownershipService.verifyOwnershipAndGetOrganization(ORG_ID, USER_ID)).thenReturn(orgWithoutLogo);
         doNothing().when(organizationRepository).delete(any(Organization.class));
 
         // Act
         organizationService.deleteOrganization(ORG_ID, USER_ID);
 
         // Assert
-        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
-        verify(ownershipService).evictAllOwnershipByOrganization(ORG_ID);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(ORG_ID, USER_ID);
         verify(s3StorageService, never()).deleteFile(anyString());
-        verify(organizationRepository).delete(testOrganization);
+        verify(organizationRepository).delete(orgWithoutLogo);
     }
 
     @Test
     void removeLogo_ShouldDeleteLogoAndUpdateOrganization() {
         // Arrange
-        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
-        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(testOrganization));
+        when(ownershipService.verifyOwnershipAndGetOrganization(ORG_ID, USER_ID)).thenReturn(testOrganization);
         when(organizationRepository.save(any(Organization.class))).thenReturn(testOrganization);
 
         // Act
         organizationService.removeLogo(ORG_ID, USER_ID);
 
         // Assert
-        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(ORG_ID, USER_ID);
         verify(s3StorageService).deleteFile(LOGO_URL);
 
         ArgumentCaptor<Organization> organizationCaptor = ArgumentCaptor.forClass(Organization.class);
@@ -388,29 +378,29 @@ class OrganizationServiceTest {
     void removeLogo_ShouldNotCallS3Delete_WhenLogoDoesNotExist() {
         // Arrange
         Organization orgWithoutLogo = testOrganization.toBuilder().logoUrl(null).build();
-        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(true);
-        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(orgWithoutLogo));
+        when(ownershipService.verifyOwnershipAndGetOrganization(ORG_ID, USER_ID)).thenReturn(orgWithoutLogo);
 
         // Act
         organizationService.removeLogo(ORG_ID, USER_ID);
 
         // Assert
-        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(ORG_ID, USER_ID);
         verify(s3StorageService, never()).deleteFile(anyString());
         verify(organizationRepository, never()).save(any(Organization.class));
     }
 
     @Test
-    void removeLogo_ShouldThrowException_WhenUserIsNotOwner() {
+    void removeLogo_ShouldPropagateException_WhenUserIsNotOwner() {
         // Arrange
-        when(ownershipService.isOrganizationOwnedByUser(USER_ID, ORG_ID)).thenReturn(false);
+        when(ownershipService.verifyOwnershipAndGetOrganization(ORG_ID, USER_ID))
+                .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // Act & Assert
         assertThrows(AuthorizationDeniedException.class, () ->
                 organizationService.removeLogo(ORG_ID, USER_ID)
         );
 
-        verify(ownershipService).isOrganizationOwnedByUser(USER_ID, ORG_ID);
+        verify(ownershipService).verifyOwnershipAndGetOrganization(ORG_ID, USER_ID);
         verify(s3StorageService, never()).deleteFile(anyString());
         verify(organizationRepository, never()).save(any());
     }
