@@ -44,13 +44,13 @@ public class CategoryController {
     }
 
     /**
-     * Create a new category - only accessible to users with system-admin role
+     * Create a new category - only accessible to users with manage_categories role
      *
      * @param request the category data
      * @return the created category
      */
     @PostMapping
-    @PreAuthorize("hasRole('system-admin')")
+    @PreAuthorize("hasRole('manage_categories')")
     public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest request) {
         log.info("Creating new category with name: {}", request.getName());
         CategoryResponse createdCategory = categoryService.createCategory(request);
@@ -58,14 +58,14 @@ public class CategoryController {
     }
 
     /**
-     * Update a category - only accessible to users with system-admin role
+     * Update a category - only accessible to users with manage_categories role
      *
      * @param id the category ID to update
      * @param request the updated category data
      * @return the updated category
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('system-admin')")
+    @PreAuthorize("hasRole('manage_categories')")
     public ResponseEntity<CategoryResponse> updateCategory(
             @PathVariable UUID id,
             @Valid @RequestBody CategoryRequest request) {
@@ -74,13 +74,13 @@ public class CategoryController {
     }
 
     /**
-     * Delete a category - only accessible to users with system-admin role
+     * Delete a category - only accessible to users with manage_categories role
      *
      * @param id the category ID to delete
      * @return no content response
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('system-admin')")
+    @PreAuthorize("hasRole('manage_categories')")
     public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
         log.info("Deleting category with id: {}", id);
         categoryService.deleteCategory(id);

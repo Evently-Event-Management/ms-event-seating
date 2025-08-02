@@ -3,12 +3,14 @@ package com.ticketly.mseventseating.service;
 import com.ticketly.mseventseating.dto.OrganizationRequest;
 import com.ticketly.mseventseating.dto.OrganizationResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
+import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.repository.OrganizationRepository;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,11 +28,10 @@ public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
     private final S3StorageService s3StorageService;
+    private final OrganizationOwnershipService ownershipService;
+    private final TierService tierService;
 
-    @Value("${app.organization.max-per-user:3}")
-    private int maxOrganizationsPerUser;
-
-    @Value("${app.organization.max-logo-size}")
+    @Value("${app.organization.max-logo-size:1048576}") // 1MB
     private long maxLogoSize;
 
     /**
@@ -67,12 +68,13 @@ public class OrganizationService {
      * @throws BadRequestException if the user has reached the maximum organization limit
      */
     @Transactional
-    public OrganizationResponse createOrganization(OrganizationRequest request, String userId) {
+    public OrganizationResponse createOrganization(OrganizationRequest request, String userId, Jwt jwt) {
         // Check if user has reached the max organization limit
         long userOrganizationCount = organizationRepository.countByUserId(userId);
-        if (userOrganizationCount >= maxOrganizationsPerUser) {
+        int maxOrganizations = tierService.getMaxOrganizationsForUser(jwt);
+        if (userOrganizationCount >= maxOrganizations) {
             throw new BadRequestException("You have reached the maximum limit of " +
-                    maxOrganizationsPerUser + " organizations per user");
+                    maxOrganizations + " organizations for your tier.");
         }
 
         Organization organization = Organization.builder()
@@ -104,6 +106,9 @@ public class OrganizationService {
         organization.setWebsite(request.getWebsite());
 
         Organization updatedOrganization = organizationRepository.save(organization);
+
+        // Remember to evict the cache if ownership changes
+
         log.info("Updated organization with ID: {}", updatedOrganization.getId());
         return mapToDto(updatedOrganization);
     }
@@ -116,7 +121,7 @@ public class OrganizationService {
      * @param userId   the ID of the current user
      * @return the updated organization response
      * @throws AuthorizationDeniedException if the organization does not exist or user is not owner
-     * @throws IOException               if there is an error handling the file
+     * @throws IOException                  if there is an error handling the file
      */
     @Transactional
     public OrganizationResponse uploadLogo(UUID id, MultipartFile logoFile, String userId) throws IOException {
@@ -177,12 +182,14 @@ public class OrganizationService {
     public void deleteOrganization(UUID id, String userId) {
         Organization organization = findOrganizationByIdAndUser(id, userId);
 
-        // Delete logo from S3 if it exists
         if (organization.getLogoUrl() != null) {
             s3StorageService.deleteFile(organization.getLogoUrl());
         }
 
         organizationRepository.delete(organization);
+
+        ownershipService.evictAllOwnershipByOrganization(id);
+
         log.info("Deleted organization with ID: {}", id);
     }
 
@@ -195,9 +202,13 @@ public class OrganizationService {
      * @throws AuthorizationDeniedException if the organization does not exist or user is not owner
      */
     private Organization findOrganizationByIdAndUser(UUID id, String userId) {
+        if (!ownershipService.isOrganizationOwnedByUser(userId, id)) {
+            throw new AuthorizationDeniedException("Organization not found or you don't have permission to access it");
+        }
+
+        // Since we know the user is authorized, we can safely fetch the entity.
         return organizationRepository.findById(id)
-                .filter(org -> org.getUserId().equals(userId))
-                .orElseThrow(() -> new AuthorizationDeniedException("Organization not found or you don't have permission to access it"));
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found with ID: " + id));
     }
 
     /**

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -46,11 +46,13 @@ public class Event {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private EventStatus status = EventStatus.PENDING;
 
     private String rejectionReason;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isOnline = false;
 
     private String onlineLink;
@@ -60,18 +62,19 @@ public class Event {
     // --- Rolling Sales Window Rules ---
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private SalesStartRuleType salesStartRuleType = SalesStartRuleType.IMMEDIATE;
 
     @Column(name = "sales_start_days_before")
     private Integer salesStartDaysBefore;
 
     @Column(name = "sales_start_fixed_datetime")
-    private LocalDateTime salesStartFixedDatetime;
+    private OffsetDateTime salesStartFixedDatetime;
     // --- End of Sales Window Rules ---
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tier> tiers;

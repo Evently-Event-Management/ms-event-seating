@@ -10,18 +10,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -60,8 +61,8 @@ class OrganizationControllerTest {
                 .name("Test Organization")
                 .website("https://test-org.com")
                 .logoUrl("https://bucket.s3.amazonaws.com/logo.jpg")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(OffsetDateTime.now())
+                .updatedAt(OffsetDateTime.now())
                 .build();
     }
 
@@ -100,7 +101,7 @@ class OrganizationControllerTest {
     @Test
     void createOrganization_ShouldCreateAndReturnOrganization() throws Exception {
         // Arrange
-        when(organizationService.createOrganization(any(OrganizationRequest.class), eq(USER_ID)))
+        when(organizationService.createOrganization(any(OrganizationRequest.class), eq(USER_ID), any(Jwt.class)))
                 .thenReturn(testResponse);
 
         // Act & Assert
@@ -179,5 +180,4 @@ class OrganizationControllerTest {
         // Verify service method was called with correct parameters
         verify(organizationService, times(1)).removeLogo(ORG_ID, USER_ID);
     }
-
 }

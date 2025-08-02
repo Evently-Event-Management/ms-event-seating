@@ -119,7 +119,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "system-admin")
+    @WithMockUser(roles = "manage_categories")
     void createCategory_WithAdminRole_ShouldCreateCategory() throws Exception {
         // Given
         when(categoryService.createCategory(any(CategoryRequest.class))).thenReturn(categoryResponse);
@@ -150,7 +150,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "system-admin")
+    @WithMockUser(roles = "manage_categories")
     void updateCategory_WithAdminRole_ShouldUpdateCategory() throws Exception {
         // Given
         when(categoryService.updateCategory(eq(categoryId), any(CategoryRequest.class))).thenReturn(categoryResponse);
@@ -179,7 +179,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "system-admin")
+    @WithMockUser(roles = "manage_categories")
     void deleteCategory_WithAdminRole_ShouldDeleteCategory() throws Exception {
         // Given
         doNothing().when(categoryService).deleteCategory(categoryId);

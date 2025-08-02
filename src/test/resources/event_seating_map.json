@@ -1,0 +1,51 @@
+{
+  "blocks": [
+    {
+      "id": "blk_a1b2c3d4",
+      "name": "Orchestra Center",
+      "type": "seated_grid",
+      "rows": [
+        {
+          "id": "row_A",
+          "label": "A",
+          "seats": [
+            {
+              "id": "A1",
+              "label": "1",
+              "tier_id": "tier_uuid_for_vip",
+              "statuses": {
+                "session_uuid_friday": "AVAILABLE",
+                "session_uuid_saturday": "SOLD"
+              }
+            },
+            {
+              "id": "A2",
+              "label": "2",
+              "tier_id": "tier_uuid_for_vip",
+              "statuses": {
+                "session_uuid_friday": "LOCKED",
+                "session_uuid_saturday": "AVAILABLE"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blk_e5f6g7h8",
+      "name": "General Admission Pit",
+      "type": "standing_capacity",
+      "capacity": 250,
+      "tier_id": "tier_uuid_for_ga",
+      "sold_counts": {
+        "session_uuid_friday": 120,
+        "session_uuid_saturday": 250
+      }
+    },
+    {
+      "id": "blk_i9j0k1l2",
+      "name": "Stage",
+      "type": "non_sellable"
+    }
+  ]
+}
