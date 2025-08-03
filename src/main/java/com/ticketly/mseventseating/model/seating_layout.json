@@ -1,81 +1,86 @@
 {
-  "name": "Untitled Layout",
+  "name": "Nelum Pokuna",
   "layout": {
     "blocks": [
       {
-        "id": "blk_1754026177329",
-        "name": "New seated grid",
-        "type": "seated_grid",
-        "position": {
-          "x": 2.933349609375,
-          "y": 114.00002034505208
-        },
+        "id": "5ff31403-929f-4025-98c5-0da9a11543cd",
+        "name": "Seated grid 1",
         "rows": 5,
+        "type": "seated_grid",
+        "width": null,
+        "height": null,
         "columns": 10,
+        "capacity": null,
+        "position": {
+          "x": 30.3333740234375,
+          "y": 169.0
+        },
         "startRowLabel": "A",
         "startColumnLabel": 1
       },
       {
-        "id": "blk_1754026207625",
-        "name": "New seated grid",
-        "type": "seated_grid",
+        "id": "275e9a98-4321-4c11-b4ae-5bdf5b96b7b3",
+        "name": "Stage",
+        "rows": null,
+        "type": "non_sellable",
+        "width": 674,
+        "height": 90,
+        "columns": null,
+        "capacity": null,
         "position": {
-          "x": 3.733306884765625,
-          "y": 370.8000233968099
+          "x": 29.0,
+          "y": 25.0
         },
-        "rows": 5,
-        "columns": 10,
-        "startRowLabel": "F",
-        "startColumnLabel": 1
+        "startRowLabel": null,
+        "startColumnLabel": null
       },
       {
-        "id": "blk_1754026242963",
-        "name": "New seated grid",
-        "type": "seated_grid",
-        "position": {
-          "x": 373.93326568603516,
-          "y": 111.0000041325887
-        },
+        "id": "09fd670d-94a5-4b22-981a-d3167f88ada0",
+        "name": "Seated grid 2",
         "rows": 5,
+        "type": "seated_grid",
+        "width": null,
+        "height": null,
         "columns": 10,
+        "capacity": null,
+        "position": {
+          "x": 388.3333740234375,
+          "y": 167.00003051757812
+        },
         "startRowLabel": "A",
         "startColumnLabel": 11
       },
       {
-        "id": "blk_1754026265757",
-        "name": "New seated grid",
-        "type": "seated_grid",
-        "position": {
-          "x": 375.9332504272461,
-          "y": 363.99993260701496
-        },
+        "id": "fb74c579-a716-42c2-9ab4-cbb41dc49b7a",
+        "name": "Seated grid 3",
         "rows": 5,
-        "columns": 11,
+        "type": "seated_grid",
+        "width": null,
+        "height": null,
+        "columns": 10,
+        "capacity": null,
+        "position": {
+          "x": 25.0,
+          "y": 401.6667022705078
+        },
         "startRowLabel": "F",
         "startColumnLabel": 1
       },
       {
-        "id": "blk_1754026799875",
-        "name": "Stage",
-        "type": "non_sellable",
-        "position": {
-          "x": 60.53332519531244,
-          "y": 0
-        },
-        "width": 568,
-        "height": 70
-      },
-      {
-        "id": "blk_1754026819378",
+        "id": "0528abdd-fc72-4788-abfa-f0764506e468",
         "name": "New standing capacity",
+        "rows": null,
         "type": "standing_capacity",
-        "position": {
-          "x": 0,
-          "y": 598.0000991821288
-        },
+        "width": 319,
+        "height": 172,
+        "columns": null,
         "capacity": 100,
-        "width": 707,
-        "height": 397.60003662109375
+        "position": {
+          "x": 384.3333740234375,
+          "y": 401.00001525878906
+        },
+        "startRowLabel": null,
+        "startColumnLabel": null
       }
     ]
   }
