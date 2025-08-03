@@ -161,7 +161,7 @@ class OrganizationServiceTest {
     void createOrganization_ShouldThrowException_WhenUserExceedsLimit() {
         // Arrange
         when(organizationRepository.countByUserId(USER_ID)).thenReturn(3L);
-        when(subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER,mockJwt)).thenReturn(3);
+        when(subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, mockJwt)).thenReturn(3);
 
         // Act & Assert
         assertThrows(BadRequestException.class, () ->
