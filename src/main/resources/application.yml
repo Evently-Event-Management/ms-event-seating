@@ -37,6 +37,10 @@ spring:
     redis:
       time-to-live: 3600s
       key-prefix: "event-seating-ms::"
+  data:
+    redis:
+      repositories:
+        enabled: false
 
 logging:
   level:
