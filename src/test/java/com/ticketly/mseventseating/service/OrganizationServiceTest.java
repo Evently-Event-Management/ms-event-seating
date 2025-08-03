@@ -37,7 +37,7 @@ class OrganizationServiceTest {
 
     @Mock
     private OrganizationOwnershipService ownershipService;
-    
+
     @Mock
     private SubscriptionTierService subscriptionTierService;
 
@@ -75,7 +75,7 @@ class OrganizationServiceTest {
                 .name(ORG_NAME)
                 .website(ORG_WEBSITE)
                 .build();
-                
+
         // Mock JWT
         mockJwt = mock(Jwt.class);
     }
@@ -137,7 +137,7 @@ class OrganizationServiceTest {
         // Arrange
         Organization savedOrganization = testOrganization;
         when(organizationRepository.countByUserId(USER_ID)).thenReturn(2L);
-        when(subscriptionTierService.getLimit( SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER,mockJwt)).thenReturn(3);
+        when(subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, mockJwt)).thenReturn(3);
         when(organizationRepository.save(any(Organization.class))).thenReturn(savedOrganization);
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
 
@@ -171,7 +171,7 @@ class OrganizationServiceTest {
         verify(organizationRepository).countByUserId(USER_ID);
         verify(organizationRepository, never()).save(any());
     }
-    
+
     @Test
     void createOrganization_ShouldAllowDifferentLimitsBasedOnTier() {
         // Arrange
@@ -187,7 +187,7 @@ class OrganizationServiceTest {
         // Assert
         assertEquals(ORG_NAME, result.getName());
         assertEquals(ORG_WEBSITE, result.getWebsite());
-        
+
         // Verify the tier service was called
         verify(subscriptionTierService).getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, mockJwt);
     }

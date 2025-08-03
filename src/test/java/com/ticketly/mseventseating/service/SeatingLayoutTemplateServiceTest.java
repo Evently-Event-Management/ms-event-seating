@@ -145,8 +145,8 @@ class SeatingLayoutTemplateServiceTest {
         when(seatingLayoutTemplateRepository.findById(templateId)).thenReturn(Optional.empty());
 
         // When/Then
-        assertThrows(ResourceNotFoundException.class, 
-            () -> seatingLayoutTemplateService.getTemplateById(templateId, userId));
+        assertThrows(ResourceNotFoundException.class,
+                () -> seatingLayoutTemplateService.getTemplateById(templateId, userId));
         verify(ownershipService, never()).verifyOwnershipAndGetOrganization(any(), any());
     }
 
@@ -158,8 +158,8 @@ class SeatingLayoutTemplateServiceTest {
                 .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // When/Then
-        assertThrows(AuthorizationDeniedException.class, 
-            () -> seatingLayoutTemplateService.getTemplateById(templateId, userId));
+        assertThrows(AuthorizationDeniedException.class,
+                () -> seatingLayoutTemplateService.getTemplateById(templateId, userId));
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
     }
 
@@ -173,7 +173,7 @@ class SeatingLayoutTemplateServiceTest {
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(seatingLayoutTemplateRepository.countByOrganizationId(organizationId)).thenReturn(2L);
-        when(subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG,mockJwt)).thenReturn(5);
+        when(subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, mockJwt)).thenReturn(5);
         when(seatingLayoutTemplateRepository.save(any(SeatingLayoutTemplate.class))).thenAnswer(invocation -> {
             SeatingLayoutTemplate savedTemplate = invocation.getArgument(0);
             savedTemplate.setId(UUID.randomUUID());
@@ -189,7 +189,7 @@ class SeatingLayoutTemplateServiceTest {
         assertEquals(organizationId, result.getOrganizationId());
         assertNotNull(result.getLayoutData());
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
-        verify(subscriptionTierService).getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG,mockJwt);
+        verify(subscriptionTierService).getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, mockJwt);
         verify(seatingLayoutTemplateRepository).countByOrganizationId(organizationId);
         verify(seatingLayoutTemplateRepository).save(any(SeatingLayoutTemplate.class));
     }
@@ -204,14 +204,14 @@ class SeatingLayoutTemplateServiceTest {
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(seatingLayoutTemplateRepository.countByOrganizationId(organizationId)).thenReturn(5L);
-        when(subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG,mockJwt)).thenReturn(5);
+        when(subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, mockJwt)).thenReturn(5);
 
         // When/Then
         assertThrows(BadRequestException.class,
-            () -> seatingLayoutTemplateService.createTemplate(request, userId, mockJwt));
+                () -> seatingLayoutTemplateService.createTemplate(request, userId, mockJwt));
 
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
-        verify(subscriptionTierService).getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG,mockJwt);
+        verify(subscriptionTierService).getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, mockJwt);
         verify(seatingLayoutTemplateRepository).countByOrganizationId(organizationId);
         verify(seatingLayoutTemplateRepository, never()).save(any(SeatingLayoutTemplate.class));
     }
@@ -228,11 +228,11 @@ class SeatingLayoutTemplateServiceTest {
                 .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // When/Then
-        assertThrows(AuthorizationDeniedException.class, 
-            () -> seatingLayoutTemplateService.createTemplate(request, userId, mockJwt));
+        assertThrows(AuthorizationDeniedException.class,
+                () -> seatingLayoutTemplateService.createTemplate(request, userId, mockJwt));
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(seatingLayoutTemplateRepository, never()).save(any(SeatingLayoutTemplate.class));
-        verify(subscriptionTierService, never()).getLimit(any(),any());
+        verify(subscriptionTierService, never()).getLimit(any(), any());
     }
 
     @Test
@@ -268,8 +268,8 @@ class SeatingLayoutTemplateServiceTest {
         when(seatingLayoutTemplateRepository.findById(templateId)).thenReturn(Optional.empty());
 
         // When/Then
-        assertThrows(ResourceNotFoundException.class, 
-            () -> seatingLayoutTemplateService.updateTemplate(templateId, request, userId));
+        assertThrows(ResourceNotFoundException.class,
+                () -> seatingLayoutTemplateService.updateTemplate(templateId, request, userId));
         verify(seatingLayoutTemplateRepository, never()).save(any(SeatingLayoutTemplate.class));
     }
 
@@ -285,8 +285,8 @@ class SeatingLayoutTemplateServiceTest {
                 .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // When/Then
-        assertThrows(AuthorizationDeniedException.class, 
-            () -> seatingLayoutTemplateService.updateTemplate(templateId, request, userId));
+        assertThrows(AuthorizationDeniedException.class,
+                () -> seatingLayoutTemplateService.updateTemplate(templateId, request, userId));
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(seatingLayoutTemplateRepository, never()).save(any(SeatingLayoutTemplate.class));
     }
@@ -311,8 +311,8 @@ class SeatingLayoutTemplateServiceTest {
         when(seatingLayoutTemplateRepository.findById(templateId)).thenReturn(Optional.empty());
 
         // When/Then
-        assertThrows(ResourceNotFoundException.class, 
-            () -> seatingLayoutTemplateService.deleteTemplate(templateId, userId));
+        assertThrows(ResourceNotFoundException.class,
+                () -> seatingLayoutTemplateService.deleteTemplate(templateId, userId));
         verify(ownershipService, never()).verifyOwnershipAndGetOrganization(any(), any());
         verify(seatingLayoutTemplateRepository, never()).deleteById(any());
     }
@@ -325,8 +325,8 @@ class SeatingLayoutTemplateServiceTest {
                 .thenThrow(new AuthorizationDeniedException("User does not have access to this organization"));
 
         // When/Then
-        assertThrows(AuthorizationDeniedException.class, 
-            () -> seatingLayoutTemplateService.deleteTemplate(templateId, userId));
+        assertThrows(AuthorizationDeniedException.class,
+                () -> seatingLayoutTemplateService.deleteTemplate(templateId, userId));
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(seatingLayoutTemplateRepository, never()).deleteById(any());
     }
@@ -335,7 +335,7 @@ class SeatingLayoutTemplateServiceTest {
     void normalizeLayoutData_ShouldNormalizeCoordinates_AndReplaceIds() {
         // Use reflection to access the private method
         LayoutDataDTO input = sampleLayoutData;
-        
+
         // Create a method that exposes the private method for testing
         LayoutDataDTO result = invokeNormalizeLayoutData(input);
 
@@ -344,20 +344,20 @@ class SeatingLayoutTemplateServiceTest {
                 .mapToDouble(block -> block.getPosition().getX())
                 .min()
                 .orElse(0.0);
-                
+
         double minY = input.getLayout().getBlocks().stream()
                 .mapToDouble(block -> block.getPosition().getY())
                 .min()
                 .orElse(0.0);
-                
+
         // Check the first block's position is normalized correctly
         assertEquals(
-            input.getLayout().getBlocks().getFirst().getPosition().getX() - minX,
-            result.getLayout().getBlocks().getFirst().getPosition().getX()
+                input.getLayout().getBlocks().getFirst().getPosition().getX() - minX,
+                result.getLayout().getBlocks().getFirst().getPosition().getX()
         );
         assertEquals(
-            input.getLayout().getBlocks().getFirst().getPosition().getY() - minY,
-            result.getLayout().getBlocks().getFirst().getPosition().getY()
+                input.getLayout().getBlocks().getFirst().getPosition().getY() - minY,
+                result.getLayout().getBlocks().getFirst().getPosition().getY()
         );
 
         // Verify all blocks have new UUIDs (not datetime-based IDs)
@@ -367,54 +367,54 @@ class SeatingLayoutTemplateServiceTest {
             // Ensure it doesn't contain the original datetime-based ID prefix
             assertFalse(block.getId().startsWith("blk_"));
         }
-        
+
         // Verify block properties are preserved
         assertEquals(input.getLayout().getBlocks().size(), result.getLayout().getBlocks().size());
-        
+
         // Find and check a seated grid block
         Optional<LayoutDataDTO.Block> seatedGridBlock = result.getLayout().getBlocks().stream()
-            .filter(b -> "seated_grid".equals(b.getType()))
-            .findFirst();
+                .filter(b -> "seated_grid".equals(b.getType()))
+                .findFirst();
         assertTrue(seatedGridBlock.isPresent());
         assertEquals(5, seatedGridBlock.get().getRows());
         assertEquals(10, seatedGridBlock.get().getColumns());
-        
+
         // Find and check a standing capacity block
         Optional<LayoutDataDTO.Block> standingBlock = result.getLayout().getBlocks().stream()
-            .filter(b -> "standing_capacity".equals(b.getType()))
-            .findFirst();
+                .filter(b -> "standing_capacity".equals(b.getType()))
+                .findFirst();
         assertTrue(standingBlock.isPresent());
         assertEquals(100, standingBlock.get().getCapacity());
     }
-    
+
     @Test
     void normalizeLayoutData_ShouldReturnOriginal_WhenInputIsNull() {
         LayoutDataDTO result = invokeNormalizeLayoutData(null);
         assertNull(result);
     }
-    
+
     @Test
     void normalizeLayoutData_ShouldReturnOriginal_WhenLayoutIsNull() {
         LayoutDataDTO input = new LayoutDataDTO();
         LayoutDataDTO result = invokeNormalizeLayoutData(input);
         assertSame(input, result);
     }
-    
+
     @Test
     void normalizeLayoutData_ShouldReturnOriginal_WhenBlocksAreNull() {
         LayoutDataDTO input = new LayoutDataDTO();
         LayoutDataDTO.Layout layout = new LayoutDataDTO.Layout();
         input.setLayout(layout);
-        
+
         LayoutDataDTO result = invokeNormalizeLayoutData(input);
         assertSame(input, result);
     }
 
     private LayoutDataDTO invokeNormalizeLayoutData(LayoutDataDTO layoutData) {
         return ReflectionTestUtils.invokeMethod(
-            seatingLayoutTemplateService, 
-            "normalizeLayoutData", 
-            layoutData
+                seatingLayoutTemplateService,
+                "normalizeLayoutData",
+                layoutData
         );
     }
 }

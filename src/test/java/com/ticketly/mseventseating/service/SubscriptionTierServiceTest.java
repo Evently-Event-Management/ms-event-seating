@@ -63,10 +63,10 @@ class SubscriptionTierServiceTest {
     void getMaxOrganizationsForUser_WithFreeTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/FREE"));
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
-        
+
         // Assert
         assertEquals(1, result);
     }
@@ -75,10 +75,10 @@ class SubscriptionTierServiceTest {
     void getMaxOrganizationsForUser_WithProTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/PRO"));
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
-        
+
         // Assert
         assertEquals(3, result);
     }
@@ -87,10 +87,10 @@ class SubscriptionTierServiceTest {
     void getMaxOrganizationsForUser_WithEnterpriseTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/ENTERPRISE"));
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
-        
+
         // Assert
         assertEquals(10, result);
     }
@@ -99,10 +99,10 @@ class SubscriptionTierServiceTest {
     void getMaxSeatingLayoutsForOrg_WithFreeTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/FREE"));
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, jwt);
-        
+
         // Assert
         assertEquals(3, result);
     }
@@ -111,10 +111,10 @@ class SubscriptionTierServiceTest {
     void getMaxSeatingLayoutsForOrg_WithProTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/PRO"));
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, jwt);
-        
+
         // Assert
         assertEquals(10, result);
     }
@@ -123,10 +123,10 @@ class SubscriptionTierServiceTest {
     void getMaxOrganizationsForUser_WithMultipleTiers_ShouldUseHighest() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Arrays.asList("/Tiers/FREE", "/Tiers/PRO"));
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
-        
+
         // Assert
         assertEquals(3, result); // Should use PRO tier (higher level)
     }
@@ -135,10 +135,10 @@ class SubscriptionTierServiceTest {
     void getMaxOrganizationsForUser_WithNoTier_ShouldUseFreeTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.emptyList());
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
-        
+
         // Assert
         assertEquals(1, result); // Should use FREE tier (default)
     }
@@ -147,10 +147,10 @@ class SubscriptionTierServiceTest {
     void getMaxOrganizationsForUser_WithNullGroups_ShouldUseFreeTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(null);
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
-        
+
         // Assert
         assertEquals(1, result); // Should use FREE tier (default)
     }
@@ -159,10 +159,10 @@ class SubscriptionTierServiceTest {
     void getMaxOrganizationsForUser_WithInvalidTier_ShouldIgnoreThem() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Arrays.asList("/Tiers/INVALID", "/Other/Group"));
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
-        
+
         // Assert
         assertEquals(1, result); // Should use FREE tier (default)
     }
@@ -171,12 +171,12 @@ class SubscriptionTierServiceTest {
     void getMaxOrganizationsForUser_WithMixedValidAndInvalidTiers_ShouldUseValidOnes() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(
-            Arrays.asList("/Tiers/INVALID", "/Tiers/PRO", "/Other/Group")
+                Arrays.asList("/Tiers/INVALID", "/Tiers/PRO", "/Other/Group")
         );
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
-        
+
         // Assert
         assertEquals(3, result); // Should use PRO tier
     }
@@ -185,10 +185,10 @@ class SubscriptionTierServiceTest {
     void getMaxActiveEvents_WithFreeTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/FREE"));
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
-        
+
         // Assert
         assertEquals(2, result);
     }
@@ -197,10 +197,10 @@ class SubscriptionTierServiceTest {
     void getMaxActiveEvents_WithProTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/PRO"));
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
-        
+
         // Assert
         assertEquals(10, result);
     }
@@ -209,10 +209,10 @@ class SubscriptionTierServiceTest {
     void getMaxActiveEvents_WithEnterpriseTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/ENTERPRISE"));
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
-        
+
         // Assert
         assertEquals(100, result);
     }
@@ -221,10 +221,10 @@ class SubscriptionTierServiceTest {
     void getMaxActiveEvents_WithMultipleTiers_ShouldUseHighest() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Arrays.asList("/Tiers/FREE", "/Tiers/PRO"));
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
-        
+
         // Assert
         assertEquals(10, result); // Should use PRO tier (higher level)
     }
@@ -233,10 +233,10 @@ class SubscriptionTierServiceTest {
     void getMaxSessionsPerEvent_WithFreeTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/FREE"));
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
-        
+
         // Assert
         assertEquals(3, result);
     }
@@ -245,10 +245,10 @@ class SubscriptionTierServiceTest {
     void getMaxSessionsPerEvent_WithProTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/PRO"));
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
-        
+
         // Assert
         assertEquals(15, result);
     }
@@ -257,10 +257,10 @@ class SubscriptionTierServiceTest {
     void getMaxSessionsPerEvent_WithEnterpriseTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/ENTERPRISE"));
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
-        
+
         // Assert
         assertEquals(100, result);
     }
@@ -269,10 +269,10 @@ class SubscriptionTierServiceTest {
     void getMaxSessionsPerEvent_WithNoTier_ShouldUseFreeTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.emptyList());
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
-        
+
         // Assert
         assertEquals(3, result); // Should use FREE tier (default)
     }
@@ -281,10 +281,10 @@ class SubscriptionTierServiceTest {
     void getMaxSessionsPerEvent_WithNullGroups_ShouldUseFreeTier() {
         // Arrange
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(null);
-        
+
         // Act
         int result = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
-        
+
         // Assert
         assertEquals(3, result); // Should use FREE tier (default)
     }
