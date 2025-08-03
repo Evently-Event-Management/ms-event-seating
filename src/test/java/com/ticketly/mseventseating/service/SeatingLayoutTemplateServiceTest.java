@@ -8,6 +8,7 @@ import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.model.SeatingLayoutTemplate;
+import com.ticketly.mseventseating.model.SubscriptionLimitType;
 import com.ticketly.mseventseating.repository.SeatingLayoutTemplateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,7 @@ class SeatingLayoutTemplateServiceTest {
     private OrganizationOwnershipService ownershipService;
 
     @Mock
-    private TierService tierService;
+    private SubscriptionTierService subscriptionTierService;
 
     @Mock
     private Jwt mockJwt;
@@ -172,7 +173,7 @@ class SeatingLayoutTemplateServiceTest {
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(seatingLayoutTemplateRepository.countByOrganizationId(organizationId)).thenReturn(2L);
-        when(tierService.getMaxSeatingLayoutsForOrg(mockJwt)).thenReturn(5);
+        when(subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG,mockJwt)).thenReturn(5);
         when(seatingLayoutTemplateRepository.save(any(SeatingLayoutTemplate.class))).thenAnswer(invocation -> {
             SeatingLayoutTemplate savedTemplate = invocation.getArgument(0);
             savedTemplate.setId(UUID.randomUUID());
@@ -188,7 +189,7 @@ class SeatingLayoutTemplateServiceTest {
         assertEquals(organizationId, result.getOrganizationId());
         assertNotNull(result.getLayoutData());
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
-        verify(tierService).getMaxSeatingLayoutsForOrg(mockJwt);
+        verify(subscriptionTierService).getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG,mockJwt);
         verify(seatingLayoutTemplateRepository).countByOrganizationId(organizationId);
         verify(seatingLayoutTemplateRepository).save(any(SeatingLayoutTemplate.class));
     }
@@ -203,14 +204,14 @@ class SeatingLayoutTemplateServiceTest {
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(seatingLayoutTemplateRepository.countByOrganizationId(organizationId)).thenReturn(5L);
-        when(tierService.getMaxSeatingLayoutsForOrg(mockJwt)).thenReturn(5);
+        when(subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG,mockJwt)).thenReturn(5);
 
         // When/Then
         assertThrows(BadRequestException.class,
             () -> seatingLayoutTemplateService.createTemplate(request, userId, mockJwt));
 
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
-        verify(tierService).getMaxSeatingLayoutsForOrg(mockJwt);
+        verify(subscriptionTierService).getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG,mockJwt);
         verify(seatingLayoutTemplateRepository).countByOrganizationId(organizationId);
         verify(seatingLayoutTemplateRepository, never()).save(any(SeatingLayoutTemplate.class));
     }
@@ -231,7 +232,7 @@ class SeatingLayoutTemplateServiceTest {
             () -> seatingLayoutTemplateService.createTemplate(request, userId, mockJwt));
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(seatingLayoutTemplateRepository, never()).save(any(SeatingLayoutTemplate.class));
-        verify(tierService, never()).getMaxSeatingLayoutsForOrg(any());
+        verify(subscriptionTierService, never()).getLimit(any(),any());
     }
 
     @Test

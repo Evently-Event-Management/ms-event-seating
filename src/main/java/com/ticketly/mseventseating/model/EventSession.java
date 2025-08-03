@@ -6,7 +6,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "event_sessions")
+@Table(name = "event_sessions")  // Changed from "event_session" to "event_sessions"
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,4 +32,8 @@ public class EventSession {
     @Column(nullable = false)
     @Builder.Default
     private SessionStatus status = SessionStatus.SCHEDULED;
+
+    // ✅ ADDED: A one-to-one mapping to this session's specific seating map.
+    @OneToOne(mappedBy = "eventSession", cascade = CascadeType.ALL, orphanRemoval = true)
+    private SessionSeatingMap sessionSeatingMap;
 }

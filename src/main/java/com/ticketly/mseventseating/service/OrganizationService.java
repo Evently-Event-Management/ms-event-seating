@@ -4,6 +4,7 @@ import com.ticketly.mseventseating.dto.OrganizationRequest;
 import com.ticketly.mseventseating.dto.OrganizationResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.model.Organization;
+import com.ticketly.mseventseating.model.SubscriptionLimitType;
 import com.ticketly.mseventseating.repository.OrganizationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ public class OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final S3StorageService s3StorageService;
     private final OrganizationOwnershipService ownershipService;
-    private final TierService tierService;
+    private final SubscriptionTierService subscriptionTierService;
 
     @Value("${app.organization.max-logo-size:1048576}") // 1MB
     private long maxLogoSize;
@@ -70,7 +71,7 @@ public class OrganizationService {
      */
     @Transactional
     public OrganizationResponse createOrganization(OrganizationRequest request, String userId, Jwt jwt) {
-        int maxOrganizations = tierService.getMaxOrganizationsForUser(jwt);
+        int maxOrganizations = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
         long userOrganizationCount = organizationRepository.countByUserId(userId);
         if (userOrganizationCount >= maxOrganizations) {
             throw new BadRequestException("You have reached the maximum limit of " +

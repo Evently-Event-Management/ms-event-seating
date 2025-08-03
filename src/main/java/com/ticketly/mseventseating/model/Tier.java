@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
+@Table(name = "tiers")  // Added table name explicitly
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,6 +25,4 @@ public class Tier {
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
-
-    // getters and setters
 }
