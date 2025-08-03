@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.dto;
+package com.ticketly.mseventseating.dto.category;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

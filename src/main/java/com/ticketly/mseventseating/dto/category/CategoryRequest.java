@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.dto;
+package com.ticketly.mseventseating.dto.category;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

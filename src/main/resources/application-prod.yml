@@ -15,3 +15,8 @@ aws:
   region: ap-south-1 # Or your desired production region
   s3:
     bucket-name: event-seating-uploads # Your production S3 bucket name
+  # Production EventBridge Scheduler configuration
+  scheduler:
+    sqs-queue-arn: ${AWS_SQS_QUEUE_ARN}
+    role-arn: ${AWS_SCHEDULER_ROLE_ARN}
+    group-name: ${AWS_SCHEDULER_GROUP_NAME:event-ticketing-schedules}

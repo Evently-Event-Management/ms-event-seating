@@ -1,7 +1,7 @@
 package com.ticketly.mseventseating.controller;
 
-import com.ticketly.mseventseating.dto.CategoryRequest;
-import com.ticketly.mseventseating.dto.CategoryResponse;
+import com.ticketly.mseventseating.dto.category.CategoryRequest;
+import com.ticketly.mseventseating.dto.category.CategoryResponse;
 import com.ticketly.mseventseating.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.ticketly.mseventseating.service;
 
-import com.ticketly.mseventseating.dto.OrganizationRequest;
-import com.ticketly.mseventseating.dto.OrganizationResponse;
+import com.ticketly.mseventseating.dto.organization.OrganizationRequest;
+import com.ticketly.mseventseating.dto.organization.OrganizationResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.model.SubscriptionLimitType;

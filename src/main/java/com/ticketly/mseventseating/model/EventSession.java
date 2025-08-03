@@ -33,6 +33,18 @@ public class EventSession {
     @Builder.Default
     private SessionStatus status = SessionStatus.SCHEDULED;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private SalesStartRuleType salesStartRuleType = SalesStartRuleType.IMMEDIATE;
+
+    @Column(name = "sales_start_hours_before")
+    private Integer salesStartHoursBefore;
+
+    @Column(name = "sales_start_fixed_datetime")
+    private OffsetDateTime salesStartFixedDatetime;
+    // --- End of Sales Window Rules ---
+
     // ✅ ADDED: A one-to-one mapping to this session's specific seating map.
     @OneToOne(mappedBy = "eventSession", cascade = CascadeType.ALL, orphanRemoval = true)
     private SessionSeatingMap sessionSeatingMap;

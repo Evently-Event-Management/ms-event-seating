@@ -1,7 +1,7 @@
 package com.ticketly.mseventseating.service;
 
-import com.ticketly.mseventseating.dto.VenueRequest;
-import com.ticketly.mseventseating.dto.VenueResponse;
+import com.ticketly.mseventseating.dto.venue.VenueRequest;
+import com.ticketly.mseventseating.dto.venue.VenueResponse;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.model.Venue;

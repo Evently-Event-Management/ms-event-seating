@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.dto;
+package com.ticketly.mseventseating.dto.layout_template;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,5 @@
-package com.ticketly.mseventseating.dto;
+package com.ticketly.mseventseating.dto.organization;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,11 +11,11 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class SeatingLayoutTemplateDTO {
+public class OrganizationResponse {
     private UUID id;
-    private UUID organizationId;
     private String name;
+    private String logoUrl;
+    private String website;
+    private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
-    private LayoutDataDTO layoutData;
 }

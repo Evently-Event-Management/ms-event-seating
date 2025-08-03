@@ -2,8 +2,8 @@ package com.ticketly.mseventseating.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.config.SecurityConfig;
-import com.ticketly.mseventseating.dto.VenueRequest;
-import com.ticketly.mseventseating.dto.VenueResponse;
+import com.ticketly.mseventseating.dto.venue.VenueRequest;
+import com.ticketly.mseventseating.dto.venue.VenueResponse;
 import com.ticketly.mseventseating.service.VenueService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

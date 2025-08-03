@@ -59,18 +59,7 @@ public class Event {
 
     private String locationDescription;
 
-    // --- Rolling Sales Window Rules ---
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Builder.Default
-    private SalesStartRuleType salesStartRuleType = SalesStartRuleType.IMMEDIATE;
-
-    @Column(name = "sales_start_days_before")
-    private Integer salesStartDaysBefore;
-
-    @Column(name = "sales_start_fixed_datetime")
-    private OffsetDateTime salesStartFixedDatetime;
-    // --- End of Sales Window Rules ---
+    // Removes sales start rule fields
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

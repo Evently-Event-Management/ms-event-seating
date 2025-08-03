@@ -1,7 +1,7 @@
 package com.ticketly.mseventseating.service;
 
-import com.ticketly.mseventseating.dto.CategoryRequest;
-import com.ticketly.mseventseating.dto.CategoryResponse;
+import com.ticketly.mseventseating.dto.category.CategoryRequest;
+import com.ticketly.mseventseating.dto.category.CategoryResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Category;

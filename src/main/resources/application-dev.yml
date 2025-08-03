@@ -24,3 +24,8 @@ aws:
     endpoint: http://localhost:4566
     access-key: test
     secret-key: test
+  # Local development EventBridge Scheduler configuration
+  scheduler:
+    sqs-queue-arn: arn:aws:sqs:us-east-1:000000000000:session-on-sale-queue
+    role-arn: arn:aws:iam::000000000000:role/EventBridgeSchedulerRole
+    group-name: event-ticketing-schedules

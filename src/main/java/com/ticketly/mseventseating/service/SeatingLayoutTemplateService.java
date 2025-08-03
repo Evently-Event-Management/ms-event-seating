@@ -2,9 +2,9 @@ package com.ticketly.mseventseating.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ticketly.mseventseating.dto.LayoutDataDTO;
-import com.ticketly.mseventseating.dto.SeatingLayoutTemplateDTO;
-import com.ticketly.mseventseating.dto.SeatingLayoutTemplateRequest;
+import com.ticketly.mseventseating.dto.layout_template.LayoutDataDTO;
+import com.ticketly.mseventseating.dto.layout_template.SeatingLayoutTemplateDTO;
+import com.ticketly.mseventseating.dto.layout_template.SeatingLayoutTemplateRequest;
 import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
