@@ -2,7 +2,6 @@ package com.ticketly.mseventseating.dto.event;
 
 import com.ticketly.mseventseating.dto.session.SessionRequest;
 import com.ticketly.mseventseating.dto.tier.TierRequest;
-import com.ticketly.mseventseating.model.SalesStartRuleType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -10,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -43,6 +41,8 @@ public class CreateEventRequest {
     @NotEmpty
     private List<SessionRequest> sessions;
 
+    // Removed seatingLayoutTemplateId and replaced with direct session layouts
+    // This allows clients to either use a template or create layouts from scratch
     @NotNull
-    private UUID seatingLayoutTemplateId;
+    private String sessionLayoutData;
 }

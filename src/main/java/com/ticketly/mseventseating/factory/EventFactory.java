@@ -1,14 +1,13 @@
 package com.ticketly.mseventseating.factory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ticketly.mseventseating.dto.LayoutDataDTO;
+import com.ticketly.mseventseating.dto.session_layout.LayoutDataDTO;
 import com.ticketly.mseventseating.dto.event.CreateEventRequest;
 import com.ticketly.mseventseating.dto.session.SessionRequest;
 import com.ticketly.mseventseating.dto.tier.TierRequest;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.CategoryRepository;
-import com.ticketly.mseventseating.repository.SeatingLayoutTemplateRepository;
 import com.ticketly.mseventseating.repository.VenueRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,20 +27,20 @@ public class EventFactory {
 
     private final VenueRepository venueRepository;
     private final CategoryRepository categoryRepository;
-    private final SeatingLayoutTemplateRepository seatingLayoutTemplateRepository;
+    // Removed seatingLayoutTemplateRepository dependency
     private final ObjectMapper objectMapper;
 
     public Event createFromRequest(CreateEventRequest request, Organization organization) {
         Venue venue = findVenue(request.getVenueId());
         Set<Category> categories = findCategories(request.getCategoryIds());
-        SeatingLayoutTemplate layoutTemplate = findLayoutTemplate(request.getSeatingLayoutTemplateId());
 
         Event event = buildEventEntity(request, organization, venue, categories);
 
         List<Tier> tiers = buildTiers(request.getTiers(), event);
         event.setTiers(tiers);
 
-        List<EventSession> sessions = buildSessions(request.getSessions(), event, layoutTemplate);
+        // Use the sessionLayoutData directly from request instead of fetching a template
+        List<EventSession> sessions = buildSessions(request.getSessions(), event, request.getSessionLayoutData());
         event.setSessions(sessions);
 
         return event;
@@ -53,7 +52,6 @@ public class EventFactory {
                 .coverPhotos(request.getCoverPhotos()).organization(org).venue(venue).categories(categories)
                 .isOnline(request.isOnline()).onlineLink(request.getOnlineLink())
                 .locationDescription(request.getLocationDescription())
-                // ✅ REMOVED: Sales rules are no longer set here.
                 .build();
     }
 
@@ -63,7 +61,8 @@ public class EventFactory {
                 .collect(Collectors.toList());
     }
 
-    private List<EventSession> buildSessions(List<SessionRequest> sessionRequests, Event event, SeatingLayoutTemplate layoutTemplate) {
+    // Updated to accept sessionLayoutData string directly instead of a template entity
+    private List<EventSession> buildSessions(List<SessionRequest> sessionRequests, Event event, String sessionLayoutData) {
         List<EventSession> sessions = new ArrayList<>();
         for (SessionRequest req : sessionRequests) {
             EventSession session = EventSession.builder()
@@ -75,14 +74,15 @@ public class EventFactory {
                     .salesStartFixedDatetime(req.getSalesStartFixedDatetime())
                     .build();
 
-            // Transform the layout template data into session seating map data
-            String sessionLayoutData = transformLayoutDataForSession(layoutTemplate.getLayoutData());
-            
+            // No transformation needed - use the provided sessionLayoutData directly
+            // Just validate it's valid JSON matching our DTO structure
+            String validatedLayoutData = validateAndPrepareSessionLayout(sessionLayoutData);
+
             SessionSeatingMap map = SessionSeatingMap.builder()
-                    .layoutData(sessionLayoutData)
+                    .layoutData(validatedLayoutData)
                     .eventSession(session)
                     .build();
-                    
+
             session.setSessionSeatingMap(map);
             sessions.add(session);
         }
@@ -90,165 +90,59 @@ public class EventFactory {
     }
 
     /**
-     * Transforms the structural layout template data into an expanded session seating map
-     * with generated IDs, seat rows and seat objects with initial statuses.
+     * Validates the session layout data is properly formatted and initializes any required fields
+     * Always assigns new unique UUIDs to every block, row, and seat
      *
-     * @param templateLayoutData JSON string from the seating layout template
-     * @return JSON string with the transformed layout data for the session
+     * @param sessionLayoutData JSON string containing the session layout
+     * @return The validated and possibly enhanced JSON string
      */
-    private String transformLayoutDataForSession(String templateLayoutData) {
+    private String validateAndPrepareSessionLayout(String sessionLayoutData) {
         try {
-            // Deserialize template layout data
-            LayoutDataDTO templateLayout = objectMapper.readValue(templateLayoutData, LayoutDataDTO.class);
-            
-            // Create a new layout data object for the session
-            LayoutDataDTO sessionLayout = new LayoutDataDTO();
-            sessionLayout.setName(templateLayout.getName());
-            
-            LayoutDataDTO.Layout layout = new LayoutDataDTO.Layout();
-            List<LayoutDataDTO.Block> transformedBlocks = new ArrayList<>();
-            
-            // Process each block in the template
-            for (LayoutDataDTO.Block templateBlock : templateLayout.getLayout().getBlocks()) {
-                LayoutDataDTO.Block sessionBlock = new LayoutDataDTO.Block();
-                
-                // Generate a new UUID for the block
-                sessionBlock.setId(UUID.randomUUID().toString());
-                sessionBlock.setName(templateBlock.getName());
-                sessionBlock.setType(templateBlock.getType());
-                sessionBlock.setPosition(templateBlock.getPosition());
-                
-                // Handle different block types
-                if ("seated_grid".equals(templateBlock.getType())) {
-                    // For seated grid, expand rows and columns into actual row and seat objects
-                    sessionBlock.setRows(createRowsWithSeats(
-                            templateBlock.getRowCount(),
-                            templateBlock.getColumns(),
-                            templateBlock.getStartRowLabel(),
-                            templateBlock.getStartColumnLabel()
-                    ));
-                } else if ("standing_capacity".equals(templateBlock.getType())) {
-                    // For standing capacity, initialize capacity, width, height, and sold count
-                    sessionBlock.setCapacity(templateBlock.getCapacity());
-                    sessionBlock.setWidth(templateBlock.getWidth());
-                    sessionBlock.setHeight(templateBlock.getHeight());
-                    sessionBlock.setTierId(null);
-                    sessionBlock.setSoldCount(0);
-                } else {
-                    // For non-sellable blocks, just copy the properties
-                    sessionBlock.setWidth(templateBlock.getWidth());
-                    sessionBlock.setHeight(templateBlock.getHeight());
-                }
-                
-                transformedBlocks.add(sessionBlock);
+            // Parse the JSON to verify it's valid and matches our expected structure
+            LayoutDataDTO layoutData = objectMapper.readValue(sessionLayoutData, LayoutDataDTO.class);
+
+            // Initialize fields and assign new UUIDs
+            if (layoutData.getLayout() != null && layoutData.getLayout().getBlocks() != null) {
+                layoutData.getLayout().getBlocks().forEach(block -> {
+                    // Always generate a new UUID for each block
+                    block.setId(UUID.randomUUID().toString());
+
+                    // For seated blocks, make sure rows and seats have IDs and proper initialization
+                    if ("seated_grid".equals(block.getType()) && block.getRows() != null) {
+                        for (LayoutDataDTO.Row row : block.getRows()) {
+                            // Always generate a new UUID for each row
+                            row.setId(UUID.randomUUID().toString());
+
+                            if (row.getSeats() != null) {
+                                for (LayoutDataDTO.Seat seat : row.getSeats()) {
+                                    // Always generate a new UUID for each seat
+                                    seat.setId(UUID.randomUUID().toString());
+                                    
+                                    // Ensure seats have a status set
+                                    if (seat.getStatus() == null) {
+                                        seat.setStatus("AVAILABLE");
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Initialize standing capacity block properties if needed
+                    if ("standing_capacity".equals(block.getType())) {
+                        if (block.getSoldCount() == null) {
+                            block.setSoldCount(0);
+                        }
+                    }
+                });
             }
-            
-            layout.setBlocks(transformedBlocks);
-            sessionLayout.setLayout(layout);
-            
-            // Serialize back to JSON
-            return objectMapper.writeValueAsString(sessionLayout);
-            
+
+            // Reserialize the validated object back to JSON
+            return objectMapper.writeValueAsString(layoutData);
+
         } catch (IOException e) {
-            log.error("Failed to transform layout data", e);
-            throw new RuntimeException("Failed to transform layout data", e);
+            log.error("Invalid session layout data", e);
+            throw new IllegalArgumentException("Invalid session layout data: " + e.getMessage());
         }
-    }
-    
-    /**
-     * Creates rows with seats based on the specified number of rows and columns
-     * with optional custom starting row label and column number
-     */
-    private List<LayoutDataDTO.Row> createRowsWithSeats(int numRows, int numColumns, 
-                                                       String startRowLabel, Integer startColumnLabel) {
-        List<LayoutDataDTO.Row> rows = new ArrayList<>();
-        
-        // Determine starting column number, default to 1 if not specified
-        int startColumn = 1;
-        if (startColumnLabel != null) {
-            startColumn = startColumnLabel;
-        }
-        
-        // Generate row labels starting from the specified label
-        List<String> rowLabels = generateRowLabels(numRows, startRowLabel);
-        
-        for (int i = 0; i < numRows; i++) {
-            LayoutDataDTO.Row row = new LayoutDataDTO.Row();
-            row.setId(UUID.randomUUID().toString());
-            row.setLabel(rowLabels.get(i));
-            
-            // Create seats for this row
-            List<LayoutDataDTO.Seat> seats = new ArrayList<>();
-            for (int j = 0; j < numColumns; j++) {
-                LayoutDataDTO.Seat seat = new LayoutDataDTO.Seat();
-                seat.setId(UUID.randomUUID().toString());
-                seat.setLabel(String.valueOf(startColumn + j));
-                seat.setTierId(null);
-                seat.setStatus("AVAILABLE");
-                seats.add(seat);
-            }
-            
-            row.setSeats(seats);
-            rows.add(row);
-        }
-        
-        return rows;
-    }
-    
-    /**
-     * Generates alphabetical row labels starting from a specified label
-     * Supports multi-character labels (e.g., "AB" → "AC" → "AD" → ...)
-     * 
-     * @param count number of row labels to generate
-     * @param startLabel the starting label (default is "A" if null or empty)
-     * @return List of generated row labels
-     */
-    private List<String> generateRowLabels(int count, String startLabel) {
-        List<String> labels = new ArrayList<>(count);
-        
-        // Default to "A" if startLabel is null or empty
-        if (startLabel == null || startLabel.isEmpty()) {
-            startLabel = "A";
-        }
-        
-        // Start with the initial label
-        labels.add(startLabel);
-        
-        // Generate subsequent labels
-        for (int i = 1; i < count; i++) {
-            String prevLabel = labels.get(i - 1);
-            labels.add(incrementLabel(prevLabel));
-        }
-        
-        return labels;
-    }
-    
-    /**
-     * Increments an alphabetical label (e.g., "A" → "B", "Z" → "AA", "AB" → "AC")
-     * 
-     * @param label the label to increment
-     * @return the next label in sequence
-     */
-    private String incrementLabel(String label) {
-        // Convert to char array for easier manipulation
-        char[] chars = label.toCharArray();
-        
-        // Start from the rightmost character and try to increment
-        for (int i = chars.length - 1; i >= 0; i--) {
-            if (chars[i] < 'Z') {
-                // If not 'Z', simply increment and we're done
-                chars[i]++;
-                return new String(chars);
-            } else {
-                // This position is 'Z', roll over to 'A'
-                chars[i] = 'A';
-                // Continue loop to increment the next position to the left
-            }
-        }
-        
-        // If we get here, all characters were 'Z'
-        // So we need to add one more 'A' at the beginning
-        return "A" + new String(chars);
     }
 
     private Venue findVenue(UUID venueId) {
@@ -259,10 +153,5 @@ public class EventFactory {
 
     private Set<Category> findCategories(Set<UUID> categoryIds) {
         return new java.util.HashSet<>(categoryRepository.findAllById(categoryIds));
-    }
-
-    private SeatingLayoutTemplate findLayoutTemplate(UUID templateId) {
-        return seatingLayoutTemplateRepository.findById(templateId)
-                .orElseThrow(() -> new ResourceNotFoundException("Seating layout template not found with ID: " + templateId));
     }
 }
