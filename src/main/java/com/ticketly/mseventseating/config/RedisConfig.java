@@ -1,9 +1,7 @@
 package com.ticketly.mseventseating.config;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +20,6 @@ import java.time.Duration;
 @EnableCaching
 public class RedisConfig {
 
-    // ✅ Inject the properties from your application.yml
     @Value("${spring.cache.redis.key-prefix}")
     private String keyPrefix;
 
@@ -30,16 +27,15 @@ public class RedisConfig {
     private Duration timeToLive;
 
     @Bean
-    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory,
+                                          // ✅ Inject the specialized Redis ObjectMapper
+                                          @Qualifier("redisObjectMapper") ObjectMapper redisObjectMapper) {
 
-        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper);
 
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(timeToLive) // ✅ Use TTL from properties
-                .prefixCacheNameWith(keyPrefix) // ✅ Fixed: use prefixCacheNameWith instead of computePrefixWith
+                .entryTtl(timeToLive)
+                .prefixCacheNameWith(keyPrefix)
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer));
 
@@ -49,15 +45,14 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory,
+                                                       // ✅ Inject the specialized Redis ObjectMapper
+                                                       @Qualifier("redisObjectMapper") ObjectMapper redisObjectMapper) {
 
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
 
-        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper);
 
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(serializer);
