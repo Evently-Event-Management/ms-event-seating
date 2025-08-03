@@ -1,7 +1,5 @@
 package com.ticketly.mseventseating.dto.event;
 
-import com.ticketly.mseventseating.dto.session.SessionRequest;
-import com.ticketly.mseventseating.dto.tier.TierRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

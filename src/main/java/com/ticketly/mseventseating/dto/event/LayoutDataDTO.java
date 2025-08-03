@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.dto.session_layout;
+package com.ticketly.mseventseating.dto.event;
 
 import lombok.Data;
 

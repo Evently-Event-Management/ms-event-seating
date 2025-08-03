@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.dto.session;
+package com.ticketly.mseventseating.dto.event;
 
 import com.ticketly.mseventseating.model.SalesStartRuleType;
 import lombok.Data;

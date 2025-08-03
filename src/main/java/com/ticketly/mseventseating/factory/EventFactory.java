@@ -1,10 +1,10 @@
 package com.ticketly.mseventseating.factory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ticketly.mseventseating.dto.session_layout.LayoutDataDTO;
+import com.ticketly.mseventseating.dto.event.LayoutDataDTO;
 import com.ticketly.mseventseating.dto.event.CreateEventRequest;
-import com.ticketly.mseventseating.dto.session.SessionRequest;
-import com.ticketly.mseventseating.dto.tier.TierRequest;
+import com.ticketly.mseventseating.dto.event.SessionRequest;
+import com.ticketly.mseventseating.dto.event.TierRequest;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.CategoryRepository;
