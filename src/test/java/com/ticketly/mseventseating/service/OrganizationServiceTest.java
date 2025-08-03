@@ -3,6 +3,7 @@ package com.ticketly.mseventseating.service;
 import com.ticketly.mseventseating.dto.OrganizationRequest;
 import com.ticketly.mseventseating.dto.OrganizationResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
+import com.ticketly.mseventseating.model.SubscriptionLimitType;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.repository.OrganizationRepository;
@@ -38,7 +39,7 @@ class OrganizationServiceTest {
     private OrganizationOwnershipService ownershipService;
     
     @Mock
-    private TierService tierService;
+    private SubscriptionTierService subscriptionTierService;
 
     @InjectMocks
     private OrganizationService organizationService;
@@ -136,7 +137,7 @@ class OrganizationServiceTest {
         // Arrange
         Organization savedOrganization = testOrganization;
         when(organizationRepository.countByUserId(USER_ID)).thenReturn(2L);
-        when(tierService.getMaxOrganizationsForUser(mockJwt)).thenReturn(3);
+        when(subscriptionTierService.getLimit( SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER,mockJwt)).thenReturn(3);
         when(organizationRepository.save(any(Organization.class))).thenReturn(savedOrganization);
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
 
@@ -160,7 +161,7 @@ class OrganizationServiceTest {
     void createOrganization_ShouldThrowException_WhenUserExceedsLimit() {
         // Arrange
         when(organizationRepository.countByUserId(USER_ID)).thenReturn(3L);
-        when(tierService.getMaxOrganizationsForUser(mockJwt)).thenReturn(3);
+        when(subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER,mockJwt)).thenReturn(3);
 
         // Act & Assert
         assertThrows(BadRequestException.class, () ->
@@ -176,7 +177,7 @@ class OrganizationServiceTest {
         // Arrange
         Organization savedOrganization = testOrganization;
         when(organizationRepository.countByUserId(USER_ID)).thenReturn(5L);
-        when(tierService.getMaxOrganizationsForUser(mockJwt)).thenReturn(10); // Higher tier limit
+        when(subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER,mockJwt)).thenReturn(10); // Higher tier limit
         when(organizationRepository.save(any(Organization.class))).thenReturn(savedOrganization);
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
 
@@ -188,7 +189,7 @@ class OrganizationServiceTest {
         assertEquals(ORG_WEBSITE, result.getWebsite());
         
         // Verify the tier service was called
-        verify(tierService).getMaxOrganizationsForUser(mockJwt);
+        verify(subscriptionTierService).getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, mockJwt);
     }
 
     @Test

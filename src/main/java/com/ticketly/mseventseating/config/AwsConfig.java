@@ -10,61 +10,85 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.scheduler.SchedulerClient;
+import software.amazon.awssdk.services.scheduler.SchedulerClientBuilder;
 
 import java.net.URI;
 
 @Configuration
-public class AwsS3Config {
+public class AwsConfig {
 
-    // Make endpoint optional by defaulting to null if not found
-    @Value("${aws.s3.endpoint:#{null}}")
-    private String endpoint;
+    // A single endpoint for all local AWS services (LocalStack)
+    @Value("${aws.local.endpoint:#{null}}")
+    private String localEndpoint;
 
-    @Value("${aws.s3.region}")
+    @Value("${aws.region}")
     private String region;
 
-    // Make keys optional for production
-    @Value("${aws.s3.access-key:#{null}}")
+    // Credentials for local development
+    @Value("${aws.local.access-key:test}")
     private String accessKey;
 
-    @Value("${aws.s3.secret-key:#{null}}")
+    @Value("${aws.local.secret-key:test}")
     private String secretKey;
 
+    /**
+     * Configures the S3Client bean.
+     * In a 'dev' or 'test' profile, it points to LocalStack.
+     * In any other profile (like 'prod'), it uses default AWS credentials and endpoints.
+     */
     @Bean
     public S3Client s3Client() {
         S3ClientBuilder builder = S3Client.builder()
                 .region(Region.of(region));
 
-        // Check if an endpoint is configured (for dev/localstack)
-        if (endpoint != null) {
-            builder.endpointOverride(URI.create(endpoint))
+        if (localEndpoint != null && !localEndpoint.isBlank()) {
+            builder.endpointOverride(URI.create(localEndpoint))
                     .forcePathStyle(true)
                     .credentialsProvider(StaticCredentialsProvider.create(
                             AwsBasicCredentials.create(accessKey, secretKey)));
         }
-        // If no endpoint is set, the SDK uses default provider chain for credentials
-        // and standard AWS endpoint. This is the production behavior.
 
         return builder.build();
     }
 
+    /**
+     * Configures the S3Presigner bean for generating presigned URLs.
+     * Points to LocalStack for local development.
+     */
     @Bean
     public S3Presigner s3Presigner() {
         S3Presigner.Builder builder = S3Presigner.builder()
                 .region(Region.of(region));
 
-        // Check if an endpoint is configured (for dev/localstack)
-        if (endpoint != null) {
+        if (localEndpoint != null && !localEndpoint.isBlank()) {
             S3Configuration s3Configuration = S3Configuration.builder()
                     .pathStyleAccessEnabled(true)
                     .build();
 
-            builder.endpointOverride(URI.create(endpoint))
+            builder.endpointOverride(URI.create(localEndpoint))
                     .serviceConfiguration(s3Configuration)
                     .credentialsProvider(StaticCredentialsProvider.create(
                             AwsBasicCredentials.create(accessKey, secretKey)));
         }
-        // If no endpoint, SDK defaults are used for production.
+
+        return builder.build();
+    }
+
+    /**
+     * Configures the SchedulerClient bean for EventBridge Scheduler.
+     * Points to LocalStack for local development.
+     */
+    @Bean
+    public SchedulerClient schedulerClient() {
+        SchedulerClientBuilder builder = SchedulerClient.builder()
+                .region(Region.of(region));
+
+        if (localEndpoint != null && !localEndpoint.isBlank()) {
+            builder.endpointOverride(URI.create(localEndpoint))
+                    .credentialsProvider(StaticCredentialsProvider.create(
+                            AwsBasicCredentials.create(accessKey, secretKey)));
+        }
 
         return builder.build();
     }

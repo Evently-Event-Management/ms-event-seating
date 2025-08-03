@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
+@Table(name = "organizations")  // Added table name explicitly
 @Getter
 @Setter
 @NoArgsConstructor

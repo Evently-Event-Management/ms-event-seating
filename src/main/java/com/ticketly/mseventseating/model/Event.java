@@ -90,6 +90,5 @@ public class Event {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EventSession> sessions;
 
-    @OneToOne(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private EventSeatingMap eventSeatingMap;
+    // ✅ REMOVED: The @OneToOne mapping to EventSeatingMap is gone.
 }

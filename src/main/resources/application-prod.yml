@@ -1,13 +1,17 @@
 spring:
+  # --- Database Configuration ---
+  # These values will be provided by your production environment (e.g., Kubernetes secrets)
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
+# --- AWS Configuration for Production ---
+# In production, the SDK automatically discovers the region and credentials
+# from the environment (e.g., an IAM role). You do not need to specify
+# endpoints or access keys.
 aws:
+  region: ap-south-1 # Or your desired production region
   s3:
-    region: ap-south-1  # Replace with your real region
-    bucket-name: event-seating-uploads
-    access-key: ${AWS_ACCESS_KEY}
-    secret-key: ${AWS_SECRET_KEY}
+    bucket-name: event-seating-uploads # Your production S3 bucket name

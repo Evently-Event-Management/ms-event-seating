@@ -9,6 +9,7 @@ import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.model.SeatingLayoutTemplate;
+import com.ticketly.mseventseating.model.SubscriptionLimitType;
 import com.ticketly.mseventseating.repository.SeatingLayoutTemplateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,7 @@ public class SeatingLayoutTemplateService {
     private final SeatingLayoutTemplateRepository seatingLayoutTemplateRepository;
     private final ObjectMapper objectMapper;
     private final OrganizationOwnershipService ownershipService;
-    private final TierService tierService;
+    private final SubscriptionTierService subscriptionTierService;
 
     @Value("${app.seating_layout.default-gap:25}")
     private int gap;
@@ -83,7 +84,7 @@ public class SeatingLayoutTemplateService {
         Organization organization = ownershipService.verifyOwnershipAndGetOrganization(request.getOrganizationId(), userId);
 
         long currentTemplateCount = seatingLayoutTemplateRepository.countByOrganizationId(organization.getId());
-        int maxTemplates = tierService.getMaxSeatingLayoutsForOrg(jwt);
+        int maxTemplates = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, jwt);
 
         if (currentTemplateCount >= maxTemplates) {
             throw new BadRequestException(String.format(

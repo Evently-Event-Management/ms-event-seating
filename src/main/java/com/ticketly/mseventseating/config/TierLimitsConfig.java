@@ -10,12 +10,13 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "app.tier")
 @Data
 public class TierLimitsConfig {
-    // This will automatically bind the nested map from your application.yml
     private Map<String, TierLimitDetails> limits;
 
     @Data
     public static class TierLimitDetails {
         private int maxOrganizationsPerUser;
         private int maxSeatingLayoutsPerOrg;
+        private int maxActiveEvents;
+        private int maxSessionsPerEvent;
     }
 }
