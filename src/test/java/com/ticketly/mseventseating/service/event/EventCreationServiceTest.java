@@ -1,16 +1,18 @@
 package com.ticketly.mseventseating.service.event;
 
+import com.ticketly.mseventseating.config.AppLimitsConfig;
+import com.ticketly.mseventseating.dto.AppConfigDTO;
+//import com.ticketly.mseventseating.dto.EventLimitsDTO;
 import com.ticketly.mseventseating.dto.event.CreateEventRequest;
 import com.ticketly.mseventseating.dto.event.EventResponseDTO;
 import com.ticketly.mseventseating.dto.session.SessionRequest;
-import com.ticketly.mseventseating.model.SalesStartRuleType;
 import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.factory.EventFactory;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
+import com.ticketly.mseventseating.service.LimitService;
 import com.ticketly.mseventseating.service.OrganizationOwnershipService;
 import com.ticketly.mseventseating.service.S3StorageService;
-import com.ticketly.mseventseating.service.SubscriptionTierService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,16 +21,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,14 +37,27 @@ class EventCreationServiceTest {
 
     @Mock
     private EventRepository eventRepository;
+
     @Mock
     private OrganizationOwnershipService ownershipService;
+
     @Mock
-    private SubscriptionTierService tierService;
+    private LimitService limitService;
+
     @Mock
     private EventFactory eventFactory;
+
     @Mock
-    private S3StorageService s3StorageService; // ✅ Mock the S3 service
+    private S3StorageService s3StorageService;
+
+    @Mock
+    private AppConfigDTO appConfig;
+
+    @Mock
+    private AppLimitsConfig.EventConfig eventConfig;
+//
+//    @Mock
+//    private EventLimitsDTO eventLimits;
 
     @InjectMocks
     private EventCreationService eventCreationService;
@@ -54,15 +68,34 @@ class EventCreationServiceTest {
     private Event event;
     private CreateEventRequest createEventRequest;
     private Jwt jwt;
+    private MockMultipartFile validImageFile;
+    private MockMultipartFile invalidImageFile;
+    private MockMultipartFile largeImageFile;
 
     @BeforeEach
     void setUp() {
+        // Initialize common test data
         organizationId = UUID.randomUUID();
         userId = "user123";
 
-        organization = Organization.builder().id(organizationId).name("Test Organization").build();
-        event = Event.builder().id(UUID.randomUUID()).title("Test Event").status(EventStatus.PENDING).organization(organization).createdAt(OffsetDateTime.now()).build();
+        // Setup organization
+        organization = Organization.builder()
+                .id(organizationId)
+                .name("Test Organization")
+                .build();
 
+        // Setup event
+        event = Event.builder()
+                .id(UUID.randomUUID())
+                .title("Test Event")
+                .description("Test Description")
+                .overview("Test Overview")
+                .status(EventStatus.PENDING)
+                .organization(organization)
+                .createdAt(OffsetDateTime.now())
+                .build();
+
+        // Setup sessions for the request
         List<SessionRequest> sessions = Collections.singletonList(
                 SessionRequest.builder()
                         .startTime(OffsetDateTime.now().plusDays(10))
@@ -72,36 +105,74 @@ class EventCreationServiceTest {
                         .build()
         );
 
+        // Setup create event request
         createEventRequest = CreateEventRequest.builder()
                 .title("Test Event")
                 .description("Test Description")
+                .overview("Test Overview")
                 .organizationId(organizationId)
                 .sessions(sessions)
                 .build();
 
+        // Setup JWT token
         Map<String, Object> claims = new HashMap<>();
         claims.put("sub", userId);
-        jwt = Jwt.withTokenValue("token").header("alg", "RS256").claims(c -> c.putAll(claims)).build();
 
-        // Use ReflectionTestUtils to set the values from properties
-        ReflectionTestUtils.setField(eventCreationService, "maxCoverPhotos", 3);
-        ReflectionTestUtils.setField(eventCreationService, "maxCoverPhotoSize", 5 * 1024 * 1024); // 5MB max size
+        jwt = Jwt.withTokenValue("token")
+                .header("alg", "RS256")
+                .claims(c -> c.putAll(claims))
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(3600))
+                .build();
+
+        // Setup test files
+        validImageFile = new MockMultipartFile(
+                "coverImages",
+                "test-image.jpg",
+                "image/jpeg",
+                "test image content".getBytes()
+        );
+
+        invalidImageFile = new MockMultipartFile(
+                "coverImages",
+                "test-document.pdf",
+                "application/pdf",
+                "test document content".getBytes()
+        );
+
+        byte[] largeContent = new byte[6 * 1024 * 1024]; // 6MB
+        Arrays.fill(largeContent, (byte) 1);
+        largeImageFile = new MockMultipartFile(
+                "coverImages",
+                "large-image.jpg",
+                "image/jpeg",
+                largeContent
+        );
+
+        // Setup app config mocks
+//        when(limitService.getAppConfiguration()).thenReturn(appConfig);
+//        when(appConfig.getEventLimits()).thenReturn(eventConfig);
+//        when(eventConfig.getMaxCoverPhotos()).thenReturn(3);
+//        when(eventConfig.getMaxCoverPhotoSize()).thenReturn(5L * 1024 * 1024); // 5MB
     }
 
     @Test
-    void createEvent_WithCoverImages_Success() throws IOException {
+    void createEvent_Success() throws IOException {
         // Arrange
-        MockMultipartFile file1 = new MockMultipartFile("coverImages", "image1.jpg", "image/jpeg", "image1".getBytes());
-        MultipartFile[] coverImages = {file1};
-        List<String> s3Keys = List.of("s3-key-for-image1.jpg");
+        MultipartFile[] coverImages = {validImageFile};
+        List<String> uploadedKeys = Collections.singletonList("s3-key-1.jpg");
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        // These are subscription tier limits, not file size limits
-        when(tierService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
-        when(tierService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(10);
-        when(s3StorageService.uploadFile(any(MultipartFile.class), eq("event-cover-photos"))).thenReturn("s3-key-for-image1.jpg");
-        when(eventFactory.createFromRequest(eq(createEventRequest), eq(organization), eq(s3Keys))).thenReturn(event);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
+        when(s3StorageService.uploadFile(any(MultipartFile.class), eq("event-cover-photos"))).thenReturn("s3-key-1.jpg");
+        when(eventFactory.createFromRequest(eq(createEventRequest), eq(organization), eq(uploadedKeys))).thenReturn(event);
         when(eventRepository.save(event)).thenReturn(event);
+        when(limitService.getAppConfiguration()).thenReturn(appConfig);
+        when(appConfig.getEventLimits()).thenReturn(eventConfig);
+        when(eventConfig.getMaxCoverPhotos()).thenReturn(3);
+        when(eventConfig.getMaxCoverPhotoSize()).thenReturn(5L * 1024 * 1024); // 5MB
 
         // Act
         EventResponseDTO response = eventCreationService.createEvent(createEventRequest, coverImages, userId, jwt);
@@ -109,19 +180,30 @@ class EventCreationServiceTest {
         // Assert
         assertNotNull(response);
         assertEquals(event.getId(), response.getId());
+        assertEquals(event.getTitle(), response.getTitle());
+        assertEquals(event.getStatus().name(), response.getStatus());
+        assertEquals(organization.getId(), response.getOrganizationId());
 
-        // Verify interactions
-        verify(s3StorageService, times(1)).uploadFile(file1, "event-cover-photos");
-        verify(eventFactory).createFromRequest(createEventRequest, organization, s3Keys);
+        // Verify
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
+        verify(limitService).getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
+        verify(limitService).getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
+        verify(eventRepository).countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED);
+        verify(s3StorageService).uploadFile(any(MultipartFile.class), eq("event-cover-photos"));
+        verify(eventFactory).createFromRequest(createEventRequest, organization, uploadedKeys);
         verify(eventRepository).save(event);
     }
 
     @Test
-    void createEvent_WithNoCoverImages_Success() {
+    void createEvent_WithNullCoverImages_Success() throws IOException {
         // Arrange
+        List<String> emptyKeys = Collections.emptyList();
+
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        when(tierService.getLimit(any(), any())).thenReturn(10);
-        when(eventFactory.createFromRequest(eq(createEventRequest), eq(organization), eq(Collections.emptyList()))).thenReturn(event);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
+        when(eventFactory.createFromRequest(eq(createEventRequest), eq(organization), eq(emptyKeys))).thenReturn(event);
         when(eventRepository.save(event)).thenReturn(event);
 
         // Act
@@ -131,73 +213,246 @@ class EventCreationServiceTest {
         assertNotNull(response);
         assertEquals(event.getId(), response.getId());
 
-        // Verify S3 service was never called
+        // Verify
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
+        verify(eventFactory).createFromRequest(createEventRequest, organization, emptyKeys);
+        verify(eventRepository).save(event);
         verifyNoInteractions(s3StorageService);
-        // Verify factory was called with an empty list of keys
-        verify(eventFactory).createFromRequest(createEventRequest, organization, Collections.emptyList());
+    }
+
+    @Test
+    void createEvent_WithEmptyCoverImagesArray_Success() throws IOException {
+        // Arrange
+        MultipartFile[] emptyCoverImages = new MultipartFile[0];
+        List<String> emptyKeys = Collections.emptyList();
+
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
+        when(eventFactory.createFromRequest(eq(createEventRequest), eq(organization), eq(emptyKeys))).thenReturn(event);
+        when(eventRepository.save(event)).thenReturn(event);
+
+        // Act
+        EventResponseDTO response = eventCreationService.createEvent(createEventRequest, emptyCoverImages, userId, jwt);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(event.getId(), response.getId());
+
+        // Verify
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
+        verify(eventFactory).createFromRequest(createEventRequest, organization, emptyKeys);
+        verify(eventRepository).save(event);
+        verifyNoInteractions(s3StorageService);
+    }
+
+    @Test
+    void createEvent_MultipleCoverImages_Success() throws IOException {
+        // Arrange
+        MockMultipartFile image1 = new MockMultipartFile("coverImages", "image1.jpg", "image/jpeg", "image1".getBytes());
+        MockMultipartFile image2 = new MockMultipartFile("coverImages", "image2.jpg", "image/jpeg", "image2".getBytes());
+        MultipartFile[] coverImages = {image1, image2};
+        List<String> uploadedKeys = Arrays.asList("s3-key-1.jpg", "s3-key-2.jpg");
+
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
+        when(s3StorageService.uploadFile(image1, "event-cover-photos")).thenReturn("s3-key-1.jpg");
+        when(s3StorageService.uploadFile(image2, "event-cover-photos")).thenReturn("s3-key-2.jpg");
+        when(eventFactory.createFromRequest(eq(createEventRequest), eq(organization), eq(uploadedKeys))).thenReturn(event);
+        when(eventRepository.save(event)).thenReturn(event);
+        when(limitService.getAppConfiguration()).thenReturn(appConfig);
+        when(appConfig.getEventLimits()).thenReturn(eventConfig);
+        when(eventConfig.getMaxCoverPhotos()).thenReturn(3);
+        when(eventConfig.getMaxCoverPhotoSize()).thenReturn(5L * 1024 * 1024); // 5MB
+
+        // Act
+        EventResponseDTO response = eventCreationService.createEvent(createEventRequest, coverImages, userId, jwt);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(event.getId(), response.getId());
+
+        // Verify
+        verify(s3StorageService).uploadFile(image1, "event-cover-photos");
+        verify(s3StorageService).uploadFile(image2, "event-cover-photos");
+        verify(eventFactory).createFromRequest(createEventRequest, organization, uploadedKeys);
     }
 
     @Test
     void createEvent_ExceedsActiveEventLimit_ThrowsBadRequestException() {
         // Arrange
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        when(tierService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(5);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
 
         // Act & Assert
         BadRequestException exception = assertThrows(BadRequestException.class, () ->
-                eventCreationService.createEvent(createEventRequest, null, userId, jwt));
-
-        assertTrue(exception.getMessage().contains("You have reached the limit of 5 active events"));
-        verifyNoInteractions(eventFactory, s3StorageService);
-    }
-
-    @Test
-    void createEvent_ExceedsCoverPhotoLimit_ThrowsBadRequestException() {
-        // Arrange
-        MultipartFile[] tooManyFiles = {
-                new MockMultipartFile("file", "1.jpg", "image/jpeg", "1".getBytes()),
-                new MockMultipartFile("file", "2.jpg", "image/jpeg", "2".getBytes()),
-                new MockMultipartFile("file", "3.jpg", "image/jpeg", "3".getBytes()),
-                new MockMultipartFile("file", "4.jpg", "image/jpeg", "4".getBytes())
-        }; // 4 files, but limit is 3
-
-        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        when(tierService.getLimit(any(), any())).thenReturn(10);
-
-        // Act & Assert
-        BadRequestException exception = assertThrows(BadRequestException.class, () ->
-                eventCreationService.createEvent(createEventRequest, tooManyFiles, userId, jwt));
-
-        assertTrue(exception.getMessage().contains("You can upload a maximum of 3 cover photos"));
-        verifyNoInteractions(eventFactory, s3StorageService);
-    }
-
-    @Test
-    void createEvent_ExceedsCoverPhotoSizeLimit_ThrowsBadRequestException() {
-        // Arrange
-        // Create a large file that exceeds the 5MB limit set in setUp
-        byte[] largeContent = new byte[6 * 1024 * 1024]; // 6MB, exceeding the 5MB limit
-        Arrays.fill(largeContent, (byte) 1);
-
-        MockMultipartFile largeFile = new MockMultipartFile(
-                "coverImages",
-                "large_image.jpg",
-                "image/jpeg",
-                largeContent
+                eventCreationService.createEvent(createEventRequest, null, userId, jwt)
         );
 
-        MultipartFile[] coverImages = {largeFile};
+        assertTrue(exception.getMessage().contains("You have reached the limit of 5 active events"));
+
+        // Verify
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
+        verify(limitService).getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
+        verify(eventRepository).countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED);
+        verifyNoInteractions(eventFactory);
+        verifyNoInteractions(s3StorageService);
+        verify(eventRepository, never()).save(any());
+    }
+
+    @Test
+    void createEvent_ExceedsSessionsPerEventLimit_ThrowsBadRequestException() {
+        // Arrange
+        // Create a request with too many sessions
+        List<SessionRequest> manySessions = Arrays.asList(
+                SessionRequest.builder().startTime(OffsetDateTime.now().plusDays(1)).endTime(OffsetDateTime.now().plusDays(1).plusHours(2)).build(),
+                SessionRequest.builder().startTime(OffsetDateTime.now().plusDays(2)).endTime(OffsetDateTime.now().plusDays(2).plusHours(2)).build(),
+                SessionRequest.builder().startTime(OffsetDateTime.now().plusDays(3)).endTime(OffsetDateTime.now().plusDays(3).plusHours(2)).build()
+        );
+
+        CreateEventRequest requestWithManySessions = CreateEventRequest.builder()
+                .title("Test Event")
+                .description("Test Description")
+                .organizationId(organizationId)
+                .sessions(manySessions)
+                .build();
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        when(tierService.getLimit(any(), any())).thenReturn(10); // Tier limits are not exceeded
+        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(2); // Limit is 2, but we're trying to create 3
+        when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
 
         // Act & Assert
         BadRequestException exception = assertThrows(BadRequestException.class, () ->
-                eventCreationService.createEvent(createEventRequest, coverImages, userId, jwt));
+                eventCreationService.createEvent(requestWithManySessions, null, userId, jwt)
+        );
 
-        assertTrue(exception.getMessage().contains("File size exceeds the maximum allowed size of 5MB"));
+        assertTrue(exception.getMessage().contains("You cannot create more than 2 sessions per event"));
+
+        // Verify
+        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
+        verify(limitService).getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
+        verify(limitService).getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
+        verify(eventRepository).countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED);
         verifyNoInteractions(eventFactory);
         verifyNoInteractions(s3StorageService);
+        verify(eventRepository, never()).save(any());
+    }
+
+    @Test
+    void createEvent_ExceedsMaxCoverPhotos_ThrowsBadRequestException() {
+        // Arrange
+        MockMultipartFile image1 = new MockMultipartFile("coverImages", "image1.jpg", "image/jpeg", "content1".getBytes());
+        MockMultipartFile image2 = new MockMultipartFile("coverImages", "image2.jpg", "image/jpeg", "content2".getBytes());
+        MockMultipartFile image3 = new MockMultipartFile("coverImages", "image3.jpg", "image/jpeg", "content3".getBytes());
+        MockMultipartFile image4 = new MockMultipartFile("coverImages", "image4.jpg", "image/jpeg", "content4".getBytes());
+        MultipartFile[] tooManyCoverImages = {image1, image2, image3, image4}; // 4 images, but limit is 3
+
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
+        when(limitService.getAppConfiguration()).thenReturn(appConfig);
+        when(appConfig.getEventLimits()).thenReturn(eventConfig);
+        when(eventConfig.getMaxCoverPhotos()).thenReturn(3);
+
+        // Act & Assert
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+                eventCreationService.createEvent(createEventRequest, tooManyCoverImages, userId, jwt)
+        );
+
+        assertTrue(exception.getMessage().contains("You can upload a maximum of 3 cover photos"));
+
+        // Verify
+        verifyNoInteractions(s3StorageService);
+        verifyNoInteractions(eventFactory);
+        verify(eventRepository, never()).save(any());
+    }
+
+    @Test
+    void createEvent_InvalidFileType_ThrowsBadRequestException() {
+        // Arrange
+        MultipartFile[] coverImages = {invalidImageFile}; // PDF, not an image
+
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
+        when(limitService.getAppConfiguration()).thenReturn(appConfig);
+        when(appConfig.getEventLimits()).thenReturn(eventConfig);
+        when(eventConfig.getMaxCoverPhotos()).thenReturn(3);
+
+        // Act & Assert
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+                eventCreationService.createEvent(createEventRequest, coverImages, userId, jwt)
+        );
+
+        assertTrue(exception.getMessage().contains("Invalid file type detected"));
+
+        // Verify
+        verifyNoInteractions(s3StorageService);
+        verifyNoInteractions(eventFactory);
+        verify(eventRepository, never()).save(any());
+    }
+
+    @Test
+    void createEvent_ExceedsFileSizeLimit_ThrowsBadRequestException() {
+        // Arrange
+        MultipartFile[] coverImages = {largeImageFile}; // 6MB, exceeds 5MB limit
+
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
+        when(limitService.getAppConfiguration()).thenReturn(appConfig);
+        when(appConfig.getEventLimits()).thenReturn(eventConfig);
+        when(eventConfig.getMaxCoverPhotos()).thenReturn(3);
+        when(eventConfig.getMaxCoverPhotoSize()).thenReturn(5L * 1024 * 1024); // 5MB
+
+        // Act & Assert
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+                eventCreationService.createEvent(createEventRequest, coverImages, userId, jwt)
+        );
+
+        assertTrue(exception.getMessage().contains("File size exceeds the maximum allowed size"));
+
+        // Verify
+        verifyNoInteractions(s3StorageService);
+        verifyNoInteractions(eventFactory);
+        verify(eventRepository, never()).save(any());
+    }
+
+    @Test
+    void createEvent_UploadFails_ThrowsRuntimeException() throws IOException {
+        // Arrange
+        MultipartFile[] coverImages = {validImageFile};
+
+        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
+        when(s3StorageService.uploadFile(any(MultipartFile.class), eq("event-cover-photos")))
+                .thenThrow(new IOException("Upload failed"));
+        when(limitService.getAppConfiguration()).thenReturn(appConfig);
+        when(appConfig.getEventLimits()).thenReturn(eventConfig);
+        when(eventConfig.getMaxCoverPhotos()).thenReturn(3);
+        when(eventConfig.getMaxCoverPhotoSize()).thenReturn(5L * 1024 * 1024); // 5MB
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                eventCreationService.createEvent(createEventRequest, coverImages, userId, jwt)
+        );
+
+        assertTrue(exception.getMessage().contains("Failed to upload cover image"));
+
+        // Verify
+        verify(s3StorageService).uploadFile(any(MultipartFile.class), eq("event-cover-photos"));
+        verifyNoInteractions(eventFactory);
+        verify(eventRepository, never()).save(any());
     }
 }
+

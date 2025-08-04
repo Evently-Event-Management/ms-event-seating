@@ -8,7 +8,6 @@ import com.ticketly.mseventseating.model.SubscriptionLimitType;
 import com.ticketly.mseventseating.repository.OrganizationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -29,10 +28,7 @@ public class OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final S3StorageService s3StorageService;
     private final OrganizationOwnershipService ownershipService;
-    private final SubscriptionTierService subscriptionTierService;
-
-    @Value("${app.organization.max-logo-size:1048576}") // 1MB
-    private long maxLogoSize;
+    private final LimitService limitService;
 
     /**
      * Get all organizations for the current user.
@@ -71,7 +67,7 @@ public class OrganizationService {
      */
     @Transactional
     public OrganizationResponse createOrganization(OrganizationRequest request, String userId, Jwt jwt) {
-        int maxOrganizations = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
+        int maxOrganizations = limitService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
         long userOrganizationCount = organizationRepository.countByUserId(userId);
         if (userOrganizationCount >= maxOrganizations) {
             throw new BadRequestException("You have reached the maximum limit of " +
@@ -124,6 +120,7 @@ public class OrganizationService {
         if (logoFile.isEmpty() || !Objects.requireNonNull(logoFile.getContentType()).startsWith("image/")) {
             throw new BadRequestException("Invalid file type. Please upload an image file.");
         }
+        long maxLogoSize = getMaxLogoSize();
         if (logoFile.getSize() > maxLogoSize) {
             throw new BadRequestException("File size exceeds the maximum allowed size of " +
                     (maxLogoSize / (1024 * 1024)) + "MB");
@@ -197,5 +194,10 @@ public class OrganizationService {
                 .createdAt(organization.getCreatedAt())
                 .updatedAt(organization.getUpdatedAt())
                 .build();
+    }
+
+    // Replace @Value annotation with LimitService
+    private long getMaxLogoSize() {
+        return limitService.getAppConfiguration().getOrganizationLimits().getMaxLogoSize();
     }
 }

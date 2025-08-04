@@ -1,5 +1,7 @@
 package com.ticketly.mseventseating.service;
 
+import com.ticketly.mseventseating.config.AppLimitsConfig;
+import com.ticketly.mseventseating.dto.AppConfigDTO;
 import com.ticketly.mseventseating.dto.organization.OrganizationRequest;
 import com.ticketly.mseventseating.dto.organization.OrganizationResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
@@ -16,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -39,7 +40,13 @@ class OrganizationServiceTest {
     private OrganizationOwnershipService ownershipService;
 
     @Mock
-    private SubscriptionTierService subscriptionTierService;
+    private LimitService limitService;
+
+    @Mock
+    private AppConfigDTO appConfigDTO;
+
+    @Mock
+    private AppLimitsConfig.OrganizationConfig organizationConfig;
 
     @InjectMocks
     private OrganizationService organizationService;
@@ -50,6 +57,7 @@ class OrganizationServiceTest {
     private final String ORG_WEBSITE = "https://test-org.com";
     private final String LOGO_URL = "organization-logos/logo-uuid.jpg";
     private final String PRESIGNED_URL = "https://bucket.s3.amazonaws.com/organization-logos/logo-uuid.jpg";
+    private final long MAX_LOGO_SIZE = 2 * 1024 * 1024; // 2MB
 
     private Organization testOrganization;
     private OrganizationRequest testRequest;
@@ -57,9 +65,6 @@ class OrganizationServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Configure service properties
-        ReflectionTestUtils.setField(organizationService, "maxLogoSize", 2 * 1024 * 1024); // 2MB
-
         // Set up test data
         testOrganization = Organization.builder()
                 .id(ORG_ID)
@@ -137,7 +142,7 @@ class OrganizationServiceTest {
         // Arrange
         Organization savedOrganization = testOrganization;
         when(organizationRepository.countByUserId(USER_ID)).thenReturn(2L);
-        when(subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, mockJwt)).thenReturn(3);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, mockJwt)).thenReturn(3);
         when(organizationRepository.save(any(Organization.class))).thenReturn(savedOrganization);
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
 
@@ -161,7 +166,7 @@ class OrganizationServiceTest {
     void createOrganization_ShouldThrowException_WhenUserExceedsLimit() {
         // Arrange
         when(organizationRepository.countByUserId(USER_ID)).thenReturn(3L);
-        when(subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, mockJwt)).thenReturn(3);
+        when(limitService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, mockJwt)).thenReturn(3);
 
         // Act & Assert
         assertThrows(BadRequestException.class, () ->
@@ -177,7 +182,7 @@ class OrganizationServiceTest {
         // Arrange
         Organization savedOrganization = testOrganization;
         when(organizationRepository.countByUserId(USER_ID)).thenReturn(5L);
-        when(subscriptionTierService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, mockJwt)).thenReturn(10); // Higher tier limit
+        when(limitService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, mockJwt)).thenReturn(10); // Higher tier limit
         when(organizationRepository.save(any(Organization.class))).thenReturn(savedOrganization);
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
 
@@ -189,7 +194,7 @@ class OrganizationServiceTest {
         assertEquals(ORG_WEBSITE, result.getWebsite());
 
         // Verify the tier service was called
-        verify(subscriptionTierService).getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, mockJwt);
+        verify(limitService).getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, mockJwt);
     }
 
     @Test
@@ -248,6 +253,9 @@ class OrganizationServiceTest {
         when(s3StorageService.uploadFile(any(MultipartFile.class), eq("organization-logos"))).thenReturn(LOGO_URL);
         when(organizationRepository.save(any(Organization.class))).thenReturn(testOrganization);
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
+        when(limitService.getAppConfiguration()).thenReturn(appConfigDTO);
+        when(appConfigDTO.getOrganizationLimits()).thenReturn(organizationConfig);
+        when(organizationConfig.getMaxLogoSize()).thenReturn(MAX_LOGO_SIZE);
 
         // Act
         OrganizationResponse result = organizationService.uploadLogo(ORG_ID, logoFile, USER_ID);
@@ -258,6 +266,9 @@ class OrganizationServiceTest {
         verify(ownershipService).verifyOwnershipAndGetOrganization(ORG_ID, USER_ID);
         verify(s3StorageService).uploadFile(any(MultipartFile.class), eq("organization-logos"));
         verify(organizationRepository).save(any(Organization.class));
+
+        // Verify LimitService was called to get the max logo size
+        verify(limitService).getAppConfiguration();
     }
 
     @Test
@@ -277,6 +288,9 @@ class OrganizationServiceTest {
         when(s3StorageService.uploadFile(any(MultipartFile.class), eq("organization-logos"))).thenReturn(LOGO_URL);
         when(organizationRepository.save(any(Organization.class))).thenReturn(testOrganization);
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
+        when(limitService.getAppConfiguration()).thenReturn(appConfigDTO);
+        when(appConfigDTO.getOrganizationLimits()).thenReturn(organizationConfig);
+        when(organizationConfig.getMaxLogoSize()).thenReturn(MAX_LOGO_SIZE);
 
         // Act
         organizationService.uploadLogo(ORG_ID, logoFile, USER_ID);
@@ -284,6 +298,9 @@ class OrganizationServiceTest {
         // Assert
         verify(ownershipService).verifyOwnershipAndGetOrganization(ORG_ID, USER_ID);
         verify(s3StorageService).deleteFile(oldLogoUrl);
+
+        // Verify LimitService was called to get the max logo size
+        verify(limitService).getAppConfiguration();
     }
 
     @Test
@@ -307,12 +324,17 @@ class OrganizationServiceTest {
 
     @Test
     void uploadLogo_ShouldThrowException_WhenFileSizeExceedsLimit() throws IOException {
+        when(limitService.getAppConfiguration()).thenReturn(appConfigDTO);
+        when(appConfigDTO.getOrganizationLimits()).thenReturn(organizationConfig);
+        when(organizationConfig.getMaxLogoSize()).thenReturn(MAX_LOGO_SIZE);
+
+
         // Arrange
         MockMultipartFile logoFile = new MockMultipartFile(
                 "logo",
                 "logo.jpg",
                 "image/jpeg",
-                new byte[3 * 1024 * 1024] // 3MB
+                new byte[3 * 1024 * 1024] // 3MB, exceeds the 2MB limit
         );
 
         // Act & Assert
@@ -322,6 +344,9 @@ class OrganizationServiceTest {
 
         verify(s3StorageService, never()).uploadFile(any(), anyString());
         verify(organizationRepository, never()).save(any());
+
+        // Verify LimitService was called to get the max logo size
+        verify(limitService).getAppConfiguration();
     }
 
     @Test

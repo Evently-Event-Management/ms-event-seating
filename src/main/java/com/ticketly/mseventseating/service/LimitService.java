@@ -1,6 +1,7 @@
 package com.ticketly.mseventseating.service;
 
-import com.ticketly.mseventseating.config.TierLimitsConfig;
+import com.ticketly.mseventseating.config.AppLimitsConfig;
+import com.ticketly.mseventseating.dto.AppConfigDTO;
 import com.ticketly.mseventseating.model.SubscriptionLimitType;
 import com.ticketly.mseventseating.model.SubscriptionTier;
 import lombok.RequiredArgsConstructor;
@@ -13,27 +14,35 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class SubscriptionTierService {
+public class LimitService {
 
-    private final TierLimitsConfig tierLimitsConfig;
+    private final AppLimitsConfig appLimitsConfig;
     private static final SubscriptionTier DEFAULT_TIER = SubscriptionTier.FREE;
 
     /**
-     * Generic method to get any limit for a user based on their highest SubscriptionTier.
-     * This class is now OPEN for extension (by adding to LimitType) but
-     * CLOSED for modification.
-     *
-     * @param limitType The type of limit to retrieve (e.g., LimitType.MAX_ACTIVE_EVENTS).
-     * @param jwt The user's JWT.
-     * @return The integer value of the requested limit.
+     * Retrieves the complete, consolidated application configuration for the frontend.
+     * This is called by the controller.
+     */
+    public AppConfigDTO getAppConfiguration() {
+        return AppConfigDTO.builder()
+                .tierLimits(appLimitsConfig.getTier().getLimits())
+                .organizationLimits(appLimitsConfig.getOrganization())
+                .eventLimits(appLimitsConfig.getEvent())
+                .seatingLayoutConfig(appLimitsConfig.getSeatingLayout())
+                .build();
+    }
+
+    /**
+     * Generic method for internal services to get any limit for a user based on their highest tier.
+     * This replaces the need for other services to use @Value.
      */
     public int getLimit(SubscriptionLimitType limitType, Jwt jwt) {
         SubscriptionTier userTier = getHighestTierForUser(jwt);
 
-        return Optional.ofNullable(tierLimitsConfig.getLimits().get(userTier.name()))
+        return Optional.ofNullable(appLimitsConfig.getTier().getLimits().get(userTier.name()))
                 .map(limitType.getLimitExtractor())
                 .orElseGet(() -> limitType.getLimitExtractor()
-                        .apply(tierLimitsConfig.getLimits().get(DEFAULT_TIER.name())));
+                        .apply(appLimitsConfig.getTier().getLimits().get(DEFAULT_TIER.name())));
     }
 
     private SubscriptionTier getHighestTierForUser(Jwt jwt) {
