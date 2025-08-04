@@ -6,12 +6,11 @@ import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.factory.EventFactory;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
+import com.ticketly.mseventseating.service.LimitService;
 import com.ticketly.mseventseating.service.OrganizationOwnershipService;
 import com.ticketly.mseventseating.service.S3StorageService;
-import com.ticketly.mseventseating.service.SubscriptionTierService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,16 +29,17 @@ public class EventCreationService {
 
     private final EventRepository eventRepository;
     private final OrganizationOwnershipService ownershipService;
-    private final SubscriptionTierService tierService;
+    private final LimitService limitService; // ✅ Inject the new LimitService
     private final EventFactory eventFactory;
     private final S3StorageService s3StorageService; // ✅ Inject S3 service
 
-    @Value("${app.event.max-cover-photos:5}")
-    private int maxCoverPhotos;
+    private int getMaxCoverPhotos() {
+        return limitService.getAppConfiguration().getEventLimits().getMaxCoverPhotos();
+    }
 
-    @Value("${app.event.max-cover-photo-size:31457280}")
-    private long maxCoverPhotoSize;
-
+    private long getMaxCoverPhotoSize() {
+        return limitService.getAppConfiguration().getEventLimits().getMaxCoverPhotoSize();
+    }
 
     @Transactional
     public EventResponseDTO createEvent(CreateEventRequest request, MultipartFile[] coverImages, String userId, Jwt jwt) {
@@ -60,13 +60,13 @@ public class EventCreationService {
     }
 
     private void validateTierLimits(UUID organizationId, Jwt jwt, int numSessions) {
-        int maxActiveEvents = tierService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
+        int maxActiveEvents = limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
         long currentActiveEvents = eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED);
         if (currentActiveEvents >= maxActiveEvents) {
             throw new BadRequestException("You have reached the limit of " + maxActiveEvents + " active events for your tier.");
         }
 
-        int maxSessions = tierService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
+        int maxSessions = limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
         if (numSessions > maxSessions) {
             throw new BadRequestException("You cannot create more than " + maxSessions + " sessions per event for your tier.");
         }
@@ -77,8 +77,8 @@ public class EventCreationService {
             return new ArrayList<>(); // No images provided
         }
 
-        if (coverImages.length > maxCoverPhotos) {
-            throw new BadRequestException("You can upload a maximum of " + maxCoverPhotos + " cover photos.");
+        if (coverImages.length > getMaxCoverPhotos()) {
+            throw new BadRequestException("You can upload a maximum of " + getMaxCoverPhotos() + " cover photos.");
         }
 
         List<String> keys = new ArrayList<>();
@@ -89,9 +89,9 @@ public class EventCreationService {
                 }
 
                 // Size verification
-                if (file.getSize() > maxCoverPhotoSize) {
+                if (file.getSize() > getMaxCoverPhotoSize()) {
                     throw new BadRequestException("File size exceeds the maximum allowed size of " +
-                            (maxCoverPhotoSize / (1024 * 1024)) + "MB");
+                            (getMaxCoverPhotoSize() / (1024 * 1024)) + "MB");
                 }
 
                 String key = s3StorageService.uploadFile(file, "event-cover-photos");

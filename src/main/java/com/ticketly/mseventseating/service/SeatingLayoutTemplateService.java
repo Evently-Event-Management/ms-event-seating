@@ -13,7 +13,6 @@ import com.ticketly.mseventseating.model.SubscriptionLimitType;
 import com.ticketly.mseventseating.repository.SeatingLayoutTemplateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,13 +33,15 @@ public class SeatingLayoutTemplateService {
     private final SeatingLayoutTemplateRepository seatingLayoutTemplateRepository;
     private final ObjectMapper objectMapper;
     private final OrganizationOwnershipService ownershipService;
-    private final SubscriptionTierService subscriptionTierService;
+    private final LimitService limitService;
 
-    @Value("${app.seating_layout.default-gap:25}")
-    private int gap;
+    private int getGap() {
+        return limitService.getAppConfiguration().getSeatingLayoutConfig().getDefaultGap();
+    }
 
-    @Value("${app.seating_layout.default-page-size:6}")
-    private int defaultPageSize;
+    private int getDefaultPageSize() {
+        return limitService.getAppConfiguration().getSeatingLayoutConfig().getDefaultPageSize();
+    }
 
     /**
      * Get all templates for an organization with pagination.
@@ -55,7 +56,7 @@ public class SeatingLayoutTemplateService {
         ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId);
 
         if (size <= 0) {
-            size = defaultPageSize;
+            size = getDefaultPageSize();
         }
         Pageable pageable = PageRequest.of(page, size, Sort.by("updatedAt").descending());
 
@@ -84,7 +85,7 @@ public class SeatingLayoutTemplateService {
         Organization organization = ownershipService.verifyOwnershipAndGetOrganization(request.getOrganizationId(), userId);
 
         long currentTemplateCount = seatingLayoutTemplateRepository.countByOrganizationId(organization.getId());
-        int maxTemplates = subscriptionTierService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, jwt);
+        int maxTemplates = limitService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, jwt);
 
         if (currentTemplateCount >= maxTemplates) {
             throw new BadRequestException(String.format(
@@ -183,8 +184,8 @@ public class SeatingLayoutTemplateService {
                     newBlock.setType(block.getType());
 
                     LayoutDataDTO.Position normalizedPosition = new LayoutDataDTO.Position();
-                    normalizedPosition.setX(block.getPosition().getX() - minX + gap);
-                    normalizedPosition.setY(block.getPosition().getY() - minY + gap);
+                    normalizedPosition.setX(block.getPosition().getX() - minX + getGap());
+                    normalizedPosition.setY(block.getPosition().getY() - minY + getGap());
                     newBlock.setPosition(normalizedPosition);
 
                     if ("seated_grid".equals(block.getType())) {
