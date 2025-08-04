@@ -73,6 +73,9 @@ app:
     default-gap: 25
   organization:
     max-logo-size: 1048576 # 1MB
+  event:
+    max-cover-photos: 5
+    max-cover-photo-size: 31457280 # 3MB
 
 # AWS EventBridge Scheduler configuration
 aws:

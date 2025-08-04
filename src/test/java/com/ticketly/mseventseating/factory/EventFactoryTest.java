@@ -47,6 +47,8 @@ class EventFactoryTest {
     private Organization organization;
     private CreateEventRequest createEventRequest;
 
+    private List<String> coverPhotoKeys;
+
     @BeforeEach
     void setUp() {
         // --- Basic Setup ---
@@ -117,6 +119,12 @@ class EventFactoryTest {
                                 .build()
                 ))
                 .build();
+
+        // Add cover photo keys for testing
+        coverPhotoKeys = List.of(
+            "events/123/cover1.jpg",
+            "events/123/cover2.jpg"
+        );
     }
 
     @Test
@@ -125,13 +133,16 @@ class EventFactoryTest {
         when(venueRepository.findById(any(UUID.class))).thenReturn(Optional.of(venue));
         when(categoryRepository.findAllById(any())).thenReturn(new ArrayList<>(categories));
 
-        // Act
-        Event resultEvent = eventFactory.createFromRequest(createEventRequest, organization);
+        // Act - Updated to include coverPhotoKeys
+        Event resultEvent = eventFactory.createFromRequest(createEventRequest, organization, coverPhotoKeys);
 
         // Assert
         assertNotNull(resultEvent);
         assertEquals(2, resultEvent.getTiers().size());
         assertEquals(1, resultEvent.getSessions().size());
+        assertEquals(2, resultEvent.getCoverPhotos().size());
+        assertEquals("events/123/cover1.jpg", resultEvent.getCoverPhotos().get(0));
+        assertEquals("events/123/cover2.jpg", resultEvent.getCoverPhotos().get(1));
 
         // Extract the permanent UUIDs generated for the tiers
         UUID vipTierUuid = resultEvent.getTiers().stream()
@@ -175,8 +186,9 @@ class EventFactoryTest {
         when(venueRepository.findById(any(UUID.class))).thenReturn(Optional.of(venue));
         when(categoryRepository.findAllById(any())).thenReturn(new ArrayList<>(categories));
 
-        // Act & Assert
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> eventFactory.createFromRequest(createEventRequest, organization));
+        // Act & Assert - Updated to include coverPhotoKeys
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> eventFactory.createFromRequest(createEventRequest, organization, coverPhotoKeys));
 
         assertTrue(exception.getMessage().contains("Seat is assigned to an invalid Tier ID"));
     }
@@ -186,7 +198,39 @@ class EventFactoryTest {
         // Arrange
         when(venueRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-        // Act & Assert
-        assertThrows(ResourceNotFoundException.class, () -> eventFactory.createFromRequest(createEventRequest, organization));
+        // Act & Assert - Updated to include coverPhotoKeys
+        assertThrows(ResourceNotFoundException.class,
+            () -> eventFactory.createFromRequest(createEventRequest, organization, coverPhotoKeys));
+    }
+
+    @Test
+    void createFromRequest_WithEmptyCoverPhotos_ShouldCreateEventWithEmptyPhotosList() {
+        // Arrange
+        when(venueRepository.findById(any(UUID.class))).thenReturn(Optional.of(venue));
+        when(categoryRepository.findAllById(any())).thenReturn(new ArrayList<>(categories));
+
+        List<String> emptyPhotosList = List.of();
+
+        // Act
+        Event resultEvent = eventFactory.createFromRequest(createEventRequest, organization, emptyPhotosList);
+
+        // Assert
+        assertNotNull(resultEvent);
+        assertNotNull(resultEvent.getCoverPhotos());
+        assertTrue(resultEvent.getCoverPhotos().isEmpty());
+    }
+
+    @Test
+    void createFromRequest_WithNullCoverPhotos_ShouldCreateEventWithNullPhotosList() {
+        // Arrange
+        when(venueRepository.findById(any(UUID.class))).thenReturn(Optional.of(venue));
+        when(categoryRepository.findAllById(any())).thenReturn(new ArrayList<>(categories));
+
+        // Act
+        Event resultEvent = eventFactory.createFromRequest(createEventRequest, organization, null);
+
+        // Assert
+        assertNotNull(resultEvent);
+        assertNull(resultEvent.getCoverPhotos());
     }
 }

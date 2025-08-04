@@ -27,11 +27,12 @@ public class EventFactory {
     private final CategoryRepository categoryRepository;
     private final ObjectMapper objectMapper;
 
-    public Event createFromRequest(CreateEventRequest request, Organization organization) {
+    public Event createFromRequest(CreateEventRequest request, Organization organization, List<String> coverPhotoKeys) {
         Venue venue = findVenue(request.getVenueId());
         Set<Category> categories = findCategories(request.getCategoryIds());
 
-        Event event = buildEventEntity(request, organization, venue, categories);
+        // ✅ Pass the keys to the entity builder
+        Event event = buildEventEntity(request, organization, venue, categories, coverPhotoKeys);
 
         Map<String, Tier> tierIdMap = new HashMap<>();
         List<Tier> tiers = buildTiers(request.getTiers(), event, tierIdMap);
@@ -135,11 +136,17 @@ public class EventFactory {
     }
 
     // --- Helper methods for finding entities ---
-    private Event buildEventEntity(CreateEventRequest request, Organization org, Venue venue, Set<Category> categories) {
+    private Event buildEventEntity(CreateEventRequest request, Organization org, Venue venue, Set<Category> categories, List<String> coverPhotoKeys) {
         return Event.builder()
-                .title(request.getTitle()).description(request.getDescription()).overview(request.getOverview())
-                .coverPhotos(request.getCoverPhotos()).organization(org).venue(venue).categories(categories)
-                .isOnline(request.isOnline()).onlineLink(request.getOnlineLink())
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .overview(request.getOverview())
+                .coverPhotos(coverPhotoKeys) // ✅ Set the S3 keys
+                .organization(org)
+                .venue(venue)
+                .categories(categories)
+                .isOnline(request.isOnline())
+                .onlineLink(request.getOnlineLink())
                 .locationDescription(request.getLocationDescription())
                 .build();
     }
