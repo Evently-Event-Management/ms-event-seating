@@ -181,10 +181,10 @@ class EventCreationServiceTest {
         Arrays.fill(largeContent, (byte) 1);
 
         MockMultipartFile largeFile = new MockMultipartFile(
-            "coverImages",
-            "large_image.jpg",
-            "image/jpeg",
-            largeContent
+                "coverImages",
+                "large_image.jpg",
+                "image/jpeg",
+                largeContent
         );
 
         MultipartFile[] coverImages = {largeFile};
