@@ -1,7 +1,7 @@
 package com.ticketly.mseventseating.service;
 
 import com.ticketly.mseventseating.config.AppLimitsConfig;
-import com.ticketly.mseventseating.dto.AppConfigDTO;
+import com.ticketly.mseventseating.dto.config.AppConfigDTO;
 import com.ticketly.mseventseating.dto.organization.OrganizationRequest;
 import com.ticketly.mseventseating.dto.organization.OrganizationResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;

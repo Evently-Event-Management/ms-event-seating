@@ -2,7 +2,7 @@ package com.ticketly.mseventseating.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.config.AppLimitsConfig;
-import com.ticketly.mseventseating.dto.AppConfigDTO;
+import com.ticketly.mseventseating.dto.config.AppConfigDTO;
 import com.ticketly.mseventseating.dto.layout_template.LayoutDataDTO;
 import com.ticketly.mseventseating.dto.layout_template.SeatingLayoutTemplateDTO;
 import com.ticketly.mseventseating.dto.layout_template.SeatingLayoutTemplateRequest;

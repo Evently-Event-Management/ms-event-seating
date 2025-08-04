@@ -1,7 +1,7 @@
 package com.ticketly.mseventseating.service.event;
 
 import com.ticketly.mseventseating.config.AppLimitsConfig;
-import com.ticketly.mseventseating.dto.AppConfigDTO;
+import com.ticketly.mseventseating.dto.config.AppConfigDTO;
 import com.ticketly.mseventseating.dto.event.CreateEventRequest;
 import com.ticketly.mseventseating.dto.event.EventResponseDTO;
 import com.ticketly.mseventseating.dto.session.SessionRequest;

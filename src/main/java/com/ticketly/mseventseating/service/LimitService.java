@@ -1,7 +1,8 @@
 package com.ticketly.mseventseating.service;
 
 import com.ticketly.mseventseating.config.AppLimitsConfig;
-import com.ticketly.mseventseating.dto.AppConfigDTO;
+import com.ticketly.mseventseating.dto.config.AppConfigDTO;
+import com.ticketly.mseventseating.dto.config.MyLimitsResponseDTO;
 import com.ticketly.mseventseating.model.SubscriptionLimitType;
 import com.ticketly.mseventseating.model.SubscriptionTier;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,6 @@ public class LimitService {
 
     /**
      * Retrieves the complete, consolidated application configuration for the frontend.
-     * This is called by the controller.
      */
     public AppConfigDTO getAppConfiguration() {
         return AppConfigDTO.builder()
@@ -33,8 +33,26 @@ public class LimitService {
     }
 
     /**
+     * Retrieves the limits and configuration relevant to the currently authenticated user.
+     *
+     * @param jwt The user's JWT token.
+     * @return A DTO containing the user's specific tier limits and general app limits.
+     */
+    public MyLimitsResponseDTO getMyLimits(Jwt jwt) {
+        SubscriptionTier userTier = getHighestTierForUser(jwt);
+        AppLimitsConfig.TierLimitDetails userTierLimits = appLimitsConfig.getTier().getLimits().get(userTier.name());
+
+        return MyLimitsResponseDTO.builder()
+                .currentTier(userTier.name())
+                .tierLimits(userTierLimits)
+                .organizationLimits(appLimitsConfig.getOrganization())
+                .eventLimits(appLimitsConfig.getEvent())
+                .seatingLayoutConfig(appLimitsConfig.getSeatingLayout())
+                .build();
+    }
+
+    /**
      * Generic method for internal services to get any limit for a user based on their highest tier.
-     * This replaces the need for other services to use @Value.
      */
     public int getLimit(SubscriptionLimitType limitType, Jwt jwt) {
         SubscriptionTier userTier = getHighestTierForUser(jwt);
