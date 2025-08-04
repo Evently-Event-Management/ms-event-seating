@@ -67,7 +67,7 @@ public class OrganizationService {
      */
     @Transactional
     public OrganizationResponse createOrganization(OrganizationRequest request, String userId, Jwt jwt) {
-        int maxOrganizations = limitService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
+        int maxOrganizations = limitService.getTierLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
         long userOrganizationCount = organizationRepository.countByUserId(userId);
         if (userOrganizationCount >= maxOrganizations) {
             throw new BadRequestException("You have reached the maximum limit of " +
@@ -198,6 +198,6 @@ public class OrganizationService {
 
     // Replace @Value annotation with LimitService
     private long getMaxLogoSize() {
-        return limitService.getAppConfiguration().getOrganizationLimits().getMaxLogoSize();
+        return limitService.getOrganizationConfig().getMaxLogoSize();
     }
 }

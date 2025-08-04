@@ -34,11 +34,11 @@ public class EventCreationService {
     private final S3StorageService s3StorageService; // ✅ Inject S3 service
 
     private int getMaxCoverPhotos() {
-        return limitService.getAppConfiguration().getEventLimits().getMaxCoverPhotos();
+        return limitService.getEventConfig().getMaxCoverPhotos();
     }
 
     private long getMaxCoverPhotoSize() {
-        return limitService.getAppConfiguration().getEventLimits().getMaxCoverPhotoSize();
+        return limitService.getEventConfig().getMaxCoverPhotoSize();
     }
 
     @Transactional
@@ -60,13 +60,13 @@ public class EventCreationService {
     }
 
     private void validateTierLimits(UUID organizationId, Jwt jwt, int numSessions) {
-        int maxActiveEvents = limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
+        int maxActiveEvents = limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
         long currentActiveEvents = eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED);
         if (currentActiveEvents >= maxActiveEvents) {
             throw new BadRequestException("You have reached the limit of " + maxActiveEvents + " active events for your tier.");
         }
 
-        int maxSessions = limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
+        int maxSessions = limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
         if (numSessions > maxSessions) {
             throw new BadRequestException("You cannot create more than " + maxSessions + " sessions per event for your tier.");
         }

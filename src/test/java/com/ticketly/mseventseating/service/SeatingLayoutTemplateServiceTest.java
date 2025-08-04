@@ -2,7 +2,6 @@ package com.ticketly.mseventseating.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.config.AppLimitsConfig;
-import com.ticketly.mseventseating.dto.config.AppConfigDTO;
 import com.ticketly.mseventseating.dto.layout_template.LayoutDataDTO;
 import com.ticketly.mseventseating.dto.layout_template.SeatingLayoutTemplateDTO;
 import com.ticketly.mseventseating.dto.layout_template.SeatingLayoutTemplateRequest;
@@ -64,10 +63,6 @@ class SeatingLayoutTemplateServiceTest {
     private String userId;
     private LayoutDataDTO sampleLayoutData;
     int DEFAULT_GAP = 25;
-
-
-    @Mock
-    private AppConfigDTO appConfigDTO;
 
     @Mock
     private AppLimitsConfig.SeatingLayoutConfig seatingLayoutConfig;
@@ -180,14 +175,13 @@ class SeatingLayoutTemplateServiceTest {
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(seatingLayoutTemplateRepository.countByOrganizationId(organizationId)).thenReturn(2L);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, mockJwt)).thenReturn(5);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, mockJwt)).thenReturn(5);
         when(seatingLayoutTemplateRepository.save(any(SeatingLayoutTemplate.class))).thenAnswer(invocation -> {
             SeatingLayoutTemplate savedTemplate = invocation.getArgument(0);
             savedTemplate.setId(UUID.randomUUID());
             return savedTemplate;
         });
-        when(limitService.getAppConfiguration()).thenReturn(appConfigDTO);
-        when(appConfigDTO.getSeatingLayoutConfig()).thenReturn(seatingLayoutConfig);
+        when(limitService.getSeatingLayoutConfig()).thenReturn(seatingLayoutConfig);
         when(seatingLayoutConfig.getDefaultGap()).thenReturn(DEFAULT_GAP);
 
         // When
@@ -199,7 +193,7 @@ class SeatingLayoutTemplateServiceTest {
         assertEquals(organizationId, result.getOrganizationId());
         assertNotNull(result.getLayoutData());
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
-        verify(limitService).getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, mockJwt);
+        verify(limitService).getTierLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, mockJwt);
         verify(seatingLayoutTemplateRepository).countByOrganizationId(organizationId);
         verify(seatingLayoutTemplateRepository).save(any(SeatingLayoutTemplate.class));
     }
@@ -214,14 +208,14 @@ class SeatingLayoutTemplateServiceTest {
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(seatingLayoutTemplateRepository.countByOrganizationId(organizationId)).thenReturn(5L);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, mockJwt)).thenReturn(5);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, mockJwt)).thenReturn(5);
 
         // When/Then
         assertThrows(BadRequestException.class,
                 () -> seatingLayoutTemplateService.createTemplate(request, userId, mockJwt));
 
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
-        verify(limitService).getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, mockJwt);
+        verify(limitService).getTierLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, mockJwt);
         verify(seatingLayoutTemplateRepository).countByOrganizationId(organizationId);
         verify(seatingLayoutTemplateRepository, never()).save(any(SeatingLayoutTemplate.class));
     }
@@ -242,7 +236,7 @@ class SeatingLayoutTemplateServiceTest {
                 () -> seatingLayoutTemplateService.createTemplate(request, userId, mockJwt));
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(seatingLayoutTemplateRepository, never()).save(any(SeatingLayoutTemplate.class));
-        verify(limitService, never()).getLimit(any(), any());
+        verify(limitService, never()).getTierLimit(any(), any());
     }
 
     @Test
@@ -257,8 +251,7 @@ class SeatingLayoutTemplateServiceTest {
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(seatingLayoutTemplateRepository.save(any(SeatingLayoutTemplate.class))).thenReturn(template);
 
-        when(limitService.getAppConfiguration()).thenReturn(appConfigDTO);
-        when(appConfigDTO.getSeatingLayoutConfig()).thenReturn(seatingLayoutConfig);
+        when(limitService.getSeatingLayoutConfig()).thenReturn(seatingLayoutConfig);
         when(seatingLayoutConfig.getDefaultGap()).thenReturn(DEFAULT_GAP);
 
         // When
@@ -347,8 +340,7 @@ class SeatingLayoutTemplateServiceTest {
 
     @Test
     void normalizeLayoutData_ShouldNormalizeCoordinates_AndReplaceIds() {
-        when(limitService.getAppConfiguration()).thenReturn(appConfigDTO);
-        when(appConfigDTO.getSeatingLayoutConfig()).thenReturn(seatingLayoutConfig);
+        when(limitService.getSeatingLayoutConfig()).thenReturn(seatingLayoutConfig);
         when(seatingLayoutConfig.getDefaultGap()).thenReturn(DEFAULT_GAP);
 
         // Use reflection to access the private method

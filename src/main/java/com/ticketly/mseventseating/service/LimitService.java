@@ -20,8 +20,13 @@ public class LimitService {
     private final AppLimitsConfig appLimitsConfig;
     private static final SubscriptionTier DEFAULT_TIER = SubscriptionTier.FREE;
 
+    // ================================================================================
+    // Methods for Controllers (High-Level DTOs for the Frontend)
+    // ================================================================================
+
     /**
-     * Retrieves the complete, consolidated application configuration for the frontend.
+     * Retrieves the complete, consolidated application configuration.
+     * Intended for use by the LimitConfigurationController for pages like "Pricing".
      */
     public AppConfigDTO getAppConfiguration() {
         return AppConfigDTO.builder()
@@ -34,9 +39,7 @@ public class LimitService {
 
     /**
      * Retrieves the limits and configuration relevant to the currently authenticated user.
-     *
-     * @param jwt The user's JWT token.
-     * @return A DTO containing the user's specific tier limits and general app limits.
+     * Intended for use by the LimitConfigurationController.
      */
     public MyLimitsResponseDTO getMyLimits(Jwt jwt) {
         SubscriptionTier userTier = getHighestTierForUser(jwt);
@@ -51,10 +54,15 @@ public class LimitService {
                 .build();
     }
 
+    // ================================================================================
+    // Methods for Internal Services (Specific, Granular Configs & Limits)
+    // ================================================================================
+
     /**
-     * Generic method for internal services to get any limit for a user based on their highest tier.
+     * Generic method for internal services to get any TIER-BASED limit for a user.
+     * This replaces the need for other services to use @Value for tier-specific limits.
      */
-    public int getLimit(SubscriptionLimitType limitType, Jwt jwt) {
+    public int getTierLimit(SubscriptionLimitType limitType, Jwt jwt) {
         SubscriptionTier userTier = getHighestTierForUser(jwt);
 
         return Optional.ofNullable(appLimitsConfig.getTier().getLimits().get(userTier.name()))
@@ -62,6 +70,32 @@ public class LimitService {
                 .orElseGet(() -> limitType.getLimitExtractor()
                         .apply(appLimitsConfig.getTier().getLimits().get(DEFAULT_TIER.name())));
     }
+
+    /**
+     * Provides the general, non-tier-specific configuration for events.
+     */
+    public AppLimitsConfig.EventConfig getEventConfig() {
+        return appLimitsConfig.getEvent();
+    }
+
+    /**
+     * Provides the general, non-tier-specific configuration for organizations.
+     */
+    public AppLimitsConfig.OrganizationConfig getOrganizationConfig() {
+        return appLimitsConfig.getOrganization();
+    }
+
+    /**
+     * Provides the general, non-tier-specific configuration for seating layouts.
+     */
+    public AppLimitsConfig.SeatingLayoutConfig getSeatingLayoutConfig() {
+        return appLimitsConfig.getSeatingLayout();
+    }
+
+
+    // ================================================================================
+    // Private Helper Methods
+    // ================================================================================
 
     private SubscriptionTier getHighestTierForUser(Jwt jwt) {
         List<String> userGroups = jwt.getClaimAsStringList("user_groups");

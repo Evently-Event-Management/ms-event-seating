@@ -67,56 +67,56 @@ class LimitServiceTest { // ✅ Renamed for clarity
     @Test
     void getLimit_ForMaxOrganizations_WithFreeTier() {
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/FREE"));
-        int result = limitService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
+        int result = limitService.getTierLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
         assertEquals(1, result);
     }
 
     @Test
     void getLimit_ForMaxOrganizations_WithProTier() {
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/PRO"));
-        int result = limitService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
+        int result = limitService.getTierLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
         assertEquals(3, result);
     }
 
     @Test
     void getLimit_ForMaxOrganizations_WithEnterpriseTier() {
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/ENTERPRISE"));
-        int result = limitService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
+        int result = limitService.getTierLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
         assertEquals(10, result);
     }
 
     @Test
     void getLimit_ForMaxSeatingLayouts_WithProTier() {
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/PRO"));
-        int result = limitService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, jwt);
+        int result = limitService.getTierLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, jwt);
         assertEquals(10, result);
     }
 
     @Test
     void getLimit_WithMultipleTiers_ShouldUseHighest() {
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Arrays.asList("/Tiers/FREE", "/Tiers/PRO"));
-        int result = limitService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
+        int result = limitService.getTierLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
         assertEquals(3, result); // Should use PRO tier (higher level)
     }
 
     @Test
     void getLimit_WithNoTier_ShouldUseFreeTier() {
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.emptyList());
-        int result = limitService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
+        int result = limitService.getTierLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
         assertEquals(1, result); // Should use FREE tier (default)
     }
 
     @Test
     void getLimit_WithNullGroups_ShouldUseFreeTier() {
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(null);
-        int result = limitService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
+        int result = limitService.getTierLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
         assertEquals(1, result); // Should use FREE tier (default)
     }
 
     @Test
     void getLimit_WithInvalidTier_ShouldUseFreeTier() {
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Arrays.asList("/Tiers/INVALID", "/Other/Group"));
-        int result = limitService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
+        int result = limitService.getTierLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
         assertEquals(1, result); // Should use FREE tier (default)
     }
 
@@ -125,21 +125,21 @@ class LimitServiceTest { // ✅ Renamed for clarity
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(
                 Arrays.asList("/Tiers/INVALID", "/Tiers/PRO", "/Tiers/FREE")
         );
-        int result = limitService.getLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
+        int result = limitService.getTierLimit(SubscriptionLimitType.MAX_ORGANIZATIONS_PER_USER, jwt);
         assertEquals(3, result); // Should use PRO tier
     }
 
     @Test
     void getLimit_ForMaxActiveEvents_WithProTier() {
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/PRO"));
-        int result = limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
+        int result = limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
         assertEquals(10, result);
     }
 
     @Test
     void getLimit_ForMaxSessionsPerEvent_WithEnterpriseTier() {
         when(jwt.getClaimAsStringList("user_groups")).thenReturn(Collections.singletonList("/Tiers/ENTERPRISE"));
-        int result = limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
+        int result = limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
         assertEquals(100, result);
     }
 }

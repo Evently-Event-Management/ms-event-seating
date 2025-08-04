@@ -36,11 +36,11 @@ public class SeatingLayoutTemplateService {
     private final LimitService limitService;
 
     private int getGap() {
-        return limitService.getAppConfiguration().getSeatingLayoutConfig().getDefaultGap();
+        return limitService.getSeatingLayoutConfig().getDefaultGap();
     }
 
     private int getDefaultPageSize() {
-        return limitService.getAppConfiguration().getSeatingLayoutConfig().getDefaultPageSize();
+        return limitService.getSeatingLayoutConfig().getDefaultPageSize();
     }
 
     /**
@@ -85,7 +85,7 @@ public class SeatingLayoutTemplateService {
         Organization organization = ownershipService.verifyOwnershipAndGetOrganization(request.getOrganizationId(), userId);
 
         long currentTemplateCount = seatingLayoutTemplateRepository.countByOrganizationId(organization.getId());
-        int maxTemplates = limitService.getLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, jwt);
+        int maxTemplates = limitService.getTierLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, jwt);
 
         if (currentTemplateCount >= maxTemplates) {
             throw new BadRequestException(String.format(

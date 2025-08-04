@@ -1,7 +1,6 @@
 package com.ticketly.mseventseating.service.event;
 
 import com.ticketly.mseventseating.config.AppLimitsConfig;
-import com.ticketly.mseventseating.dto.config.AppConfigDTO;
 import com.ticketly.mseventseating.dto.event.CreateEventRequest;
 import com.ticketly.mseventseating.dto.event.EventResponseDTO;
 import com.ticketly.mseventseating.dto.session.SessionRequest;
@@ -48,9 +47,6 @@ class EventCreationServiceTest {
 
     @Mock
     private S3StorageService s3StorageService;
-
-    @Mock
-    private AppConfigDTO appConfig;
 
     @Mock
     private AppLimitsConfig.EventConfig eventConfig;
@@ -162,14 +158,13 @@ class EventCreationServiceTest {
         List<String> uploadedKeys = Collections.singletonList("s3-key-1.jpg");
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
         when(s3StorageService.uploadFile(any(MultipartFile.class), eq("event-cover-photos"))).thenReturn("s3-key-1.jpg");
         when(eventFactory.createFromRequest(eq(createEventRequest), eq(organization), eq(uploadedKeys))).thenReturn(event);
         when(eventRepository.save(event)).thenReturn(event);
-        when(limitService.getAppConfiguration()).thenReturn(appConfig);
-        when(appConfig.getEventLimits()).thenReturn(eventConfig);
+        when(limitService.getEventConfig()).thenReturn(eventConfig);
         when(eventConfig.getMaxCoverPhotos()).thenReturn(3);
         when(eventConfig.getMaxCoverPhotoSize()).thenReturn(5L * 1024 * 1024); // 5MB
 
@@ -185,8 +180,8 @@ class EventCreationServiceTest {
 
         // Verify
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
-        verify(limitService).getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
-        verify(limitService).getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
+        verify(limitService).getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
+        verify(limitService).getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
         verify(eventRepository).countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED);
         verify(s3StorageService).uploadFile(any(MultipartFile.class), eq("event-cover-photos"));
         verify(eventFactory).createFromRequest(createEventRequest, organization, uploadedKeys);
@@ -199,8 +194,8 @@ class EventCreationServiceTest {
         List<String> emptyKeys = Collections.emptyList();
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
         when(eventFactory.createFromRequest(eq(createEventRequest), eq(organization), eq(emptyKeys))).thenReturn(event);
         when(eventRepository.save(event)).thenReturn(event);
@@ -226,8 +221,8 @@ class EventCreationServiceTest {
         List<String> emptyKeys = Collections.emptyList();
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
         when(eventFactory.createFromRequest(eq(createEventRequest), eq(organization), eq(emptyKeys))).thenReturn(event);
         when(eventRepository.save(event)).thenReturn(event);
@@ -255,15 +250,14 @@ class EventCreationServiceTest {
         List<String> uploadedKeys = Arrays.asList("s3-key-1.jpg", "s3-key-2.jpg");
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
         when(s3StorageService.uploadFile(image1, "event-cover-photos")).thenReturn("s3-key-1.jpg");
         when(s3StorageService.uploadFile(image2, "event-cover-photos")).thenReturn("s3-key-2.jpg");
         when(eventFactory.createFromRequest(eq(createEventRequest), eq(organization), eq(uploadedKeys))).thenReturn(event);
         when(eventRepository.save(event)).thenReturn(event);
-        when(limitService.getAppConfiguration()).thenReturn(appConfig);
-        when(appConfig.getEventLimits()).thenReturn(eventConfig);
+        when(limitService.getEventConfig()).thenReturn(eventConfig);
         when(eventConfig.getMaxCoverPhotos()).thenReturn(3);
         when(eventConfig.getMaxCoverPhotoSize()).thenReturn(5L * 1024 * 1024); // 5MB
 
@@ -284,7 +278,7 @@ class EventCreationServiceTest {
     void createEvent_ExceedsActiveEventLimit_ThrowsBadRequestException() {
         // Arrange
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(5);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
 
         // Act & Assert
@@ -296,7 +290,7 @@ class EventCreationServiceTest {
 
         // Verify
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
-        verify(limitService).getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
+        verify(limitService).getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
         verify(eventRepository).countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED);
         verifyNoInteractions(eventFactory);
         verifyNoInteractions(s3StorageService);
@@ -321,8 +315,8 @@ class EventCreationServiceTest {
                 .build();
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(2); // Limit is 2, but we're trying to create 3
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(2); // Limit is 2, but we're trying to create 3
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
 
         // Act & Assert
@@ -334,8 +328,8 @@ class EventCreationServiceTest {
 
         // Verify
         verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
-        verify(limitService).getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
-        verify(limitService).getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
+        verify(limitService).getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
+        verify(limitService).getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
         verify(eventRepository).countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED);
         verifyNoInteractions(eventFactory);
         verifyNoInteractions(s3StorageService);
@@ -352,11 +346,10 @@ class EventCreationServiceTest {
         MultipartFile[] tooManyCoverImages = {image1, image2, image3, image4}; // 4 images, but limit is 3
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
-        when(limitService.getAppConfiguration()).thenReturn(appConfig);
-        when(appConfig.getEventLimits()).thenReturn(eventConfig);
+        when(limitService.getEventConfig()).thenReturn(eventConfig);
         when(eventConfig.getMaxCoverPhotos()).thenReturn(3);
 
         // Act & Assert
@@ -378,11 +371,10 @@ class EventCreationServiceTest {
         MultipartFile[] coverImages = {invalidImageFile}; // PDF, not an image
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
-        when(limitService.getAppConfiguration()).thenReturn(appConfig);
-        when(appConfig.getEventLimits()).thenReturn(eventConfig);
+        when(limitService.getEventConfig()).thenReturn(eventConfig);
         when(eventConfig.getMaxCoverPhotos()).thenReturn(3);
 
         // Act & Assert
@@ -404,11 +396,10 @@ class EventCreationServiceTest {
         MultipartFile[] coverImages = {largeImageFile}; // 6MB, exceeds 5MB limit
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
-        when(limitService.getAppConfiguration()).thenReturn(appConfig);
-        when(appConfig.getEventLimits()).thenReturn(eventConfig);
+        when(limitService.getEventConfig()).thenReturn(eventConfig);
         when(eventConfig.getMaxCoverPhotos()).thenReturn(3);
         when(eventConfig.getMaxCoverPhotoSize()).thenReturn(5L * 1024 * 1024); // 5MB
 
@@ -431,13 +422,12 @@ class EventCreationServiceTest {
         MultipartFile[] coverImages = {validImageFile};
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
-        when(limitService.getLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
+        when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
         when(s3StorageService.uploadFile(any(MultipartFile.class), eq("event-cover-photos")))
                 .thenThrow(new IOException("Upload failed"));
-        when(limitService.getAppConfiguration()).thenReturn(appConfig);
-        when(appConfig.getEventLimits()).thenReturn(eventConfig);
+        when(limitService.getEventConfig()).thenReturn(eventConfig);
         when(eventConfig.getMaxCoverPhotos()).thenReturn(3);
         when(eventConfig.getMaxCoverPhotoSize()).thenReturn(5L * 1024 * 1024); // 5MB
 
