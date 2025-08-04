@@ -195,7 +195,7 @@ class EventCreationServiceTest {
     }
 
     @Test
-    void createEvent_WithNullCoverImages_Success() throws IOException {
+    void createEvent_WithNullCoverImages_Success() {
         // Arrange
         List<String> emptyKeys = Collections.emptyList();
 
@@ -221,7 +221,7 @@ class EventCreationServiceTest {
     }
 
     @Test
-    void createEvent_WithEmptyCoverImagesArray_Success() throws IOException {
+    void createEvent_WithEmptyCoverImagesArray_Success() {
         // Arrange
         MultipartFile[] emptyCoverImages = new MultipartFile[0];
         List<String> emptyKeys = Collections.emptyList();

@@ -63,7 +63,6 @@ class SeatingLayoutTemplateServiceTest {
     private UUID templateId;
     private String userId;
     private LayoutDataDTO sampleLayoutData;
-    int DEFAULT_PAGE_SIZE = 6;
     int DEFAULT_GAP = 25;
 
 

@@ -2,7 +2,6 @@ package com.ticketly.mseventseating.service;
 
 import com.ticketly.mseventseating.config.AppLimitsConfig;
 import com.ticketly.mseventseating.model.SubscriptionLimitType;
-import com.ticketly.mseventseating.model.SubscriptionTier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
