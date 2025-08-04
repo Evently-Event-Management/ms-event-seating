@@ -25,7 +25,6 @@ public class AppLimitsConfig {
     public static class TierLimitDetails {
         private int maxOrganizationsPerUser;
         private int maxSeatingLayoutsPerOrg;
-        private int maxActiveEvents;
         private int maxSessionsPerEvent;
     }
 

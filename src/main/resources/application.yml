@@ -54,17 +54,14 @@ app:
       FREE:
         max-organizations-per-user: 3
         max-seating-layouts-per-org: 5
-        max-active-events: 1
         max-sessions-per-event: 5
       PRO:
         max-organizations-per-user: 10
         max-seating-layouts-per-org: 25
-        max-active-events: 10
         max-sessions-per-event: 52
       ENTERPRISE:
         max-organizations-per-user: 100
         max-seating-layouts-per-org: 200
-        max-active-events: 1000
         max-sessions-per-event: 200
 
   # General app config
