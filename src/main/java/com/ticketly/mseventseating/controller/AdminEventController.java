@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -19,8 +21,9 @@ public class AdminEventController {
 
     @PostMapping("/{id}/approve")
     @PreAuthorize("hasRole('APPROVE_EVENT')") // Secured by a specific Keycloak role
-    public ResponseEntity<Void> approveEvent(@PathVariable UUID id) {
-        eventLifecycleService.approveEvent(id);
+    public ResponseEntity<Void> approveEvent(@PathVariable UUID id,
+                                             @AuthenticationPrincipal Jwt jwt) {
+        eventLifecycleService.approveEvent(id, jwt.getSubject());
         return ResponseEntity.ok().build();
     }
 

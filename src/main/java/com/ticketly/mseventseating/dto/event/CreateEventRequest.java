@@ -1,5 +1,7 @@
 package com.ticketly.mseventseating.dto.event;
 
+import com.ticketly.mseventseating.dto.session.SessionRequest;
+import com.ticketly.mseventseating.dto.tier.TierRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -22,7 +24,7 @@ public class CreateEventRequest {
 
     @NotNull
     private UUID organizationId;
-    private UUID venueId; // Can be null for online events
+    private UUID venueId;
 
     @NotEmpty
     private Set<UUID> categoryIds;
@@ -39,8 +41,5 @@ public class CreateEventRequest {
     @NotEmpty
     private List<SessionRequest> sessions;
 
-    // Removed seatingLayoutTemplateId and replaced with direct session layouts
-    // This allows clients to either use a template or create layouts from scratch
-    @NotNull
-    private String sessionLayoutData;
+    // ✅ REMOVED: seatingLayoutTemplateId is no longer needed here.
 }

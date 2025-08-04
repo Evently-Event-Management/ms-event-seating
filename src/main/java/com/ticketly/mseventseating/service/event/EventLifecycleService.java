@@ -2,13 +2,11 @@ package com.ticketly.mseventseating.service.event;
 
 import com.ticketly.mseventseating.exception.InvalidStateException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
-import com.ticketly.mseventseating.model.Event;
-import com.ticketly.mseventseating.model.EventStatus;
-import com.ticketly.mseventseating.model.EventSession;
-import com.ticketly.mseventseating.model.SessionStatus;
+import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +23,19 @@ public class EventLifecycleService {
     private final EventSchedulingService schedulingService;
 
     /**
-     * Approves a pending event, making it live.
-     * It also cancels any sessions that are already in the past.
+     * Approves a pending event submission.
+     * * This method can only be called by an admin or a user who is not the owner of the event's organization.
+     * * It changes the event status to APPROVED and handles session scheduling.
+     * * Past sessions are automatically cancelled, and future sessions are scheduled for on-sale.
      */
-    public void approveEvent(UUID eventId) {
+    public void approveEvent(UUID eventId, String userId) {
         Event event = findEventById(eventId);
+
+        // User cannot approve own event
+        Organization organization = event.getOrganization();
+        if (organization.getUserId().equals(userId)) {
+            throw new AuthorizationDeniedException("You cannot approve your own event.");
+        }
 
         if (event.getStatus() != EventStatus.PENDING) {
             throw new InvalidStateException("Only events with PENDING status can be approved.");

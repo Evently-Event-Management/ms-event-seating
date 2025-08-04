@@ -1,11 +1,11 @@
-package com.ticketly.mseventseating.dto.event;
+package com.ticketly.mseventseating.dto.session_layout;
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class LayoutDataDTO {
+public class SessionSeatingMapRequest {
     private String name;
     private Layout layout;
 
