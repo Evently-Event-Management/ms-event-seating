@@ -3,7 +3,7 @@ package com.ticketly.mseventseating.service.event;
 import com.ticketly.mseventseating.config.AppLimitsConfig;
 import com.ticketly.mseventseating.dto.event.CreateEventRequest;
 import com.ticketly.mseventseating.dto.event.EventResponseDTO;
-import com.ticketly.mseventseating.dto.session.SessionRequest;
+import com.ticketly.mseventseating.dto.event.SessionRequest;
 import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.factory.EventFactory;
 import com.ticketly.mseventseating.model.*;

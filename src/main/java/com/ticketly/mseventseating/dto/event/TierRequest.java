@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.dto.tier;
+package com.ticketly.mseventseating.dto.event;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

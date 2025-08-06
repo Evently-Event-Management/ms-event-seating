@@ -1,7 +1,5 @@
 package com.ticketly.mseventseating.dto.event;
 
-import com.ticketly.mseventseating.dto.session.SessionRequest;
-import com.ticketly.mseventseating.dto.tier.TierRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -10,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -26,12 +23,8 @@ public class CreateEventRequest {
     private UUID organizationId;
     private UUID venueId;
 
-    @NotEmpty
-    private Set<UUID> categoryIds;
-
-    private boolean isOnline;
-    private String onlineLink;
-    private String locationDescription;
+    @NotNull
+    private UUID categoryId;
 
     @Valid
     @NotEmpty

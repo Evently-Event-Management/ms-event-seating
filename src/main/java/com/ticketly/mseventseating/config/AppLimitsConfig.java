@@ -39,7 +39,7 @@ public class AppLimitsConfig {
         private int maxCoverPhotos;
         private long maxCoverPhotoSize;
     }
-
+    
     @Data // Added the @Data annotation that was missing
     public static class SeatingLayoutConfig {
         private int defaultPageSize;

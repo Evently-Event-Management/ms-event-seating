@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.dto.session_layout;
+package com.ticketly.mseventseating.dto.event;
 
 import lombok.Data;
 
@@ -21,15 +21,20 @@ public class SessionSeatingMapRequest {
         private String type;
         private Position position;
 
-        // ✅ The frontend will now send the fully expanded rows and seats.
-        // The backend's only job is to process this structure.
+        // --- Fields for 'seated_grid' type ---
         private List<Row> rows;
 
-        // Fields for non-seated blocks
+        // --- Fields for 'standing_capacity' type ---
         private Integer capacity;
+        // ✅ ADDED: A flat list of seats for capacity-based blocks (online or GA)
+        private List<Seat> seats;
+
+        // --- Fields for resizable blocks ---
         private Integer width;
         private Integer height;
-        private Integer soldCount;
+
+        // --- Fields used AFTER transformation on the backend ---
+        private Integer soldCount; // This will be calculated from seat statuses
         private String tierId;
     }
 
@@ -45,6 +50,8 @@ public class SessionSeatingMapRequest {
         private String id;
         private String label;
         private String tierId;
+        // Status can be 'AVAILABLE', 'RESERVED', 'BOOKED', etc.
+        // The backend will validate the initial state.
         private String status;
     }
 
