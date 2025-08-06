@@ -2,11 +2,14 @@ package com.ticketly.mseventseating.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "event_sessions")  // Changed from "event_session" to "event_sessions"
+@Table(name = "event_sessions")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -33,6 +36,18 @@ public class EventSession {
     @Builder.Default
     private SessionStatus status = SessionStatus.SCHEDULED;
 
+    // --- Session-Specific Location & Sales Rules ---
+
+    @Column(nullable = false)
+    private boolean isOnline;
+
+    private String onlineLink;
+
+    // ✅ ADDED: A JSONB column to store embedded physical venue details.
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "venue_details", columnDefinition = "jsonb")
+    private String venueDetails; // Stores a JSON string of a VenueDetailsDTO
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
@@ -43,9 +58,7 @@ public class EventSession {
 
     @Column(name = "sales_start_fixed_datetime")
     private OffsetDateTime salesStartFixedDatetime;
-    // --- End of Sales Window Rules ---
 
-    // ✅ ADDED: A one-to-one mapping to this session's specific seating map.
     @OneToOne(mappedBy = "eventSession", cascade = CascadeType.ALL, orphanRemoval = true)
     private SessionSeatingMap sessionSeatingMap;
 }

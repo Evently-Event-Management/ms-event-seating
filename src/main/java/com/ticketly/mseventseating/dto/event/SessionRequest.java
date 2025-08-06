@@ -1,6 +1,5 @@
-package com.ticketly.mseventseating.dto.session;
+package com.ticketly.mseventseating.dto.event;
 
-import com.ticketly.mseventseating.dto.session_layout.SessionSeatingMapRequest;
 import com.ticketly.mseventseating.model.SalesStartRuleType;
 import lombok.Data;
 import lombok.Builder;
@@ -23,7 +22,12 @@ public class SessionRequest {
     private Integer salesStartHoursBefore;
     private OffsetDateTime salesStartFixedDatetime;
 
-    // ✅ ADDED: Each session now carries its own layout data.
+    // ✅ ADDED: All location information is now session-specific.
     @NotNull
-    private SessionSeatingMapRequest sessionSeatingMapRequest;
+    private boolean isOnline;
+    private String onlineLink;
+    private VenueDetailsDTO venueDetails; // Can be null if isOnline is true
+
+    @NotNull
+    private SessionSeatingMapRequest layoutData;
 }

@@ -6,7 +6,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -25,10 +24,6 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "venue_id")
-    private Venue venue;
 
     @Column(nullable = false)
     private String title;
@@ -51,16 +46,6 @@ public class Event {
 
     private String rejectionReason;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private boolean isOnline = false;
-
-    private String onlineLink;
-
-    private String locationDescription;
-
-    // Removes sales start rule fields
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
@@ -68,16 +53,11 @@ public class Event {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tier> tiers;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "event_categories",
-            joinColumns = @JoinColumn(name = "event_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
-    private Set<Category> categories;
+    // ✅ Changed from ManyToMany to ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id") // This will create a category_id column in the events table
+    private Category category;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EventSession> sessions;
-
-    // ✅ REMOVED: The @OneToOne mapping to EventSeatingMap is gone.
 }
