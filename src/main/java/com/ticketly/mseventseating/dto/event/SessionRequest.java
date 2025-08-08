@@ -1,15 +1,20 @@
 package com.ticketly.mseventseating.dto.event;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ticketly.mseventseating.model.SalesStartRuleType;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Builder;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
+import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 
 @Data
 @Builder
+@NoArgsConstructor      // ✅ ADDED
+@AllArgsConstructor     // ✅ ADDED
 public class SessionRequest {
     @NotNull
     @Future
@@ -22,11 +27,12 @@ public class SessionRequest {
     private Integer salesStartHoursBefore;
     private OffsetDateTime salesStartFixedDatetime;
 
-    // ✅ ADDED: All location information is now session-specific.
     @NotNull
+    @JsonProperty("isOnline") // ✅ The Fix: Explicitly name the JSON property
     private boolean isOnline;
+
     private String onlineLink;
-    private VenueDetailsDTO venueDetails; // Can be null if isOnline is true
+    private VenueDetailsDTO venueDetails;
 
     @NotNull
     private SessionSeatingMapRequest layoutData;

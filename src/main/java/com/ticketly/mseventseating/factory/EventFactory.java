@@ -127,29 +127,32 @@ public class EventFactory {
                 seat.setStatus("AVAILABLE");
             }
 
+            // Store the original temporary tier ID reference
+            // This will be replaced with the actual database ID after the event is saved
             if (seat.getTierId() != null) {
                 Tier realTier = tierIdMap.get(seat.getTierId());
                 if (realTier == null) {
                     throw new BadRequestException("Seat/slot is assigned to an invalid Tier ID: " + seat.getTierId());
                 }
-                seat.setTierId(realTier.getId().toString());
+                // Keep the original tier reference ID - we'll handle this in post-processing
             }
         }
     }
 
     private List<Tier> buildTiers(List<TierRequest> tierRequests, Event event, Map<String, Tier> tierIdMap) {
-        return tierRequests.stream()
-                .map(req -> {
-                    Tier tier = Tier.builder()
-                            .name(req.getName())
-                            .price(req.getPrice())
-                            .color(req.getColor())
-                            .event(event)
-                            .build();
-                    tierIdMap.put(req.getId(), tier);
-                    return tier;
-                })
-                .collect(Collectors.toList());
+        List<Tier> tiers = new ArrayList<>();
+        for (TierRequest req : tierRequests) {
+            Tier tier = Tier.builder()
+                    .name(req.getName())
+                    .price(req.getPrice())
+                    .color(req.getColor())
+                    .event(event)
+                    .build();
+
+            tiers.add(tier);
+            tierIdMap.put(req.getId(), tier);
+        }
+        return tiers;
     }
 
     // --- Helper methods for finding entities ---
