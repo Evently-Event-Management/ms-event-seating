@@ -7,6 +7,7 @@ import com.ticketly.mseventseating.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class EventLifecycleService {
 
     private final EventRepository eventRepository;
     private final EventSchedulingService schedulingService;
+    private final EventOwnershipService eventOwnershipService;
 
     /**
      * Approves a pending event submission.
@@ -73,6 +75,28 @@ public class EventLifecycleService {
         event.setRejectionReason(reason);
         eventRepository.save(event);
         log.info("Event with ID {} has been rejected. Reason: {}", eventId, reason);
+    }
+
+    /**
+     * Deletes an event.
+     * Only events with PENDING status can be deleted, and only by the organization owner.
+     *
+     * @param eventId the event to delete
+     * @param jwt     the JWT containing user information
+     */
+    public void deleteEvent(UUID eventId, Jwt jwt) {
+        String userId = jwt.getSubject();
+
+        // Only organization owners can delete events, no admin bypass
+        Event event = eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId);
+
+        if (event.getStatus() != EventStatus.PENDING) {
+            throw new InvalidStateException("Only events with PENDING status can be deleted.");
+        }
+
+        // Delete the event and all its children (cascade delete)
+        eventRepository.delete(event);
+        log.info("Event with ID {} has been deleted by user {}", eventId, userId);
     }
 
     private Event findEventById(UUID eventId) {

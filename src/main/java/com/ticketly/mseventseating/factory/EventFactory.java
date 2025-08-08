@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.CreateEventRequest;
 import com.ticketly.mseventseating.dto.event.SessionRequest;
-import com.ticketly.mseventseating.dto.event.SessionSeatingMapRequest;
+import com.ticketly.mseventseating.dto.event.SessionSeatingMapDTO;
 import com.ticketly.mseventseating.dto.event.TierRequest;
 import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
@@ -100,18 +100,18 @@ public class EventFactory {
         return sessions;
     }
 
-    private String prepareSessionLayout(SessionSeatingMapRequest layoutData, Map<String, Tier> tierIdMap) {
+    private String prepareSessionLayout(SessionSeatingMapDTO layoutData, Map<String, Tier> tierIdMap) {
         try {
             if (layoutData == null || layoutData.getLayout() == null || layoutData.getLayout().getBlocks() == null) {
                 throw new BadRequestException("Layout data or blocks cannot be null.");
             }
 
-            for (SessionSeatingMapRequest.Block block : layoutData.getLayout().getBlocks()) {
+            for (SessionSeatingMapDTO.Block block : layoutData.getLayout().getBlocks()) {
                 block.setId(UUID.randomUUID().toString());
 
                 if ("seated_grid".equals(block.getType())) {
                     if (block.getRows() == null) continue;
-                    for (SessionSeatingMapRequest.Row row : block.getRows()) {
+                    for (SessionSeatingMapDTO.Row row : block.getRows()) {
                         row.setId(UUID.randomUUID().toString());
                         if (row.getSeats() != null) {
                             prepareSeats(row.getSeats(), tierIdMap);
@@ -130,8 +130,8 @@ public class EventFactory {
         }
     }
 
-    private void prepareSeats(List<SessionSeatingMapRequest.Seat> seats, Map<String, Tier> tierIdMap) {
-        for (SessionSeatingMapRequest.Seat seat : seats) {
+    private void prepareSeats(List<SessionSeatingMapDTO.Seat> seats, Map<String, Tier> tierIdMap) {
+        for (SessionSeatingMapDTO.Seat seat : seats) {
             seat.setId(UUID.randomUUID().toString());
             seat.setStatus("AVAILABLE"); // Always initialize as AVAILABLE
 

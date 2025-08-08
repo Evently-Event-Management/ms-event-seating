@@ -42,7 +42,4 @@ public class OrganizationOwnershipService {
 
         return organization;
     }
-
-    // Note: The old isOrganizationOwnedByUser and eviction methods can now be removed or refactored
-    // as the main OrganizationService will handle eviction on the "organizations" cache.
 }

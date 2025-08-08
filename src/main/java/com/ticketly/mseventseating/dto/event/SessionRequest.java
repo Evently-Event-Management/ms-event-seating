@@ -35,5 +35,5 @@ public class SessionRequest {
     private VenueDetailsDTO venueDetails;
 
     @NotNull
-    private SessionSeatingMapRequest layoutData;
+    private SessionSeatingMapDTO layoutData;
 }
