@@ -14,4 +14,5 @@ public class EventResponseDTO {
     private String status;
     private UUID organizationId;
     private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }
