@@ -26,11 +26,15 @@ public class EventFactory {
     private final CategoryRepository categoryRepository;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Assembles the complete Event aggregate (Event, Tiers, Sessions, Maps) in memory
+     * before it is persisted.
+     */
     public Event createFromRequest(CreateEventRequest request, Organization organization, List<String> coverPhotoKeys) {
         Category category = findCategory(request.getCategoryId());
-
         Event event = buildEventEntity(request, organization, category, coverPhotoKeys);
 
+        // This map will translate the client's temporary tier IDs to the newly created Tier objects.
         Map<String, Tier> tierIdMap = new HashMap<>();
         List<Tier> tiers = buildTiers(request.getTiers(), event, tierIdMap);
         event.setTiers(tiers);
@@ -41,6 +45,23 @@ public class EventFactory {
         return event;
     }
 
+    private List<Tier> buildTiers(List<TierRequest> tierRequests, Event event, Map<String, Tier> tierIdMap) {
+        return tierRequests.stream()
+                .map(req -> {
+                    Tier tier = Tier.builder()
+                            .id(UUID.randomUUID())
+                            .name(req.getName())
+                            .price(req.getPrice())
+                            .color(req.getColor())
+                            .event(event)
+                            .build();
+                    // Map the client's temp ID to the fully formed Tier object (which now has a permanent ID)
+                    tierIdMap.put(req.getId(), tier);
+                    return tier;
+                })
+                .collect(Collectors.toList());
+    }
+
     private List<EventSession> buildSessions(List<SessionRequest> sessionRequests, Event event, Map<String, Tier> tierIdMap) {
         List<EventSession> sessions = new ArrayList<>();
         for (SessionRequest req : sessionRequests) {
@@ -49,7 +70,7 @@ public class EventFactory {
                 try {
                     venueDetailsJson = objectMapper.writeValueAsString(req.getVenueDetails());
                 } catch (JsonProcessingException e) {
-                    log.error("Failed to serialize venue details for session", e);
+                    log.error("Failed to serialize venue details", e);
                     throw new BadRequestException("Invalid venue details format.");
                 }
             }
@@ -66,7 +87,7 @@ public class EventFactory {
                     .salesStartFixedDatetime(req.getSalesStartFixedDatetime())
                     .build();
 
-            String validatedLayoutData = validateAndPrepareSessionLayout(req.getLayoutData(), tierIdMap);
+            String validatedLayoutData = prepareSessionLayout(req.getLayoutData(), tierIdMap);
 
             SessionSeatingMap map = SessionSeatingMap.builder()
                     .layoutData(validatedLayoutData)
@@ -79,7 +100,7 @@ public class EventFactory {
         return sessions;
     }
 
-    private String validateAndPrepareSessionLayout(SessionSeatingMapRequest layoutData, Map<String, Tier> tierIdMap) {
+    private String prepareSessionLayout(SessionSeatingMapRequest layoutData, Map<String, Tier> tierIdMap) {
         try {
             if (layoutData == null || layoutData.getLayout() == null || layoutData.getLayout().getBlocks() == null) {
                 throw new BadRequestException("Layout data or blocks cannot be null.");
@@ -93,66 +114,36 @@ public class EventFactory {
                     for (SessionSeatingMapRequest.Row row : block.getRows()) {
                         row.setId(UUID.randomUUID().toString());
                         if (row.getSeats() != null) {
-                            validateAndPrepareSeats(row.getSeats(), tierIdMap);
+                            prepareSeats(row.getSeats(), tierIdMap);
                         }
                     }
                 } else if ("standing_capacity".equals(block.getType())) {
-                    // ✅ Process the flat list of seats for capacity blocks
                     if (block.getSeats() != null) {
-                        validateAndPrepareSeats(block.getSeats(), tierIdMap);
+                        prepareSeats(block.getSeats(), tierIdMap);
                     }
-                    // ✅ Nullify fields that are no longer the source of truth for this block type
-                    block.setSoldCount(null);
-                    block.setTierId(null);
                 }
             }
-
             return objectMapper.writeValueAsString(layoutData);
-
         } catch (IOException e) {
             log.error("Invalid session layout data", e);
             throw new BadRequestException("Invalid session layout data: " + e.getMessage());
         }
     }
 
-    /**
-     * Helper method to process a list of seats, assigning UUIDs and validating tiers.
-     * This is now used by both seated_grid and standing_capacity blocks.
-     */
-    private void validateAndPrepareSeats(List<SessionSeatingMapRequest.Seat> seats, Map<String, Tier> tierIdMap) {
+    private void prepareSeats(List<SessionSeatingMapRequest.Seat> seats, Map<String, Tier> tierIdMap) {
         for (SessionSeatingMapRequest.Seat seat : seats) {
             seat.setId(UUID.randomUUID().toString());
+            seat.setStatus("AVAILABLE"); // Always initialize as AVAILABLE
 
-            if (!"RESERVED".equals(seat.getStatus())) {
-                seat.setStatus("AVAILABLE");
-            }
-
-            // Store the original temporary tier ID reference
-            // This will be replaced with the actual database ID after the event is saved
             if (seat.getTierId() != null) {
                 Tier realTier = tierIdMap.get(seat.getTierId());
                 if (realTier == null) {
                     throw new BadRequestException("Seat/slot is assigned to an invalid Tier ID: " + seat.getTierId());
                 }
-                // Keep the original tier reference ID - we'll handle this in post-processing
+                // Now we can use the permanent ID from the Tier object
+                seat.setTierId(realTier.getId().toString());
             }
         }
-    }
-
-    private List<Tier> buildTiers(List<TierRequest> tierRequests, Event event, Map<String, Tier> tierIdMap) {
-        List<Tier> tiers = new ArrayList<>();
-        for (TierRequest req : tierRequests) {
-            Tier tier = Tier.builder()
-                    .name(req.getName())
-                    .price(req.getPrice())
-                    .color(req.getColor())
-                    .event(event)
-                    .build();
-
-            tiers.add(tier);
-            tierIdMap.put(req.getId(), tier);
-        }
-        return tiers;
     }
 
     // --- Helper methods for finding entities ---

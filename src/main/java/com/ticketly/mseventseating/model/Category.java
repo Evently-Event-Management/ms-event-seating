@@ -1,5 +1,7 @@
 package com.ticketly.mseventseating.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.Set;
@@ -21,13 +23,14 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String name;
 
-    // Defines the relationship to the parent category.
-    // LAZY fetch is crucial for performance with tree structures.
+    // ✅ This is the "child" side. It will not be serialized.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
+    @JsonBackReference("category-parent")
     private Category parent;
 
-    // Defines the relationship to the sub-categories.
+    // ✅ This is the "parent" side. It will be serialized.
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("category-parent")
     private Set<Category> subCategories;
 }

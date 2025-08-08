@@ -1,5 +1,6 @@
 package com.ticketly.mseventseating.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -31,6 +32,7 @@ public class Organization {
     private String userId;
 
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Event> events;
 
     @Column(nullable = false, updatable = false)
