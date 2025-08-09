@@ -5,6 +5,8 @@ import com.ticketly.mseventseating.dto.event.EventSummaryDTO;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
+import com.ticketly.mseventseating.service.OrganizationOwnershipService;
+import com.ticketly.mseventseating.service.S3StorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +26,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +37,12 @@ class EventQueryServiceTest {
 
     @Mock
     private EventOwnershipService eventOwnershipService;
+
+    @Mock
+    private OrganizationOwnershipService organizationOwnershipService;
+
+    @Mock
+    private S3StorageService s3StorageService;
 
     @InjectMocks
     private EventQueryService eventQueryService;
@@ -73,7 +82,23 @@ class EventQueryServiceTest {
         event.setOrganization(organization);
         event.setCategory(category);
         event.setStatus(EventStatus.PENDING);
-        event.setCoverPhotos(Arrays.asList("photo1.jpg", "photo2.jpg"));
+
+        // Setup cover photos using EventCoverPhoto entities
+        List<EventCoverPhoto> coverPhotos = new ArrayList<>();
+        EventCoverPhoto photo1 = new EventCoverPhoto();
+        photo1.setId(UUID.randomUUID());
+        photo1.setPhotoUrl("photo1.jpg");
+        photo1.setEvent(event);
+
+        EventCoverPhoto photo2 = new EventCoverPhoto();
+        photo2.setId(UUID.randomUUID());
+        photo2.setPhotoUrl("photo2.jpg");
+        photo2.setEvent(event);
+
+        coverPhotos.add(photo1);
+        coverPhotos.add(photo2);
+        event.setCoverPhotos(coverPhotos);
+
         event.setCreatedAt(OffsetDateTime.now().minusDays(1));
         event.setUpdatedAt(OffsetDateTime.now());
         
@@ -108,7 +133,16 @@ class EventQueryServiceTest {
         event2.setOrganization(organization);
         event2.setCategory(category);
         event2.setStatus(EventStatus.APPROVED);
-        event2.setCoverPhotos(Collections.singletonList("photo3.jpg"));
+
+        // Setup cover photo for second event
+        List<EventCoverPhoto> coverPhotos2 = new ArrayList<>();
+        EventCoverPhoto photo3 = new EventCoverPhoto();
+        photo3.setId(UUID.randomUUID());
+        photo3.setPhotoUrl("photo3.jpg");
+        photo3.setEvent(event2);
+        coverPhotos2.add(photo3);
+        event2.setCoverPhotos(coverPhotos2);
+
         event2.setTiers(Collections.emptyList());
         event2.setSessions(Collections.emptyList());
         eventList.add(event2);
@@ -295,10 +329,28 @@ class EventQueryServiceTest {
     }
 
     @Test
+    @DisplayName("Should handle events with EventCoverPhoto entities for cover photos")
+    void mapToEventSummary_withCoverPhotos_shouldSetFirstCoverPhotoUrl() {
+        // Arrange
+        Page<Event> eventPage = new PageImpl<>(Collections.singletonList(event), pageable, 1);
+        when(eventRepository.findAll(pageable)).thenReturn(eventPage);
+        when(s3StorageService.generatePresignedUrl("photo1.jpg", 60)).thenReturn("https://s3.example.com/photo1.jpg");
+
+        // Act
+        Page<EventSummaryDTO> result = eventQueryService.findAllEvents(null, pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals("https://s3.example.com/photo1.jpg", result.getContent().getFirst().getCoverPhoto());
+        verify(s3StorageService).generatePresignedUrl("photo1.jpg", 60);
+    }
+
+    @Test
     @DisplayName("Should handle events without cover photos")
     void mapToEventSummary_withNoCoverPhotos_shouldReturnNullCoverPhoto() {
         // Arrange
-        event.setCoverPhotos(null);
+        event.setCoverPhotos(Collections.emptyList());
         Page<Event> eventPage = new PageImpl<>(Collections.singletonList(event), pageable, 1);
         when(eventRepository.findAll(pageable)).thenReturn(eventPage);
 
@@ -309,5 +361,68 @@ class EventQueryServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         assertNull(result.getContent().getFirst().getCoverPhoto());
+        verify(s3StorageService, never()).generatePresignedUrl(any(), anyInt());
+    }
+
+    @Test
+    @DisplayName("Should map all cover photo URLs to EventDetailDTO")
+    void mapToEventDetail_withMultipleCoverPhotos_shouldMapAllUrls() {
+        // Arrange
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(s3StorageService.generatePresignedUrl("photo1.jpg", 60)).thenReturn("https://s3.example.com/photo1.jpg");
+        when(s3StorageService.generatePresignedUrl("photo2.jpg", 60)).thenReturn("https://s3.example.com/photo2.jpg");
+
+        // Act
+        EventDetailDTO result = eventQueryService.findEventById(eventId);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.getCoverPhotos().size());
+        assertEquals("https://s3.example.com/photo1.jpg", result.getCoverPhotos().get(0));
+        assertEquals("https://s3.example.com/photo2.jpg", result.getCoverPhotos().get(1));
+        verify(s3StorageService, times(2)).generatePresignedUrl(anyString(), eq(60));
+    }
+
+    @Test
+    @DisplayName("Should find events by organization with search and status filtering")
+    void findEventsByOrganization_withFilteringAndSearch_shouldReturnFilteredEvents() {
+        // Arrange
+        String searchTerm = "Test";
+        EventStatus status = EventStatus.PENDING;
+
+        Page<Event> eventPage = new PageImpl<>(Collections.singletonList(event), pageable, 1);
+        when(eventRepository.findByOrganizationIdAndSearchTermAndStatus(
+                organizationId, searchTerm, status, pageable)).thenReturn(eventPage);
+
+        // Act
+        Page<EventSummaryDTO> result = eventQueryService.findEventsByOrganization(
+                organizationId, userId, true, status, searchTerm, pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals("Test Event", result.getContent().getFirst().getTitle());
+        verify(eventRepository).findByOrganizationIdAndSearchTermAndStatus(
+                organizationId, searchTerm, status, pageable);
+        verify(organizationOwnershipService, never())
+                .verifyOwnershipAndGetOrganization(any(), any()); // Admin bypass
+    }
+
+    @Test
+    @DisplayName("Should verify ownership when non-admin user requests organization events")
+    void findEventsByOrganization_whenUserIsNotAdmin_shouldVerifyOwnership() {
+        // Arrange
+        Page<Event> eventPage = new PageImpl<>(Collections.singletonList(event), pageable, 1);
+        when(eventRepository.findByOrganizationIdAndSearchTermAndStatus(
+                eq(organizationId), isNull(), isNull(), eq(pageable))).thenReturn(eventPage);
+
+        // Act
+        Page<EventSummaryDTO> result = eventQueryService.findEventsByOrganization(
+                organizationId, userId, false, null, null, pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        verify(organizationOwnershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
     }
 }

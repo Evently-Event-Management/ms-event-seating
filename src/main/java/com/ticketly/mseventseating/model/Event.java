@@ -1,6 +1,7 @@
 package com.ticketly.mseventseating.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -25,7 +26,7 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("organization-events")
     private Organization organization;
 
     @Column(nullable = false)
@@ -37,10 +38,10 @@ public class Event {
     @Column(columnDefinition = "TEXT")
     private String overview;
 
-    @ElementCollection
-    @CollectionTable(name = "event_cover_photos", joinColumns = @JoinColumn(name = "event_id"))
-    @Column(name = "photo_url")
-    private List<String> coverPhotos;
+    // ✅ Changed from @ElementCollection to @OneToMany
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("event-photos")
+    private List<EventCoverPhoto> coverPhotos;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -57,11 +58,11 @@ public class Event {
     private OffsetDateTime updatedAt;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("event-tiers")
     private List<Tier> tiers;
 
-    // ✅ Changed from ManyToMany to ManyToOne
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id") // This will create a category_id column in the events table
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)

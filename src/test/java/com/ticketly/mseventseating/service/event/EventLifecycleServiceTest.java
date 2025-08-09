@@ -67,6 +67,7 @@ class EventLifecycleServiceTest {
         event.setOverview("Test Overview");
         event.setOrganization(organization);
         event.setStatus(EventStatus.PENDING);
+        event.setTiers(new ArrayList<>());
 
         // Setup Past Session (more than an hour ago)
         pastSession = new EventSession();

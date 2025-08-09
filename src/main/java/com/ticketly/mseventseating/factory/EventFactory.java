@@ -30,9 +30,13 @@ public class EventFactory {
      * Assembles the complete Event aggregate (Event, Tiers, Sessions, Maps) in memory
      * before it is persisted.
      */
-    public Event createFromRequest(CreateEventRequest request, Organization organization, List<String> coverPhotoKeys) {
+    public Event createFromRequest(CreateEventRequest request, Organization organization, List<String> coverPhotoUrls) {
         Category category = findCategory(request.getCategoryId());
-        Event event = buildEventEntity(request, organization, category, coverPhotoKeys);
+        Event event = buildEventEntity(request, organization, category);
+
+        // Create cover photo entities
+        List<EventCoverPhoto> coverPhotos = createCoverPhotos(coverPhotoUrls, event);
+        event.setCoverPhotos(coverPhotos);
 
         // This map will translate the client's temporary tier IDs to the newly created Tier objects.
         Map<String, Tier> tierIdMap = new HashMap<>();
@@ -43,6 +47,22 @@ public class EventFactory {
         event.setSessions(sessions);
 
         return event;
+    }
+
+    /**
+     * Creates EventCoverPhoto entities for each uploaded photo URL
+     */
+    private List<EventCoverPhoto> createCoverPhotos(List<String> photoUrls, Event event) {
+        if (photoUrls == null || photoUrls.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return photoUrls.stream()
+                .map(url -> EventCoverPhoto.builder()
+                        .photoUrl(url)
+                        .event(event)
+                        .build())
+                .collect(Collectors.toList());
     }
 
     private List<Tier> buildTiers(List<TierRequest> tierRequests, Event event, Map<String, Tier> tierIdMap) {
@@ -147,12 +167,11 @@ public class EventFactory {
     }
 
     // --- Helper methods for finding entities ---
-    private Event buildEventEntity(CreateEventRequest request, Organization org, Category category, List<String> coverPhotoKeys) {
+    private Event buildEventEntity(CreateEventRequest request, Organization org, Category category) {
         return Event.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .overview(request.getOverview())
-                .coverPhotos(coverPhotoKeys)
                 .organization(org)
                 .category(category)
                 .build();

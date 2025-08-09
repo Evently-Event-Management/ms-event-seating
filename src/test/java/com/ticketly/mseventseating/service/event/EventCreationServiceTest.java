@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -88,6 +89,9 @@ class EventCreationServiceTest {
                 .createdAt(OffsetDateTime.now())
                 .build();
 
+        // Add empty coverPhotos list to properly initialize for tests
+        event.setCoverPhotos(new ArrayList<>());
+
         // Setup sessions for the request
         List<SessionRequest> sessions = Collections.singletonList(
                 SessionRequest.builder()
@@ -98,13 +102,14 @@ class EventCreationServiceTest {
                         .build()
         );
 
-        // Setup create event request
+        // Setup create event request with empty tiers list to prevent NPE
         createEventRequest = CreateEventRequest.builder()
                 .title("Test Event")
                 .description("Test Description")
                 .overview("Test Overview")
                 .organizationId(organizationId)
                 .sessions(sessions)
+                .tiers(new ArrayList<>()) // Initialize with empty list to prevent NullPointerException
                 .build();
 
         // Setup JWT token
@@ -154,6 +159,16 @@ class EventCreationServiceTest {
         // Arrange
         MultipartFile[] coverImages = {validImageFile};
         List<String> uploadedKeys = Collections.singletonList("s3-key-1.jpg");
+
+        // Prepare expected EventCoverPhoto entities
+        List<EventCoverPhoto> expectedCoverPhotos = uploadedKeys.stream()
+            .map(key -> EventCoverPhoto.builder()
+                .photoUrl(key)
+                .event(event)
+                .build())
+            .collect(Collectors.toList());
+
+        event.setCoverPhotos(expectedCoverPhotos);
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
@@ -247,6 +262,16 @@ class EventCreationServiceTest {
         MultipartFile[] coverImages = {image1, image2};
         List<String> uploadedKeys = Arrays.asList("s3-key-1.jpg", "s3-key-2.jpg");
 
+        // Prepare expected EventCoverPhoto entities
+        List<EventCoverPhoto> expectedCoverPhotos = uploadedKeys.stream()
+            .map(key -> EventCoverPhoto.builder()
+                .photoUrl(key)
+                .event(event)
+                .build())
+            .collect(Collectors.toList());
+
+        event.setCoverPhotos(expectedCoverPhotos);
+
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
@@ -265,6 +290,9 @@ class EventCreationServiceTest {
         // Assert
         assertNotNull(response);
         assertEquals(event.getId(), response.getId());
+        assertEquals(2, event.getCoverPhotos().size());
+        assertEquals("s3-key-1.jpg", event.getCoverPhotos().get(0).getPhotoUrl());
+        assertEquals("s3-key-2.jpg", event.getCoverPhotos().get(1).getPhotoUrl());
 
         // Verify
         verify(s3StorageService).uploadFile(image1, "event-cover-photos");
@@ -310,6 +338,7 @@ class EventCreationServiceTest {
                 .description("Test Description")
                 .organizationId(organizationId)
                 .sessions(manySessions)
+                .tiers(new ArrayList<>()) // Initialize empty tiers list to avoid NullPointerException
                 .build();
 
         when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
@@ -442,4 +471,3 @@ class EventCreationServiceTest {
         verify(eventRepository, never()).save(any());
     }
 }
-

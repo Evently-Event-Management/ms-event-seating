@@ -200,6 +200,13 @@ public class EventQueryService {
                 .min(Comparator.naturalOrder())
                 .orElse(null);
 
+        String coverPhotoUrl = null;
+        if (event.getCoverPhotos() != null && !event.getCoverPhotos().isEmpty()) {
+            // Get first cover photo URL and generate presigned URL
+            coverPhotoUrl = s3StorageService.generatePresignedUrl(
+                    event.getCoverPhotos().getFirst().getPhotoUrl(), 60);
+        }
+
         return EventSummaryDTO.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -213,9 +220,7 @@ public class EventQueryService {
                         ? event.getDescription().substring(0, 147) + "..."
                         : event.getDescription())
                         : null)
-                .coverPhoto(event.getCoverPhotos() != null && !event.getCoverPhotos().isEmpty()
-                        ? s3StorageService.generatePresignedUrl(event.getCoverPhotos().getFirst(), 60)
-                        : null)
+                .coverPhoto(coverPhotoUrl)
                 .sessionCount(event.getSessions().size())
                 .earliestSessionDate(earliestDate)
                 .build();
@@ -235,6 +240,13 @@ public class EventQueryService {
                 .map(this::mapToSessionDetailDTO)
                 .collect(Collectors.toList());
 
+        // Map cover photo entities to URLs
+        List<String> coverPhotoUrls = event.getCoverPhotos() != null
+                ? event.getCoverPhotos().stream()
+                    .map(photo -> s3StorageService.generatePresignedUrl(photo.getPhotoUrl(), 60))
+                    .collect(Collectors.toList())
+                : null;
+
         return EventDetailDTO.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -242,11 +254,7 @@ public class EventQueryService {
                 .overview(event.getOverview())
                 .status(event.getStatus())
                 .rejectionReason(event.getRejectionReason())
-                .coverPhotos(event.getCoverPhotos() != null
-                        ? event.getCoverPhotos().stream()
-                        .map(photo -> s3StorageService.generatePresignedUrl(photo, 60))
-                        .collect(Collectors.toList())
-                        : null)
+                .coverPhotos(coverPhotoUrls)
                 .organizationId(event.getOrganization().getId())
                 .organizationName(event.getOrganization().getName())
                 .categoryId(event.getCategory().getId())
