@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -32,7 +33,7 @@ public class Organization {
     private String userId;
 
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference("organization-events") // Give it a unique name
     private List<Event> events;
 
     @Column(nullable = false, updatable = false)

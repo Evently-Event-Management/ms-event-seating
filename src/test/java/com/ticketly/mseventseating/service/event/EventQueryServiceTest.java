@@ -101,7 +101,7 @@ class EventQueryServiceTest {
 
         event.setCreatedAt(OffsetDateTime.now().minusDays(1));
         event.setUpdatedAt(OffsetDateTime.now());
-        
+
         // Setup Tiers
         Tier tier = new Tier();
         tier.setId(UUID.randomUUID());
@@ -109,7 +109,7 @@ class EventQueryServiceTest {
         tier.setColor("#FF0000");
         tier.setPrice(BigDecimal.valueOf(100.0));
         tier.setEvent(event);
-        
+
         // Setup Sessions
         EventSession session = new EventSession();
         session.setId(UUID.randomUUID());
@@ -117,14 +117,14 @@ class EventQueryServiceTest {
         session.setEndTime(OffsetDateTime.now().plusDays(1).plusHours(2));
         session.setEvent(event);
         session.setStatus(SessionStatus.PENDING);
-        
+
         event.setTiers(Collections.singletonList(tier));
         event.setSessions(Collections.singletonList(session));
-        
+
         // Setup event list for pagination tests
         eventList = new ArrayList<>();
         eventList.add(event);
-        
+
         // Add another event
         Event event2 = new Event();
         event2.setId(UUID.randomUUID());
@@ -210,7 +210,8 @@ class EventQueryServiceTest {
     @DisplayName("Should return event details by ID when user is organization owner")
     void findEventById_whenUserIsOrganizationOwner_shouldReturnEventDetails() {
         // Arrange
-        when(eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId)).thenReturn(event);
+        when(eventOwnershipService.isOwner(eventId, userId)).thenReturn(true);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
 
         // Act
         EventDetailDTO result = eventQueryService.findEventById(eventId, userId, false);
@@ -221,8 +222,8 @@ class EventQueryServiceTest {
         assertEquals("Test Event", result.getTitle());
         assertEquals(organizationId, result.getOrganizationId());
         assertEquals("Test Organization", result.getOrganizationName());
-        verify(eventOwnershipService).verifyOwnershipAndGetEvent(eventId, userId);
-        verifyNoInteractions(eventRepository); // Using ownership service, not direct repository
+        verify(eventOwnershipService).isOwner(eventId, userId);
+        verify(eventRepository).findById(eventId);
     }
 
     @Test
@@ -232,9 +233,9 @@ class EventQueryServiceTest {
         when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> 
-            eventQueryService.findEventById(eventId, userId, true));
-        
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () ->
+                eventQueryService.findEventById(eventId, userId, true));
+
         assertEquals("Event not found with ID: " + eventId, exception.getMessage());
         verify(eventRepository).findById(eventId);
         verifyNoInteractions(eventOwnershipService);
@@ -244,16 +245,15 @@ class EventQueryServiceTest {
     @DisplayName("Should throw AuthorizationDeniedException when user is not organization owner")
     void findEventById_whenUserIsNotOrganizationOwner_shouldThrowAuthorizationDeniedException() {
         // Arrange
-        when(eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId))
-            .thenThrow(new AuthorizationDeniedException("User does not have access to this event"));
+        when(eventOwnershipService.isOwner(eventId, userId)).thenReturn(false);
 
         // Act & Assert
-        AuthorizationDeniedException exception = assertThrows(AuthorizationDeniedException.class, () -> 
-            eventQueryService.findEventById(eventId, userId, false));
-        
+        AuthorizationDeniedException exception = assertThrows(AuthorizationDeniedException.class, () ->
+                eventQueryService.findEventById(eventId, userId, false));
+
         assertEquals("You don't have permission to access this event", exception.getMessage());
-        verify(eventOwnershipService).verifyOwnershipAndGetEvent(eventId, userId);
-        verifyNoInteractions(eventRepository);
+        verify(eventOwnershipService).isOwner(eventId, userId);
+        verify(eventRepository, never()).findById(any());
     }
 
     @Test
@@ -280,9 +280,9 @@ class EventQueryServiceTest {
         when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> 
-            eventQueryService.findEventById(eventId));
-        
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () ->
+                eventQueryService.findEventById(eventId));
+
         assertEquals("Event not found with ID: " + eventId, exception.getMessage());
         verify(eventRepository).findById(eventId);
         verifyNoInteractions(eventOwnershipService);
@@ -296,7 +296,7 @@ class EventQueryServiceTest {
                 "It should be truncated in the summary view to make the UI cleaner and more consistent. " +
                 "The truncated text should end with three dots to indicate there's more content.";
         event.setDescription(longDescription);
-        
+
         Page<Event> eventPage = new PageImpl<>(Collections.singletonList(event), pageable, 1);
         when(eventRepository.findAll(pageable)).thenReturn(eventPage);
 

@@ -107,7 +107,11 @@ public class EventLifecycleService {
 
         // Only organization owners can delete events, no admin bypass
         log.debug("Verifying ownership for event {}", eventId);
-        Event event = eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId);
+        if (!eventOwnershipService.isOwner(eventId, userId)) {
+            log.warn("User {} is not the owner of event {}", userId, eventId);
+            throw new AuthorizationDeniedException("You are not authorized to delete this event.");
+        }
+        Event event = findEventById(eventId);
 
         if (event.getStatus() != EventStatus.PENDING) {
             log.warn("Cannot delete event {} with status {}", eventId, event.getStatus());

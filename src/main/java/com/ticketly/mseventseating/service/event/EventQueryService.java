@@ -108,28 +108,19 @@ public class EventQueryService {
     @Transactional(readOnly = true)
     public EventDetailDTO findEventById(UUID eventId, String userId, boolean isAdmin) {
         log.info("Finding event details for ID: {} by user: {} (admin: {})", eventId, userId, isAdmin);
-        Event event;
 
-        if (isAdmin) {
-            // Admin users can access any event
-            log.debug("Admin access for event: {}", eventId);
-            event = eventRepository.findById(eventId)
-                    .orElseThrow(() -> {
-                        log.warn("Event not found with ID: {}", eventId);
-                        return new ResourceNotFoundException("Event not found with ID: " + eventId);
-                    });
-        } else {
-            // Regular users need to be the organization owner
-            log.debug("Verifying ownership for user: {} on event: {}", userId, eventId);
-            try {
-                event = eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId);
-            } catch (AuthorizationDeniedException e) {
-                log.warn("Authorization denied for user: {} on event: {}", userId, eventId);
+        if (!isAdmin) {
+            // 1. Perform the fast, cached ownership check first.
+            if (!eventOwnershipService.isOwner(eventId, userId)) {
+                // If the cached check fails, we know they don't have access.
                 throw new AuthorizationDeniedException("You don't have permission to access this event");
             }
         }
 
-        log.debug("Successfully retrieved event: {} with title: '{}'", eventId, event.getTitle());
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found with ID: " + eventId));
+
+        log.debug("Successfully retrieved event: {}", eventId);
         return mapToEventDetail(event);
     }
 
@@ -243,8 +234,8 @@ public class EventQueryService {
         // Map cover photo entities to URLs
         List<String> coverPhotoUrls = event.getCoverPhotos() != null
                 ? event.getCoverPhotos().stream()
-                    .map(photo -> s3StorageService.generatePresignedUrl(photo.getPhotoUrl(), 60))
-                    .collect(Collectors.toList())
+                .map(photo -> s3StorageService.generatePresignedUrl(photo.getPhotoUrl(), 60))
+                .collect(Collectors.toList())
                 : null;
 
         return EventDetailDTO.builder()

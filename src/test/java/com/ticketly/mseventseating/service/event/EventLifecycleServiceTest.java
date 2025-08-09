@@ -199,13 +199,15 @@ class EventLifecycleServiceTest {
     @DisplayName("Should delete event when user is owner and event is pending")
     void deleteEvent_whenUserIsOwnerAndEventIsPending_shouldDeleteEvent() {
         // Arrange
-        when(eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId)).thenReturn(event);
+        when(eventOwnershipService.isOwner(eventId, userId)).thenReturn(true);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
 
         // Act
         eventLifecycleService.deleteEvent(eventId, jwt);
 
         // Assert
-        verify(eventOwnershipService).verifyOwnershipAndGetEvent(eventId, userId);
+        verify(eventOwnershipService).isOwner(eventId, userId);
+        verify(eventRepository).findById(eventId);
         verify(eventRepository).delete(event);
     }
 
@@ -214,14 +216,16 @@ class EventLifecycleServiceTest {
     void deleteEvent_whenEventIsNotPending_shouldThrowException() {
         // Arrange
         event.setStatus(EventStatus.APPROVED);
-        when(eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId)).thenReturn(event);
+        when(eventOwnershipService.isOwner(eventId, userId)).thenReturn(true);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
 
         // Act & Assert
         InvalidStateException exception = assertThrows(InvalidStateException.class, () ->
                 eventLifecycleService.deleteEvent(eventId, jwt));
 
         assertEquals("Only events with PENDING status can be deleted.", exception.getMessage());
-        verify(eventOwnershipService).verifyOwnershipAndGetEvent(eventId, userId);
+        verify(eventOwnershipService).isOwner(eventId, userId);
+        verify(eventRepository).findById(eventId);
         verify(eventRepository, never()).delete(any());
     }
 
@@ -229,15 +233,18 @@ class EventLifecycleServiceTest {
     @DisplayName("Should throw exception when user is not owner during deletion")
     void deleteEvent_whenUserIsNotOwner_shouldThrowException() {
         // Arrange
-        when(eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId))
-                .thenThrow(new AuthorizationDeniedException("User does not have access to this event"));
+        when(eventOwnershipService.isOwner(eventId, userId))
+                .thenReturn(false);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
 
         // Act & Assert
         AuthorizationDeniedException exception = assertThrows(AuthorizationDeniedException.class, () ->
                 eventLifecycleService.deleteEvent(eventId, jwt));
 
         assertEquals("User does not have access to this event", exception.getMessage());
-        verify(eventOwnershipService).verifyOwnershipAndGetEvent(eventId, userId);
+        verify(eventOwnershipService).isOwner(eventId, userId);
+        // Never call findById or delete on the repository
+        verify(eventRepository, never()).findById(any());
         verify(eventRepository, never()).delete(any());
     }
 

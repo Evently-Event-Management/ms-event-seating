@@ -4,7 +4,6 @@ import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Event;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.repository.EventRepository;
-import com.ticketly.mseventseating.service.OrganizationOwnershipService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,13 +11,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,24 +28,24 @@ class EventOwnershipServiceTest {
     private EventRepository eventRepository;
 
     @Mock
-    private OrganizationOwnershipService organizationOwnershipService;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @InjectMocks
     private EventOwnershipService eventOwnershipService;
 
     private UUID eventId;
-    private UUID organizationId;
     private String userId;
+    private String nonOwnerId;
     private Event event;
-    private Organization organization;
 
     @BeforeEach
     void setUp() {
         eventId = UUID.randomUUID();
-        organizationId = UUID.randomUUID();
+        UUID organizationId = UUID.randomUUID();
         userId = "test-user-id";
+        nonOwnerId = "non-owner-id";
 
-        organization = new Organization();
+        Organization organization = new Organization();
         organization.setId(organizationId);
         organization.setUserId(userId);
         organization.setName("Test Organization");
@@ -57,111 +57,73 @@ class EventOwnershipServiceTest {
     }
 
     @Test
-    @DisplayName("Should verify ownership and return event when user is owner")
-    void verifyOwnershipAndGetEvent_whenUserIsOwner_shouldReturnEvent() {
+    @DisplayName("Should return true when user is owner")
+    void isOwner_whenUserIsOwner_shouldReturnTrue() {
         // Arrange
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
-        when(organizationOwnershipService.verifyOwnershipAndGetOrganization(organizationId, userId))
-            .thenReturn(organization);
 
         // Act
-        Event result = eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId);
+        boolean result = eventOwnershipService.isOwner(eventId, userId);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(eventId, result.getId());
+        assertTrue(result);
         verify(eventRepository).findById(eventId);
-        verify(organizationOwnershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
+    }
+
+    @Test
+    @DisplayName("Should return false when user is not owner")
+    void isOwner_whenUserIsNotOwner_shouldReturnFalse() {
+        // Arrange
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+        // Act
+        boolean result = eventOwnershipService.isOwner(eventId, nonOwnerId);
+
+        // Assert
+        assertFalse(result);
+        verify(eventRepository).findById(eventId);
     }
 
     @Test
     @DisplayName("Should throw ResourceNotFoundException when event not found")
-    void verifyOwnershipAndGetEvent_whenEventNotFound_shouldThrowResourceNotFoundException() {
+    void isOwner_whenEventNotFound_shouldThrowResourceNotFoundException() {
         // Arrange
         when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(ResourceNotFoundException.class, () ->
-            eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId));
+                eventOwnershipService.isOwner(eventId, userId));
 
         verify(eventRepository).findById(eventId);
-        verifyNoInteractions(organizationOwnershipService);
     }
 
     @Test
-    @DisplayName("Should throw AuthorizationDeniedException when user is not owner")
-    void verifyOwnershipAndGetEvent_whenUserIsNotOwner_shouldThrowAuthorizationDeniedException() {
+    @DisplayName("Should evict event cache by ID")
+    void evictEventCacheById_shouldDeleteCacheKeys() {
         // Arrange
-        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
-        doThrow(new AuthorizationDeniedException("User does not have access to this organization"))
-            .when(organizationOwnershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
-
-        // Act & Assert
-        AuthorizationDeniedException exception = assertThrows(AuthorizationDeniedException.class, () ->
-            eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId));
-
-        assertEquals("User does not have access to this event", exception.getMessage());
-        verify(eventRepository).findById(eventId);
-        verify(organizationOwnershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
-    }
-
-    @Test
-    @DisplayName("Should propagate any other exceptions that might occur")
-    void verifyOwnershipAndGetEvent_whenUnexpectedErrorOccurs_shouldPropagateException() {
-        // Arrange
-        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
-        doThrow(new RuntimeException("Unexpected error"))
-            .when(organizationOwnershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
-
-        // Act & Assert
-        assertThrows(RuntimeException.class, () ->
-            eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId));
-
-        verify(eventRepository).findById(eventId);
-        verify(organizationOwnershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
-    }
-
-    @Test
-    @DisplayName("Should verify ownership with correct parameters")
-    void verifyOwnershipAndGetEvent_shouldPassCorrectParameters() {
-        // Arrange
-        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
-        when(organizationOwnershipService.verifyOwnershipAndGetOrganization(organizationId, userId))
-            .thenReturn(organization);
+        Set<String> mockKeys = Set.of("event-seating-ms::events::" + eventId + "-user1",
+                "event-seating-ms::events::" + eventId + "-user2");
+        when(redisTemplate.keys(anyString())).thenReturn(mockKeys);
 
         // Act
-        eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId);
+        eventOwnershipService.evictEventCacheById(eventId);
 
         // Assert
-        verify(eventRepository).findById(eq(eventId));
-        verify(organizationOwnershipService).verifyOwnershipAndGetOrganization(eq(organizationId), eq(userId));
+        verify(redisTemplate).keys("event-seating-ms::events::" + eventId + "-*");
+        verify(redisTemplate).delete(mockKeys);
     }
 
     @Test
-    @DisplayName("Should not call repository multiple times when invoked with same parameters due to caching")
-    void verifyOwnershipAndGetEvent_whenCalledMultipleTimes_shouldUseCache() {
-        // Note: This test might not actually test caching since Spring's cache is proxied
-        // and the proxy might not be active during unit tests.
-        // This is more of a behavioral verification of the method.
-
+    @DisplayName("Should handle case when no cache keys found")
+    void evictEventCacheById_whenNoKeysFound_shouldDoNothing() {
         // Arrange
-        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
-        when(organizationOwnershipService.verifyOwnershipAndGetOrganization(organizationId, userId))
-            .thenReturn(organization);
+        when(redisTemplate.keys(anyString())).thenReturn(Set.of());
 
         // Act
-        Event result1 = eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId);
-        Event result2 = eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId);
+        eventOwnershipService.evictEventCacheById(eventId);
 
         // Assert
-        assertNotNull(result1);
-        assertNotNull(result2);
-        assertEquals(eventId, result1.getId());
-        assertEquals(eventId, result2.getId());
-
-        // In a real scenario with caching, this would be called once
-        // but since caching is not active in unit tests, it will be called twice
-        verify(eventRepository, times(2)).findById(eventId);
-        verify(organizationOwnershipService, times(2)).verifyOwnershipAndGetOrganization(organizationId, userId);
+        verify(redisTemplate).keys("event-seating-ms::events::" + eventId + "-*");
+        verify(redisTemplate, never()).delete(any(Set.class));
     }
 }
