@@ -286,10 +286,9 @@ public class EventQueryService {
 
         return SessionDetailDTO.builder()
                 .id(session.getId())
+                .sessionType(session.getSessionType())
                 .startTime(session.getStartTime())
                 .endTime(session.getEndTime())
-                .isOnline(session.isOnline())
-                .onlineLink(session.getOnlineLink())
                 .venueDetails(venueDetails)
                 .salesStartRuleType(session.getSalesStartRuleType())
                 .salesStartHoursBefore(session.getSalesStartHoursBefore())

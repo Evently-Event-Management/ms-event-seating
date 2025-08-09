@@ -103,6 +103,7 @@ public class OrganizationService {
 
         Organization updatedOrganization = organizationRepository.save(organization);
         log.info("Updated organization with ID: {}", updatedOrganization.getId());
+        ownershipService.evictOrganizationCacheById(id);
         return mapToDto(updatedOrganization);
     }
 
@@ -136,6 +137,7 @@ public class OrganizationService {
         organization.setLogoUrl(logoKey);
 
         Organization updatedOrganization = organizationRepository.save(organization);
+        ownershipService.evictOrganizationCacheById(id);
         log.info("Uploaded logo for organization with ID: {}", updatedOrganization.getId());
         return mapToDto(updatedOrganization);
     }
@@ -155,6 +157,7 @@ public class OrganizationService {
             s3StorageService.deleteFile(organization.getLogoUrl());
             organization.setLogoUrl(null);
             organizationRepository.save(organization);
+            ownershipService.evictOrganizationCacheById(id);
             log.info("Removed logo for organization with ID: {}", id);
         }
     }

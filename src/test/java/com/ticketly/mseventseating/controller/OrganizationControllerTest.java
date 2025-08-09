@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +41,7 @@ class OrganizationControllerTest {
 
     @MockitoBean
     private OrganizationService organizationService;
-    
+
     @MockitoBean
     private JwtDecoder jwtDecoder;
 
@@ -74,8 +75,8 @@ class OrganizationControllerTest {
 
         // Act & Assert
         mockMvc.perform(MockMvcRequestBuilders.get("/v1/organizations")
-                .with(jwt().jwt(builder -> builder.subject(USER_ID)))
-                .contentType(MediaType.APPLICATION_JSON))
+                        .with(jwt().jwt(builder -> builder.subject(USER_ID)))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id", is(ORG_ID.toString())))
@@ -90,8 +91,8 @@ class OrganizationControllerTest {
 
         // Act & Assert
         mockMvc.perform(MockMvcRequestBuilders.get("/v1/organizations/{id}", ORG_ID)
-                .with(jwt().jwt(builder -> builder.subject(USER_ID)))
-                .contentType(MediaType.APPLICATION_JSON))
+                        .with(jwt().jwt(builder -> builder.subject(USER_ID)))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(ORG_ID.toString())))
                 .andExpect(jsonPath("$.name", is("Test Organization")))
@@ -106,9 +107,9 @@ class OrganizationControllerTest {
 
         // Act & Assert
         mockMvc.perform(MockMvcRequestBuilders.post("/v1/organizations")
-                .with(jwt().jwt(builder -> builder.subject(USER_ID)))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(testRequest)))
+                        .with(jwt().jwt(builder -> builder.subject(USER_ID)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(testRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(ORG_ID.toString())))
                 .andExpect(jsonPath("$.name", is("Test Organization")))
@@ -123,9 +124,9 @@ class OrganizationControllerTest {
 
         // Act & Assert
         mockMvc.perform(MockMvcRequestBuilders.put("/v1/organizations/{id}", ORG_ID)
-                .with(jwt().jwt(builder -> builder.subject(USER_ID)))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(testRequest)))
+                        .with(jwt().jwt(builder -> builder.subject(USER_ID)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(testRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(ORG_ID.toString())))
                 .andExpect(jsonPath("$.name", is("Test Organization")))
@@ -136,19 +137,19 @@ class OrganizationControllerTest {
     void uploadLogo_ShouldUploadAndReturnOrganization() throws Exception {
         // Arrange
         MockMultipartFile file = new MockMultipartFile(
-                "file", 
-                "logo.jpg", 
-                "image/jpeg", 
+                "file",
+                "logo.jpg",
+                "image/jpeg",
                 "test content".getBytes()
         );
-        
+
         when(organizationService.uploadLogo(eq(ORG_ID), any(), eq(USER_ID))).thenReturn(testResponse);
 
         // Act & Assert
         mockMvc.perform(MockMvcRequestBuilders.multipart("/v1/organizations/{id}/logo", ORG_ID)
-                .file(file)
-                .with(jwt().jwt(builder -> builder.subject(USER_ID)))
-                .with(csrf()))
+                        .file(file)
+                        .with(jwt().jwt(builder -> builder.subject(USER_ID)))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(ORG_ID.toString())))
                 .andExpect(jsonPath("$.logoUrl", is("https://bucket.s3.amazonaws.com/logo.jpg")));
@@ -161,8 +162,8 @@ class OrganizationControllerTest {
 
         // Act & Assert
         mockMvc.perform(MockMvcRequestBuilders.delete("/v1/organizations/{id}", ORG_ID)
-                .with(jwt().jwt(builder -> builder.subject(USER_ID)))
-                .with(csrf()))
+                        .with(jwt().jwt(builder -> builder.subject(USER_ID)))
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
@@ -173,8 +174,8 @@ class OrganizationControllerTest {
 
         // Act & Assert
         mockMvc.perform(MockMvcRequestBuilders.delete("/v1/organizations/{id}/logo", ORG_ID)
-                .with(jwt().jwt(builder -> builder.subject(USER_ID)))
-                .with(csrf()))
+                        .with(jwt().jwt(builder -> builder.subject(USER_ID)))
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
 
         // Verify service method was called with correct parameters
