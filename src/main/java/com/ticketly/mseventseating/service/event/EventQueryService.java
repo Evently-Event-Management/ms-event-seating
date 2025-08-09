@@ -10,6 +10,7 @@ import com.ticketly.mseventseating.model.EventStatus;
 import com.ticketly.mseventseating.model.Tier;
 import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.service.OrganizationOwnershipService;
+import com.ticketly.mseventseating.service.S3StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,6 +35,8 @@ public class EventQueryService {
     private final EventOwnershipService eventOwnershipService;
     private final ObjectMapper objectMapper;
     private final OrganizationOwnershipService organizationOwnershipService;
+    private final S3StorageService s3StorageService;
+
 
     /**
      * Finds all events with optional status filtering
@@ -169,6 +172,10 @@ public class EventQueryService {
             organizationOwnershipService.verifyOwnershipAndGetOrganization(organizationId, userId);
         }
 
+        searchTerm = (searchTerm != null && !searchTerm.trim().isEmpty())
+                ? searchTerm.trim()
+                : null;
+
         Page<Event> eventPage = eventRepository.findByOrganizationIdAndSearchTermAndStatus(
                 organizationId,
                 searchTerm != null ? searchTerm.trim() : null,
@@ -207,7 +214,7 @@ public class EventQueryService {
                         : event.getDescription())
                         : null)
                 .coverPhoto(event.getCoverPhotos() != null && !event.getCoverPhotos().isEmpty()
-                        ? event.getCoverPhotos().getFirst()
+                        ? s3StorageService.generatePresignedUrl(event.getCoverPhotos().getFirst(), 60)
                         : null)
                 .sessionCount(event.getSessions().size())
                 .earliestSessionDate(earliestDate)
@@ -235,7 +242,11 @@ public class EventQueryService {
                 .overview(event.getOverview())
                 .status(event.getStatus())
                 .rejectionReason(event.getRejectionReason())
-                .coverPhotos(event.getCoverPhotos())
+                .coverPhotos(event.getCoverPhotos() != null
+                        ? event.getCoverPhotos().stream()
+                        .map(photo -> s3StorageService.generatePresignedUrl(photo, 60))
+                        .collect(Collectors.toList())
+                        : null)
                 .organizationId(event.getOrganization().getId())
                 .organizationName(event.getOrganization().getName())
                 .categoryId(event.getCategory().getId())

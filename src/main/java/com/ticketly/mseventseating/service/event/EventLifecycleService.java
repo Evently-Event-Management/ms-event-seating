@@ -118,6 +118,7 @@ public class EventLifecycleService {
         log.debug("Deleting event {} with {} sessions and {} tiers",
                 eventId, event.getSessions().size(), event.getTiers().size());
         eventRepository.delete(event);
+        eventOwnershipService.evictEventCacheById(eventId);
         log.info("Event with ID {} has been successfully deleted by user {}", eventId, userId);
     }
 

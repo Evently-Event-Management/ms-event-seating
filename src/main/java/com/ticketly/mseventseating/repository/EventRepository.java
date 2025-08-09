@@ -26,7 +26,7 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
     /**
      * Finds all events with the specified status, with pagination support.
      *
-     * @param status The event status to filter by.
+     * @param status   The event status to filter by.
      * @param pageable The pagination information.
      * @return A page of events matching the given status.
      */
@@ -37,32 +37,35 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
      * optionally filtered by status.
      *
      * @param searchTerm The term to search for in title or description.
-     * @param status The event status to filter by (can be null).
-     * @param pageable The pagination information.
+     * @param status     The event status to filter by (can be null).
+     * @param pageable   The pagination information.
      * @return A page of events matching the search criteria.
      */
     @Query("SELECT e FROM Event e WHERE " +
-           "(:searchTerm IS NULL OR LOWER(e.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(e.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) AND " +
-           "(:status IS NULL OR e.status = :status)")
+            "(:searchTerm IS NULL OR " +
+            "LOWER(COALESCE(e.title, '')) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "LOWER(COALESCE(e.description, '')) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) AND " +
+            "(:status IS NULL OR e.status = :status)")
     Page<Event> findBySearchTermAndStatus(
             @Param("searchTerm") String searchTerm,
             @Param("status") EventStatus status,
             Pageable pageable);
 
+
     /**
      * Finds all events for a specific organization with optional search and status filtering.
      *
      * @param organizationId The organization ID to filter by.
-     * @param searchTerm The term to search for in title or description (optional).
-     * @param status The event status to filter by (optional).
-     * @param pageable The pagination information.
+     * @param searchTerm     The term to search for in title or description (optional).
+     * @param status         The event status to filter by (optional).
+     * @param pageable       The pagination information.
      * @return A page of events matching the criteria.
      */
     @Query("SELECT e FROM Event e WHERE e.organization.id = :organizationId AND " +
-           "(:searchTerm IS NULL OR LOWER(e.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(e.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) AND " +
-           "(:status IS NULL OR e.status = :status)")
+            "(:searchTerm IS NULL OR " +
+            "LOWER(COALESCE(e.title, '')) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')) OR " +
+            "LOWER(COALESCE(e.description, '')) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%'))) AND " +
+            "(:status IS NULL OR e.status = :status)")
     Page<Event> findByOrganizationIdAndSearchTermAndStatus(
             @Param("organizationId") UUID organizationId,
             @Param("searchTerm") String searchTerm,

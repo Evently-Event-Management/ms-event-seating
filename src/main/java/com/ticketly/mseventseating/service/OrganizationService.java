@@ -166,7 +166,6 @@ public class OrganizationService {
      * @param userId the ID of the current user
      */
     @Transactional
-    @CacheEvict(value = "organizations", key = "#id")
     public void deleteOrganization(UUID id, String userId) {
         Organization organization = ownershipService.verifyOwnershipAndGetOrganization(id, userId);
 
@@ -175,6 +174,7 @@ public class OrganizationService {
         }
 
         organizationRepository.delete(organization);
+        ownershipService.evictOrganizationCacheById(id);
         log.info("Deleted organization with ID: {}", id);
     }
 
