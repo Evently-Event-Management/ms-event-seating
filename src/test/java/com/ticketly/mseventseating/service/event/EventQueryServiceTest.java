@@ -1,6 +1,5 @@
 package com.ticketly.mseventseating.service.event;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.EventDetailDTO;
 import com.ticketly.mseventseating.dto.event.EventSummaryDTO;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;

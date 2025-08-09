@@ -38,18 +38,31 @@ public class EventOwnershipService {
     @Cacheable(value = "events", key = "#eventId")
     @Transactional(readOnly = true)
     public Event verifyOwnershipAndGetEvent(UUID eventId, String userId) {
-        log.info("--- DATABASE HIT: Verifying event ownership and fetching event ID: {} ---", eventId);
+        log.info("Verifying event ownership for user: {} on event: {}", userId, eventId);
+        log.debug("--- DATABASE HIT: Verifying event ownership and fetching event ID: {} ---", eventId);
 
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found with ID: " + eventId));
+                .orElseThrow(() -> {
+                    log.warn("Event not found with ID: {}", eventId);
+                    return new ResourceNotFoundException("Event not found with ID: " + eventId);
+                });
+
+        log.debug("Found event: {} with title: '{}', organization: {}",
+                eventId, event.getTitle(), event.getOrganization().getId());
 
         try {
             // Verify that the user owns the organization that owns this event
+            log.debug("Verifying organization ownership for user: {} on organization: {}",
+                    userId, event.getOrganization().getId());
+
             organizationOwnershipService.verifyOwnershipAndGetOrganization(
                     event.getOrganization().getId(), userId);
 
+            log.info("User {} successfully verified as owner of event {}", userId, eventId);
             return event;
         } catch (AuthorizationDeniedException e) {
+            log.warn("Authorization denied: User {} is not the owner of organization {} for event {}",
+                    userId, event.getOrganization().getId(), eventId);
             throw new AuthorizationDeniedException("User does not have access to this event");
         }
     }

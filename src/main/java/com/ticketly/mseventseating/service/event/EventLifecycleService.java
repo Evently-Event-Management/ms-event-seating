@@ -31,50 +31,67 @@ public class EventLifecycleService {
      * * Past sessions are automatically cancelled, and future sessions are scheduled for on-sale.
      */
     public void approveEvent(UUID eventId, String userId) {
+        log.info("Approving event ID: {} by user: {}", eventId, userId);
         Event event = findEventById(eventId);
 
         // User cannot approve own event
         Organization organization = event.getOrganization();
         if (organization.getUserId().equals(userId)) {
+            log.warn("User {} attempted to approve their own event {}", userId, eventId);
             throw new AuthorizationDeniedException("You cannot approve your own event.");
         }
 
         if (event.getStatus() != EventStatus.PENDING) {
+            log.warn("Cannot approve event {} with status {}", eventId, event.getStatus());
             throw new InvalidStateException("Only events with PENDING status can be approved.");
         }
 
+        log.debug("Changing event {} status from PENDING to APPROVED", eventId);
         event.setStatus(EventStatus.APPROVED);
 
         // Handle sessions: cancel past sessions, schedule future ones
+        int cancelledSessions = 0;
+        int scheduledSessions = 0;
         for (EventSession session : event.getSessions()) {
             if (session.getEndTime().isBefore(OffsetDateTime.now())) {
                 session.setStatus(SessionStatus.CANCELLED);
+                cancelledSessions++;
                 log.warn("Session {} for event {} is in the past and has been automatically cancelled upon approval.",
                         session.getId(), event.getId());
+            } else {
+                scheduledSessions++;
             }
         }
 
+        log.debug("Event {} has {} cancelled past sessions and {} future sessions to schedule",
+                eventId, cancelledSessions, scheduledSessions);
+
         // Schedule the on-sale jobs for the approved, future sessions
+        log.debug("Scheduling on-sale jobs for event {}", eventId);
         schedulingService.scheduleOnSaleJobsForEvent(event);
 
         eventRepository.save(event);
-        log.info("Event with ID {} has been approved.", eventId);
+        log.info("Event with ID {} has been successfully approved with {} active sessions",
+                eventId, scheduledSessions);
     }
 
     /**
      * Rejects a pending event submission.
      */
     public void rejectEvent(UUID eventId, String reason) {
+        log.info("Rejecting event ID: {} with reason: '{}'", eventId, reason);
         Event event = findEventById(eventId);
 
         if (event.getStatus() != EventStatus.PENDING) {
+            log.warn("Cannot reject event {} with status {}", eventId, event.getStatus());
             throw new InvalidStateException("Only events with PENDING status can be rejected.");
         }
 
+        log.debug("Changing event {} status from PENDING to REJECTED", eventId);
         event.setStatus(EventStatus.REJECTED);
         event.setRejectionReason(reason);
         eventRepository.save(event);
-        log.info("Event with ID {} has been rejected. Reason: {}", eventId, reason);
+        log.info("Event with ID {} has been successfully rejected. Reason: {}", eventId, reason);
     }
 
     /**
@@ -86,21 +103,30 @@ public class EventLifecycleService {
      */
     public void deleteEvent(UUID eventId, Jwt jwt) {
         String userId = jwt.getSubject();
+        log.info("Deleting event ID: {} by user: {}", eventId, userId);
 
         // Only organization owners can delete events, no admin bypass
+        log.debug("Verifying ownership for event {}", eventId);
         Event event = eventOwnershipService.verifyOwnershipAndGetEvent(eventId, userId);
 
         if (event.getStatus() != EventStatus.PENDING) {
+            log.warn("Cannot delete event {} with status {}", eventId, event.getStatus());
             throw new InvalidStateException("Only events with PENDING status can be deleted.");
         }
 
         // Delete the event and all its children (cascade delete)
+        log.debug("Deleting event {} with {} sessions and {} tiers",
+                eventId, event.getSessions().size(), event.getTiers().size());
         eventRepository.delete(event);
-        log.info("Event with ID {} has been deleted by user {}", eventId, userId);
+        log.info("Event with ID {} has been successfully deleted by user {}", eventId, userId);
     }
 
     private Event findEventById(UUID eventId) {
+        log.debug("Finding event by ID: {}", eventId);
         return eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found with ID: " + eventId));
+                .orElseThrow(() -> {
+                    log.warn("Event not found with ID: {}", eventId);
+                    return new ResourceNotFoundException("Event not found with ID: " + eventId);
+                });
     }
 }

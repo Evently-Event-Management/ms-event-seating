@@ -76,15 +76,16 @@ public class EventController {
     }
 
     /**
-     * Get paginated list of events with filtering and sorting capabilities
+     * Get paginated list of events with filtering, searching, and sorting capabilities
      */
     @GetMapping
     @PreAuthorize("hasRole('event_admin')")
     public ResponseEntity<Page<EventSummaryDTO>> getAllEvents(
             @RequestParam(required = false) EventStatus status,
+            @RequestParam(required = false) String search,
             @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<EventSummaryDTO> events = eventQueryService.findAllEvents(status, pageable);
+        Page<EventSummaryDTO> events = eventQueryService.findAllEvents(status, search, pageable);
         return ResponseEntity.ok(events);
     }
 
@@ -97,12 +98,8 @@ public class EventController {
             @PathVariable UUID eventId,
             @AuthenticationPrincipal Jwt jwt) {
 
-        // Pass the JWT to the service layer for authorization
-        boolean isAdmin = jwt.getClaimAsMap("realm_access") != null &&
-                jwt.getClaimAsMap("realm_access").containsKey("roles") &&
-                jwt.getClaimAsMap("realm_access").get("roles") instanceof Iterable<?> &&
-                ((Iterable<?>) jwt.getClaimAsMap("realm_access").get("roles")).toString().contains("event_admin");
-
+        // Check if user has admin role and pass to service layer
+        boolean isAdmin = hasAdminRole(jwt);
         EventDetailDTO event = eventQueryService.findEventById(eventId, jwt.getSubject(), isAdmin);
         return ResponseEntity.ok(event);
     }
@@ -118,5 +115,39 @@ public class EventController {
 
         eventLifecycleService.deleteEvent(eventId, jwt);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Get paginated list of events for a specific organization with filtering, searching, and sorting capabilities
+     * Accessible by both organization owners and users with the event_admin role
+     */
+    @GetMapping("/organization/{organizationId}")
+    public ResponseEntity<Page<EventSummaryDTO>> getOrganizationEvents(
+            @PathVariable UUID organizationId,
+            @RequestParam(required = false) EventStatus status,
+            @RequestParam(required = false) String search,
+            @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal Jwt jwt) {
+
+        // Check if user has admin role
+        boolean isAdmin = hasAdminRole(jwt);
+        Page<EventSummaryDTO> events = eventQueryService.findEventsByOrganization(
+                organizationId, jwt.getSubject(), isAdmin, status, search, pageable
+        );
+        return ResponseEntity.ok(events);
+
+    }
+
+    /**
+     * Helper method to check if a JWT contains the event_admin role
+     *
+     * @param jwt The JWT token
+     * @return true if the user has the event_admin role, false otherwise
+     */
+    private boolean hasAdminRole(Jwt jwt) {
+        return jwt.getClaimAsMap("realm_access") != null &&
+                jwt.getClaimAsMap("realm_access").containsKey("roles") &&
+                jwt.getClaimAsMap("realm_access").get("roles") instanceof Iterable<?> &&
+                ((Iterable<?>) jwt.getClaimAsMap("realm_access").get("roles")).toString().contains("event_admin");
     }
 }
