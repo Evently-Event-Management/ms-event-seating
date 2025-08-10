@@ -7,5 +7,3 @@ public enum SessionStatus {
     SOLD_OUT,
     CANCELLED
 }
-
-
