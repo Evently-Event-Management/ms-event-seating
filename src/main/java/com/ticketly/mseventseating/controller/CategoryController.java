@@ -23,66 +23,53 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     /**
-     * Get all categories - accessible to all authenticated users
-     *
-     * @return list of all categories with their hierarchies
+     * Retrieve all categories with their subcategory hierarchies.
      */
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> getAllCategories() {
+        log.info("Fetching all categories with hierarchy");
         return ResponseEntity.ok(categoryService.getAllCategories());
     }
 
     /**
-     * Get a category by ID - accessible to all authenticated users
-     *
-     * @param id the category ID
-     * @return the category if found
+     * Retrieve a single category by its ID, including its subcategories.
      */
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable UUID id) {
+        log.info("Fetching category by id: {}", id);
         return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 
     /**
-     * Create a new category - only accessible to users with category_admin role
-     *
-     * @param request the category data
-     * @return the created category
+     * Create a new category. Only users with 'category_admin' role are allowed.
      */
     @PostMapping
     @PreAuthorize("hasRole('category_admin')")
     public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest request) {
-        log.info("Creating new category with name: {}", request.getName());
+        log.info("Request to create category: {}", request.getName());
         CategoryResponse createdCategory = categoryService.createCategory(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
     }
 
     /**
-     * Update a category - only accessible to users with category_admin role
-     *
-     * @param id      the category ID to update
-     * @param request the updated category data
-     * @return the updated category
+     * Update an existing category. Only users with 'category_admin' role are allowed.
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('category_admin')")
     public ResponseEntity<CategoryResponse> updateCategory(
             @PathVariable UUID id,
             @Valid @RequestBody CategoryRequest request) {
-        log.info("Updating category with id: {}", id);
+        log.info("Request to update category id: {} with name: {}", id, request.getName());
         return ResponseEntity.ok(categoryService.updateCategory(id, request));
     }
 
     /**
-     * Delete a category - only accessible to users with category_admin role
-     *
-     * @param id the category ID to delete
-     * @return no content response
+     * Delete a category by its ID. Only users with 'category_admin' role are allowed.
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('category_admin')")
     public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
-        log.info("Deleting category with id: {}", id);
+        log.info("Request to delete category id: {}", id);
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
     }

@@ -73,8 +73,8 @@ class CategoryServiceTest {
 
         // Then
         assertEquals(1, result.size());
-        assertEquals(parentCategory.getName(), result.get(0).getName());
-        assertEquals(1, result.get(0).getSubCategories().size());
+        assertEquals(parentCategory.getName(), result.getFirst().getName());
+        assertEquals(1, result.getFirst().getSubCategories().size());
         verify(categoryRepository).findByParentIsNull();
     }
 

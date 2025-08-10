@@ -109,7 +109,7 @@ class EventLifecycleServiceTest {
         // Assert
         assertEquals(EventStatus.APPROVED, event.getStatus());
         assertEquals(SessionStatus.CANCELLED, pastSession.getStatus());
-        assertEquals(SessionStatus.PENDING, futureSession.getStatus()); // Future session should remain pending
+        assertEquals(SessionStatus.SCHEDULED, futureSession.getStatus()); // Future session should remain pending
         verify(eventRepository).findById(eventId);
         verify(schedulingService).scheduleOnSaleJobsForEvent(event);
         verify(eventRepository).save(event);
@@ -203,7 +203,7 @@ class EventLifecycleServiceTest {
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
 
         // Act
-        eventLifecycleService.deleteEvent(eventId, jwt);
+        eventLifecycleService.deleteEvent(eventId, jwt.getSubject());
 
         // Assert
         verify(eventOwnershipService).isOwner(eventId, userId);
@@ -221,7 +221,7 @@ class EventLifecycleServiceTest {
 
         // Act & Assert
         InvalidStateException exception = assertThrows(InvalidStateException.class, () ->
-                eventLifecycleService.deleteEvent(eventId, jwt));
+                eventLifecycleService.deleteEvent(eventId, jwt.getSubject()));
 
         assertEquals("Only events with PENDING status can be deleted.", exception.getMessage());
         verify(eventOwnershipService).isOwner(eventId, userId);
@@ -238,7 +238,7 @@ class EventLifecycleServiceTest {
 
         // Act & Assert
         AuthorizationDeniedException exception = assertThrows(AuthorizationDeniedException.class, () ->
-                eventLifecycleService.deleteEvent(eventId, jwt));
+                eventLifecycleService.deleteEvent(eventId, jwt.getSubject()));
 
         assertEquals("You are not authorized to delete this event.", exception.getMessage());
         verify(eventOwnershipService).isOwner(eventId, userId);
@@ -259,7 +259,7 @@ class EventLifecycleServiceTest {
         // Assert
         assertEquals(EventStatus.APPROVED, event.getStatus());
         assertEquals(SessionStatus.CANCELLED, pastSession.getStatus());
-        assertEquals(SessionStatus.PENDING, futureSession.getStatus());
+        assertEquals(SessionStatus.SCHEDULED, futureSession.getStatus());
         verify(schedulingService).scheduleOnSaleJobsForEvent(event);
     }
 }

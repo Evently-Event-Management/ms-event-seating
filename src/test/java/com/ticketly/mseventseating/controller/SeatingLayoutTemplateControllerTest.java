@@ -1,161 +1,169 @@
 package com.ticketly.mseventseating.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.layout_template.LayoutDataDTO;
 import com.ticketly.mseventseating.dto.layout_template.SeatingLayoutTemplateDTO;
 import com.ticketly.mseventseating.dto.layout_template.SeatingLayoutTemplateRequest;
 import com.ticketly.mseventseating.service.SeatingLayoutTemplateService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.Jwt;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.*;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(SeatingLayoutTemplateController.class)
-class SeatingLayoutTemplateControllerTest {
+@ExtendWith(MockitoExtension.class)
+public class SeatingLayoutTemplateControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockitoBean
+    @Mock
     private SeatingLayoutTemplateService seatingLayoutTemplateService;
 
-    @MockitoBean
-    private JwtDecoder jwtDecoder; // Mock JwtDecoder for @WebMvcTest
+    @InjectMocks
+    private SeatingLayoutTemplateController seatingLayoutTemplateController;
 
-    private SeatingLayoutTemplateRequest testRequest;
-    private SeatingLayoutTemplateDTO testResponse;
-    private final String USER_ID = "test-user-id";
-    private final UUID TEMPLATE_ID = UUID.randomUUID();
-    private final UUID ORGANIZATION_ID = UUID.randomUUID();
+    private UUID templateId;
+    private UUID organizationId;
+    private String userId;
+    private Jwt jwt;
+    private SeatingLayoutTemplateRequest validRequest;
+    private SeatingLayoutTemplateDTO templateDTO;
+    private Page<SeatingLayoutTemplateDTO> templatePage;
 
     @BeforeEach
     void setUp() {
-        LayoutDataDTO layoutData = LayoutDataDTO.builder().name("Test Layout").build(); // Simplified for tests
+        templateId = UUID.randomUUID();
+        organizationId = UUID.randomUUID();
+        userId = "user-123";
 
-        testRequest = SeatingLayoutTemplateRequest.builder()
+        // Create mock JWT with subject (user ID)
+        HashMap<String, Object> headers = new HashMap<>();
+        headers.put("alg", "RS256");
+        HashMap<String, Object> claims = new HashMap<>();
+        claims.put("sub", userId);
+        jwt = new Jwt("token", Instant.now(), Instant.now().plusSeconds(60), headers, claims);
+
+        // Create mock layout data
+        LayoutDataDTO.Layout layout = new LayoutDataDTO.Layout();
+        layout.setBlocks(new ArrayList<>());
+
+        LayoutDataDTO layoutData = new LayoutDataDTO();
+        layoutData.setName("Test Layout");
+        layoutData.setLayout(layout);
+
+        // Create valid request
+        validRequest = new SeatingLayoutTemplateRequest();
+        validRequest.setName("Test Template");
+        validRequest.setOrganizationId(organizationId);
+        validRequest.setLayoutData(layoutData);
+
+        // Create template DTO
+        templateDTO = SeatingLayoutTemplateDTO.builder()
+                .id(templateId)
                 .name("Test Template")
-                .organizationId(ORGANIZATION_ID)
+                .organizationId(organizationId)
                 .layoutData(layoutData)
+                .updatedAt(OffsetDateTime.now())
                 .build();
 
-        testResponse = SeatingLayoutTemplateDTO.builder()
-                .id(TEMPLATE_ID)
-                .organizationId(ORGANIZATION_ID)
-                .name("Test Template")
-                .layoutData(layoutData)
-                .build();
+        // Create list of template DTOs
+        List<SeatingLayoutTemplateDTO> templateDTOs = Collections.singletonList(templateDTO);
+
+        // Create page of template DTOs
+        templatePage = new PageImpl<>(templateDTOs, PageRequest.of(0, 6), 1);
     }
 
     @Test
-    void getAllTemplatesByOrganization_ShouldReturnPaginatedListOfTemplates() throws Exception {
+    void getAllTemplatesByOrganization_ShouldReturnTemplates() {
         // Arrange
         int page = 0;
         int size = 6;
-        List<SeatingLayoutTemplateDTO> templates = Collections.singletonList(testResponse);
-        Page<SeatingLayoutTemplateDTO> templatePage = new PageImpl<>(templates, PageRequest.of(page, size), templates.size());
-
-        when(seatingLayoutTemplateService.getAllTemplatesByOrganizationId(ORGANIZATION_ID, USER_ID, page, size))
+        when(seatingLayoutTemplateService.getAllTemplatesByOrganizationId(organizationId, userId, page, size))
                 .thenReturn(templatePage);
 
-        // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.get("/v1/seating-templates/organization/{organizationId}", ORGANIZATION_ID)
-                        .param("page", String.valueOf(page))
-                        .param("size", String.valueOf(size))
-                        .with(jwt().jwt(builder -> builder.subject(USER_ID)))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].id", is(TEMPLATE_ID.toString())))
-                .andExpect(jsonPath("$.totalPages", is(1)))
-                .andExpect(jsonPath("$.totalElements", is(1)));
+        // Act
+        ResponseEntity<Page<SeatingLayoutTemplateDTO>> response =
+            seatingLayoutTemplateController.getAllTemplatesByOrganization(organizationId, page, size, jwt);
 
-        verify(seatingLayoutTemplateService).getAllTemplatesByOrganizationId(ORGANIZATION_ID, USER_ID, page, size);
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().getTotalElements());
+        assertEquals(templateDTO, response.getBody().getContent().getFirst());
+        verify(seatingLayoutTemplateService).getAllTemplatesByOrganizationId(organizationId, userId, page, size);
     }
 
     @Test
-    void getTemplateById_ShouldReturnTemplate() throws Exception {
+    void getTemplateById_ShouldReturnTemplate() {
         // Arrange
-        when(seatingLayoutTemplateService.getTemplateById(TEMPLATE_ID, USER_ID)).thenReturn(testResponse);
+        when(seatingLayoutTemplateService.getTemplateById(templateId, userId)).thenReturn(templateDTO);
 
-        // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.get("/v1/seating-templates/{id}", TEMPLATE_ID)
-                        .with(jwt().jwt(builder -> builder.subject(USER_ID)))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(TEMPLATE_ID.toString())))
-                .andExpect(jsonPath("$.name", is("Test Template")));
+        // Act
+        ResponseEntity<SeatingLayoutTemplateDTO> response = seatingLayoutTemplateController.getTemplateById(templateId, jwt);
 
-        verify(seatingLayoutTemplateService).getTemplateById(TEMPLATE_ID, USER_ID);
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(templateDTO, response.getBody());
+        verify(seatingLayoutTemplateService).getTemplateById(templateId, userId);
     }
 
     @Test
-    void createTemplate_ShouldCreateAndReturnTemplate() throws Exception {
+    void createTemplate_ShouldReturnCreatedTemplate() {
         // Arrange
-        when(seatingLayoutTemplateService.createTemplate(any(SeatingLayoutTemplateRequest.class), eq(USER_ID), any()))
-                .thenReturn(testResponse);
+        when(seatingLayoutTemplateService.createTemplate(eq(validRequest), eq(userId), any(Jwt.class)))
+                .thenReturn(templateDTO);
 
-        // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.post("/v1/seating-templates")
-                        .with(jwt().jwt(builder -> builder.subject(USER_ID)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(testRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is(TEMPLATE_ID.toString())));
+        // Act
+        ResponseEntity<SeatingLayoutTemplateDTO> response =
+            seatingLayoutTemplateController.createTemplate(validRequest, jwt);
 
-        verify(seatingLayoutTemplateService).createTemplate(any(SeatingLayoutTemplateRequest.class), eq(USER_ID), any());
+        // Assert
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(templateDTO, response.getBody());
+        verify(seatingLayoutTemplateService).createTemplate(eq(validRequest), eq(userId), any(Jwt.class));
     }
 
     @Test
-    void updateTemplate_ShouldUpdateAndReturnTemplate() throws Exception {
+    void updateTemplate_ShouldReturnUpdatedTemplate() {
         // Arrange
-        when(seatingLayoutTemplateService.updateTemplate(eq(TEMPLATE_ID), any(SeatingLayoutTemplateRequest.class), eq(USER_ID)))
-                .thenReturn(testResponse);
+        when(seatingLayoutTemplateService.updateTemplate(templateId, validRequest, userId))
+                .thenReturn(templateDTO);
 
-        // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.put("/v1/seating-templates/{id}", TEMPLATE_ID)
-                        .with(jwt().jwt(builder -> builder.subject(USER_ID)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(testRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(TEMPLATE_ID.toString())));
+        // Act
+        ResponseEntity<SeatingLayoutTemplateDTO> response =
+            seatingLayoutTemplateController.updateTemplate(templateId, validRequest, jwt);
 
-        verify(seatingLayoutTemplateService).updateTemplate(eq(TEMPLATE_ID), any(SeatingLayoutTemplateRequest.class), eq(USER_ID));
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(templateDTO, response.getBody());
+        verify(seatingLayoutTemplateService).updateTemplate(templateId, validRequest, userId);
     }
 
     @Test
-    void deleteTemplate_ShouldDeleteAndReturnNoContent() throws Exception {
+    void deleteTemplate_ShouldReturnNoContent() {
         // Arrange
-        doNothing().when(seatingLayoutTemplateService).deleteTemplate(TEMPLATE_ID, USER_ID);
+        doNothing().when(seatingLayoutTemplateService).deleteTemplate(templateId, userId);
 
-        // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.delete("/v1/seating-templates/{id}", TEMPLATE_ID)
-                        .with(jwt().jwt(builder -> builder.subject(USER_ID))))
-                .andExpect(status().isNoContent());
+        // Act
+        ResponseEntity<Void> response = seatingLayoutTemplateController.deleteTemplate(templateId, jwt);
 
-        verify(seatingLayoutTemplateService).deleteTemplate(TEMPLATE_ID, USER_ID);
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(seatingLayoutTemplateService).deleteTemplate(templateId, userId);
     }
 }

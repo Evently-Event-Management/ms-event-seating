@@ -22,11 +22,10 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
 
     /**
-     * Get all categories
-     *
-     * @return list of all categories
+     * Retrieve all top-level categories and their subcategories.
      */
     public List<CategoryResponse> getAllCategories() {
+        log.info("Retrieving all top-level categories and their subcategories");
         // Get all top-level categories (without parents)
         List<Category> topLevelCategories = categoryRepository.findByParentIsNull();
 
@@ -37,12 +36,10 @@ public class CategoryService {
     }
 
     /**
-     * Get a category by ID
-     *
-     * @param id the category ID
-     * @return the category if found
+     * Retrieve a category by its ID, including its subcategories.
      */
     public CategoryResponse getCategoryById(UUID id) {
+        log.info("Retrieving category by id: {}", id);
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
@@ -50,13 +47,11 @@ public class CategoryService {
     }
 
     /**
-     * Create a new category
-     *
-     * @param request the category request data
-     * @return the created category
+     * Create a new category. Throws if a category with the same name exists.
      */
     @Transactional
     public CategoryResponse createCategory(CategoryRequest request) {
+        log.info("Creating category with name: {}", request.getName());
         // Check if category with the same name already exists
         if (categoryRepository.findByName(request.getName()).isPresent()) {
             throw new BadRequestException("Category with name '" + request.getName() + "' already exists");
@@ -78,14 +73,11 @@ public class CategoryService {
     }
 
     /**
-     * Update an existing category
-     *
-     * @param id the category ID to update
-     * @param request the updated category data
-     * @return the updated category
+     * Update an existing category. Checks for duplicate names and circular references.
      */
     @Transactional
     public CategoryResponse updateCategory(UUID id, CategoryRequest request) {
+        log.info("Updating category id: {} to name: {}", id, request.getName());
         Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
@@ -124,12 +116,11 @@ public class CategoryService {
     }
 
     /**
-     * Delete a category
-     *
-     * @param id the category ID to delete
+     * Delete a category by its ID.
      */
     @Transactional
     public void deleteCategory(UUID id) {
+        log.info("Deleting category id: {}", id);
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
@@ -137,11 +128,7 @@ public class CategoryService {
     }
 
     /**
-     * Check if potentialDescendant is a descendant of the ancestor category
-     * 
-     * @param ancestor The category that should be the ancestor
-     * @param potentialDescendant The category to check if it's a descendant
-     * @return true if potentialDescendant is a descendant of ancestor, false otherwise
+     * Check if potentialDescendant is a descendant of ancestor to prevent cycles.
      */
     private boolean isDescendant(Category ancestor, Category potentialDescendant) {
         if (potentialDescendant == null) {
@@ -172,7 +159,7 @@ public class CategoryService {
     }
 
     /**
-     * Map a category entity to a response DTO without including subcategories
+     * Map a category entity to a response DTO (no subcategories).
      */
     private CategoryResponse mapToResponse(Category category) {
         return CategoryResponse.builder()
@@ -183,7 +170,7 @@ public class CategoryService {
     }
 
     /**
-     * Map a category entity to a response DTO with recursive mapping of subcategories
+     * Map a category entity to a response DTO including subcategories recursively.
      */
     private CategoryResponse mapToResponseWithSubcategories(Category category) {
         Set<CategoryResponse> subCategoryResponses = category.getSubCategories() != null ?

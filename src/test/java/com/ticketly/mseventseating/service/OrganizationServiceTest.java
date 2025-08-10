@@ -4,6 +4,7 @@ import com.ticketly.mseventseating.config.AppLimitsConfig;
 import com.ticketly.mseventseating.dto.organization.OrganizationRequest;
 import com.ticketly.mseventseating.dto.organization.OrganizationResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
+import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.SubscriptionLimitType;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import com.ticketly.mseventseating.model.Organization;
@@ -108,14 +109,14 @@ class OrganizationServiceTest {
     }
 
     @Test
-    void getOrganizationById_whenUserIsOwner_shouldReturnOrganization() {
+    void getOrganizationById_whenUserIsOwner_shouldReturnOrganizationAndUser() {
         // Arrange
         when(ownershipService.isOwner(ORG_ID, USER_ID)).thenReturn(true);
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(organization));
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
 
         // Act
-        OrganizationResponse result = organizationService.getOrganizationById(ORG_ID, USER_ID);
+        OrganizationResponse result = organizationService.getOrganizationByIdOwner(ORG_ID, USER_ID);
 
         // Assert
         assertNotNull(result);
@@ -127,13 +128,13 @@ class OrganizationServiceTest {
     }
 
     @Test
-    void getOrganizationById_whenUserIsNotOwner_shouldThrowAuthorizationDeniedException() {
+    void getOrganizationById_AndUser_whenUserIsNotOwner_shouldThrowAuthorizationDeniedException() {
         // Arrange
         when(ownershipService.isOwner(ORG_ID, USER_ID)).thenReturn(false);
 
         // Act & Assert
         assertThrows(AuthorizationDeniedException.class, () ->
-                organizationService.getOrganizationById(ORG_ID, USER_ID));
+                organizationService.getOrganizationByIdOwner(ORG_ID, USER_ID));
 
         verify(ownershipService).isOwner(ORG_ID, USER_ID);
         verifyNoMoreInteractions(organizationRepository);
@@ -296,5 +297,123 @@ class OrganizationServiceTest {
         verify(ownershipService).isOwner(ORG_ID, USER_ID);
         verifyNoInteractions(s3StorageService);
         verify(organizationRepository, never()).delete(any());
+    }
+
+    @Test
+    void getOrganizationById_adminAccess_shouldReturnOrganization() {
+        // Arrange
+        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(organization));
+        when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
+
+        // Act
+        OrganizationResponse result = organizationService.getOrganizationById(ORG_ID);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(ORG_ID, result.getId());
+        assertEquals(ORG_NAME, result.getName());
+        assertEquals(ORG_WEBSITE, result.getWebsite());
+        assertEquals(PRESIGNED_URL, result.getLogoUrl());
+
+        // Verify repository was called but not ownership service (admin access)
+        verify(organizationRepository).findById(ORG_ID);
+        verifyNoInteractions(ownershipService);
+    }
+
+    @Test
+    void getOrganizationById_whenNotFound_shouldThrowResourceNotFoundException() {
+        // Arrange
+        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> organizationService.getOrganizationById(ORG_ID));
+
+        assertTrue(exception.getMessage().contains("Organization not found with id"));
+        verify(organizationRepository).findById(ORG_ID);
+    }
+
+    @Test
+    void verifyOwnershipAndGetOrganization_whenUserIsOwner_shouldReturnOrganization() {
+        // Arrange
+        when(ownershipService.isOwner(ORG_ID, USER_ID)).thenReturn(true);
+        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(organization));
+
+        // Act
+        Organization result = organizationService.verifyOwnershipAndGetOrganization(ORG_ID, USER_ID);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(ORG_ID, result.getId());
+        assertEquals(ORG_NAME, result.getName());
+        assertEquals(USER_ID, result.getUserId());
+
+        verify(ownershipService).isOwner(ORG_ID, USER_ID);
+        verify(organizationRepository).findById(ORG_ID);
+    }
+
+    @Test
+    void verifyOwnershipAndGetOrganization_whenUserIsNotOwner_shouldThrowAuthorizationDeniedException() {
+        // Arrange
+        when(ownershipService.isOwner(ORG_ID, USER_ID)).thenReturn(false);
+
+        // Act & Assert
+        AuthorizationDeniedException exception = assertThrows(AuthorizationDeniedException.class,
+                () -> organizationService.verifyOwnershipAndGetOrganization(ORG_ID, USER_ID));
+
+        assertTrue(exception.getMessage().contains("User does not have access"));
+        verify(ownershipService).isOwner(ORG_ID, USER_ID);
+        verifyNoInteractions(organizationRepository);
+    }
+
+    @Test
+    void verifyOwnershipAndGetOrganization_whenOrganizationNotFound_shouldThrowResourceNotFoundException() {
+        // Arrange
+        when(ownershipService.isOwner(ORG_ID, USER_ID)).thenReturn(true);
+        when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> organizationService.verifyOwnershipAndGetOrganization(ORG_ID, USER_ID));
+
+        assertTrue(exception.getMessage().contains("Organization not found"));
+        verify(ownershipService).isOwner(ORG_ID, USER_ID);
+        verify(organizationRepository).findById(ORG_ID);
+    }
+
+    @Test
+    void uploadLogo_withInvalidFileType_shouldThrowBadRequestException() {
+        // Arrange
+
+        MockMultipartFile invalidFile = new MockMultipartFile(
+                "document", "document.pdf", "application/pdf", "test document content".getBytes());
+
+        // Act & Assert
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> organizationService.uploadLogo(ORG_ID, invalidFile, USER_ID));
+
+        assertTrue(exception.getMessage().contains("Invalid file type"));
+        verify(ownershipService, never()).isOwner(any(), any());
+        verify(organizationRepository, never()).findById(any());
+        verifyNoMoreInteractions(s3StorageService);
+    }
+
+    @Test
+    void uploadLogo_withExceededFileSize_shouldThrowBadRequestException() {
+        // Arrange
+        when(limitService.getOrganizationConfig()).thenReturn(organizationConfig);
+        when(organizationConfig.getMaxLogoSize()).thenReturn(10L); // Very small limit
+
+        MockMultipartFile largeFile = new MockMultipartFile(
+                "logo", "logo.jpg", "image/jpeg", "test image content".getBytes());
+
+        // Act & Assert
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> organizationService.uploadLogo(ORG_ID, largeFile, USER_ID));
+
+        assertTrue(exception.getMessage().contains("File size exceeds"));
+        verify(limitService).getOrganizationConfig();
+        verifyNoMoreInteractions(s3StorageService);
+        verify(ownershipService, never()).isOwner(any(), any());
     }
 }

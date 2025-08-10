@@ -14,10 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 
 import java.math.BigDecimal;
@@ -27,6 +24,10 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,10 +40,11 @@ class EventQueryServiceTest {
     private EventOwnershipService eventOwnershipService;
 
     @Mock
-    private OrganizationOwnershipService organizationOwnershipService;
+    private OrganizationOwnershipService ownershipService;
 
     @Mock
     private S3StorageService s3StorageService;
+
 
     @InjectMocks
     private EventQueryService eventQueryService;
@@ -156,7 +158,7 @@ class EventQueryServiceTest {
         when(eventRepository.findAll(pageable)).thenReturn(eventPage);
 
         // Act
-        Page<EventSummaryDTO> result = eventQueryService.findAllEvents(null, pageable);
+        Page<EventSummaryDTO> result = eventQueryService.findAllEvents(null, null, pageable);
 
         // Assert
         assertNotNull(result);
@@ -165,6 +167,7 @@ class EventQueryServiceTest {
         assertEquals("Second Test Event", result.getContent().get(1).getTitle());
         verify(eventRepository).findAll(pageable);
         verify(eventRepository, never()).findAllByStatus(any(), any());
+        verify(eventRepository, never()).findBySearchTermAndStatus(any(), any(), any());
     }
 
     @Test
@@ -176,7 +179,7 @@ class EventQueryServiceTest {
         when(eventRepository.findAllByStatus(EventStatus.PENDING, pageable)).thenReturn(eventPage);
 
         // Act
-        Page<EventSummaryDTO> result = eventQueryService.findAllEvents(EventStatus.PENDING, pageable);
+        Page<EventSummaryDTO> result = eventQueryService.findAllEvents(EventStatus.PENDING, null, pageable);
 
         // Assert
         assertNotNull(result);
@@ -185,36 +188,38 @@ class EventQueryServiceTest {
         assertEquals(EventStatus.PENDING, result.getContent().getFirst().getStatus());
         verify(eventRepository).findAllByStatus(EventStatus.PENDING, pageable);
         verify(eventRepository, never()).findAll(same(pageable));
+        verify(eventRepository, never()).findBySearchTermAndStatus(any(), any(), any());
     }
 
     @Test
-    @DisplayName("Should return event details by ID when user is admin")
-    void findEventById_whenUserIsAdmin_shouldReturnEventDetails() {
+    @DisplayName("Should return searched events when search term is provided")
+    void findAllEvents_whenSearchTermIsProvided_shouldReturnSearchedEvents() {
         // Arrange
-        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        String searchTerm = "Test";
+        List<Event> filteredList = Collections.singletonList(eventList.getFirst());
+        Page<Event> eventPage = new PageImpl<>(filteredList, pageable, filteredList.size());
+        when(eventRepository.findBySearchTermAndStatus(eq(searchTerm), isNull(), eq(pageable))).thenReturn(eventPage);
 
         // Act
-        EventDetailDTO result = eventQueryService.findEventById(eventId, userId, true);
+        Page<EventSummaryDTO> result = eventQueryService.findAllEvents(null, searchTerm, pageable);
 
         // Assert
         assertNotNull(result);
-        assertEquals(eventId, result.getId());
-        assertEquals("Test Event", result.getTitle());
-        assertEquals(organizationId, result.getOrganizationId());
-        assertEquals("Test Organization", result.getOrganizationName());
-        verify(eventRepository).findById(eventId);
-        verifyNoInteractions(eventOwnershipService); // Admin bypass, so no ownership check
+        assertEquals(1, result.getContent().size());
+        verify(eventRepository).findBySearchTermAndStatus(eq(searchTerm), isNull(), eq(pageable));
+        verify(eventRepository, never()).findAll((Example<Event>) any());
+        verify(eventRepository, never()).findAllByStatus(any(), any());
     }
 
     @Test
-    @DisplayName("Should return event details by ID when user is organization owner")
-    void findEventById_whenUserIsOrganizationOwner_shouldReturnEventDetails() {
+    @DisplayName("Should return event details by ID when user is owner")
+    void findEventByIdOwner_whenUserIsOwner_shouldReturnEventDetails() {
         // Arrange
         when(eventOwnershipService.isOwner(eventId, userId)).thenReturn(true);
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
 
         // Act
-        EventDetailDTO result = eventQueryService.findEventById(eventId, userId, false);
+        EventDetailDTO result = eventQueryService.findEventByIdOwner(eventId, userId);
 
         // Assert
         assertNotNull(result);
@@ -227,29 +232,14 @@ class EventQueryServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw ResourceNotFoundException when event not found for admin")
-    void findEventById_whenEventNotFoundForAdmin_shouldThrowResourceNotFoundException() {
-        // Arrange
-        when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () ->
-                eventQueryService.findEventById(eventId, userId, true));
-
-        assertEquals("Event not found with ID: " + eventId, exception.getMessage());
-        verify(eventRepository).findById(eventId);
-        verifyNoInteractions(eventOwnershipService);
-    }
-
-    @Test
-    @DisplayName("Should throw AuthorizationDeniedException when user is not organization owner")
-    void findEventById_whenUserIsNotOrganizationOwner_shouldThrowAuthorizationDeniedException() {
+    @DisplayName("Should throw AuthorizationDeniedException when user is not event owner")
+    void findEventByIdOwner_whenUserIsNotOwner_shouldThrowAuthorizationDeniedException() {
         // Arrange
         when(eventOwnershipService.isOwner(eventId, userId)).thenReturn(false);
 
         // Act & Assert
         AuthorizationDeniedException exception = assertThrows(AuthorizationDeniedException.class, () ->
-                eventQueryService.findEventById(eventId, userId, false));
+                eventQueryService.findEventByIdOwner(eventId, userId));
 
         assertEquals("You don't have permission to access this event", exception.getMessage());
         verify(eventOwnershipService).isOwner(eventId, userId);
@@ -275,7 +265,7 @@ class EventQueryServiceTest {
 
     @Test
     @DisplayName("Should throw ResourceNotFoundException when event not found without authorization check")
-    void findEventById_whenEventNotFoundWithoutAuthorizationCheck_shouldThrowResourceNotFoundException() {
+    void findEventById_whenEventNotFound_shouldThrowResourceNotFoundException() {
         // Arrange
         when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
 
@@ -301,7 +291,7 @@ class EventQueryServiceTest {
         when(eventRepository.findAll(pageable)).thenReturn(eventPage);
 
         // Act
-        Page<EventSummaryDTO> result = eventQueryService.findAllEvents(null, pageable);
+        Page<EventSummaryDTO> result = eventQueryService.findAllEvents(null, null, pageable);
 
         // Assert
         assertNotNull(result);
@@ -320,7 +310,7 @@ class EventQueryServiceTest {
         when(eventRepository.findAll(pageable)).thenReturn(eventPage);
 
         // Act
-        Page<EventSummaryDTO> result = eventQueryService.findAllEvents(null, pageable);
+        Page<EventSummaryDTO> result = eventQueryService.findAllEvents(null, null, pageable);
 
         // Assert
         assertNotNull(result);
@@ -337,7 +327,7 @@ class EventQueryServiceTest {
         when(s3StorageService.generatePresignedUrl("photo1.jpg", 60)).thenReturn("https://s3.example.com/photo1.jpg");
 
         // Act
-        Page<EventSummaryDTO> result = eventQueryService.findAllEvents(null, pageable);
+        Page<EventSummaryDTO> result = eventQueryService.findAllEvents(null, null, pageable);
 
         // Assert
         assertNotNull(result);
@@ -355,7 +345,7 @@ class EventQueryServiceTest {
         when(eventRepository.findAll(pageable)).thenReturn(eventPage);
 
         // Act
-        Page<EventSummaryDTO> result = eventQueryService.findAllEvents(null, pageable);
+        Page<EventSummaryDTO> result = eventQueryService.findAllEvents(null, null, pageable);
 
         // Assert
         assertNotNull(result);
@@ -384,8 +374,8 @@ class EventQueryServiceTest {
     }
 
     @Test
-    @DisplayName("Should find events by organization with search and status filtering")
-    void findEventsByOrganization_withFilteringAndSearch_shouldReturnFilteredEvents() {
+    @DisplayName("Should find events by organization for organization owner")
+    void findEventsByOrganizationOwner_withValidOwner_shouldReturnEvents() {
         // Arrange
         String searchTerm = "Test";
         EventStatus status = EventStatus.PENDING;
@@ -393,10 +383,11 @@ class EventQueryServiceTest {
         Page<Event> eventPage = new PageImpl<>(Collections.singletonList(event), pageable, 1);
         when(eventRepository.findByOrganizationIdAndSearchTermAndStatus(
                 organizationId, searchTerm, status, pageable)).thenReturn(eventPage);
+        when(ownershipService.isOwner(organizationId, userId)).thenReturn(true);
 
         // Act
-        Page<EventSummaryDTO> result = eventQueryService.findEventsByOrganization(
-                organizationId, userId, true, status, searchTerm, pageable);
+        Page<EventSummaryDTO> result = eventQueryService.findEventsByOrganizationOwner(
+                organizationId, userId, status, searchTerm, pageable);
 
         // Assert
         assertNotNull(result);
@@ -404,41 +395,44 @@ class EventQueryServiceTest {
         assertEquals("Test Event", result.getContent().getFirst().getTitle());
         verify(eventRepository).findByOrganizationIdAndSearchTermAndStatus(
                 organizationId, searchTerm, status, pageable);
-        verify(organizationOwnershipService, never())
-                .isOwner(any(), any()); // Admin bypass
+        verify(ownershipService).isOwner(organizationId, userId);
     }
 
     @Test
-    @DisplayName("Should verify ownership when non-admin user requests organization events")
-    void findEventsByOrganization_whenUserIsNotAdmin_shouldVerifyOwnership() {
+    @DisplayName("Should find events by organization for admin without ownership check")
+    void findEventsByOrganization_asAdmin_shouldReturnEvents() {
         // Arrange
-        Page<Event> eventPage = new PageImpl<>(Collections.singletonList(event), pageable, 1);
+        String searchTerm = null;
+        EventStatus status = null;
+
+        Page<Event> eventPage = new PageImpl<>(eventList, pageable, eventList.size());
         when(eventRepository.findByOrganizationIdAndSearchTermAndStatus(
-                eq(organizationId), isNull(), isNull(), eq(pageable))).thenReturn(eventPage);
-        when(organizationOwnershipService.isOwner(organizationId, userId)).thenReturn(true);
+                organizationId, null, null, pageable)).thenReturn(eventPage);
 
         // Act
         Page<EventSummaryDTO> result = eventQueryService.findEventsByOrganization(
-                organizationId, userId, false, null, null, pageable);
+                organizationId, status, searchTerm, pageable);
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(organizationOwnershipService).isOwner(organizationId, userId);
+        assertEquals(2, result.getContent().size());
+        verify(eventRepository).findByOrganizationIdAndSearchTermAndStatus(
+                organizationId, null, null, pageable);
+        verifyNoInteractions(ownershipService); // No ownership check for admin
     }
 
     @Test
-    @DisplayName("Should throw AuthorizationDeniedException when non-admin user doesn't own the organization")
-    void findEventsByOrganization_whenUserIsNotAdminAndNotOwner_shouldThrowAuthorizationDeniedException() {
+    @DisplayName("Should throw AuthorizationDeniedException when user is not organization owner")
+    void findEventsByOrganizationOwner_whenUserIsNotOwner_shouldThrowAuthorizationDeniedException() {
         // Arrange
-        when(organizationOwnershipService.isOwner(organizationId, userId)).thenReturn(false);
+        when(ownershipService.isOwner(organizationId, userId)).thenReturn(false);
 
         // Act & Assert
         AuthorizationDeniedException exception = assertThrows(AuthorizationDeniedException.class, () ->
-                eventQueryService.findEventsByOrganization(organizationId, userId, false, null, null, pageable));
+                eventQueryService.findEventsByOrganizationOwner(organizationId, userId, null, null, pageable));
 
         assertEquals("User does not have access to this organization", exception.getMessage());
-        verify(organizationOwnershipService).isOwner(organizationId, userId);
+        verify(ownershipService).isOwner(organizationId, userId);
         // Verify that repository is never called when access is denied
         verify(eventRepository, never()).findByOrganizationIdAndSearchTermAndStatus(any(), any(), any(), any());
     }
