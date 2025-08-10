@@ -4,6 +4,7 @@ import com.ticketly.mseventseating.exception.InvalidStateException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
+import com.ticketly.mseventseating.service.LimitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -22,6 +23,8 @@ public class EventLifecycleService {
     private final EventRepository eventRepository;
     private final EventSchedulingService schedulingService;
     private final EventOwnershipService eventOwnershipService;
+    private final LimitService limitService;
+
 
     /**
      * Approves a pending event submission.
@@ -51,14 +54,21 @@ public class EventLifecycleService {
         // Handle sessions: cancel past sessions, schedule future ones
         int cancelledSessions = 0;
         int scheduledSessions = 0;
+        OffsetDateTime now = OffsetDateTime.now();
+
         for (EventSession session : event.getSessions()) {
-            if (session.getEndTime().isBefore(OffsetDateTime.now())) {
+            // If session start time is in the past, mark it as cancelled
+            if (session.getStartTime().isBefore(now)) {
                 session.setStatus(SessionStatus.CANCELLED);
                 cancelledSessions++;
-                log.warn("Session {} for event {} is in the past and has been automatically cancelled upon approval.",
+                log.warn("Session {} for event {} start time is in the past and has been automatically cancelled upon approval.",
                         session.getId(), event.getId());
             } else {
+                // Session is in the future, mark as scheduled regardless of the on-sale time
+                session.setStatus(SessionStatus.SCHEDULED);
                 scheduledSessions++;
+                log.debug("Session {} for event {} is in the future and will be scheduled for on-sale.",
+                        session.getId(), event.getId());
             }
         }
 
