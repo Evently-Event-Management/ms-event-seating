@@ -405,7 +405,7 @@ class EventQueryServiceTest {
         verify(eventRepository).findByOrganizationIdAndSearchTermAndStatus(
                 organizationId, searchTerm, status, pageable);
         verify(organizationOwnershipService, never())
-                .verifyOwnershipAndGetOrganization(any(), any()); // Admin bypass
+                .isOwner(any(), any()); // Admin bypass
     }
 
     @Test
@@ -415,6 +415,7 @@ class EventQueryServiceTest {
         Page<Event> eventPage = new PageImpl<>(Collections.singletonList(event), pageable, 1);
         when(eventRepository.findByOrganizationIdAndSearchTermAndStatus(
                 eq(organizationId), isNull(), isNull(), eq(pageable))).thenReturn(eventPage);
+        when(organizationOwnershipService.isOwner(organizationId, userId)).thenReturn(true);
 
         // Act
         Page<EventSummaryDTO> result = eventQueryService.findEventsByOrganization(
@@ -423,6 +424,22 @@ class EventQueryServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
-        verify(organizationOwnershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
+        verify(organizationOwnershipService).isOwner(organizationId, userId);
+    }
+
+    @Test
+    @DisplayName("Should throw AuthorizationDeniedException when non-admin user doesn't own the organization")
+    void findEventsByOrganization_whenUserIsNotAdminAndNotOwner_shouldThrowAuthorizationDeniedException() {
+        // Arrange
+        when(organizationOwnershipService.isOwner(organizationId, userId)).thenReturn(false);
+
+        // Act & Assert
+        AuthorizationDeniedException exception = assertThrows(AuthorizationDeniedException.class, () ->
+                eventQueryService.findEventsByOrganization(organizationId, userId, false, null, null, pageable));
+
+        assertEquals("User does not have access to this organization", exception.getMessage());
+        verify(organizationOwnershipService).isOwner(organizationId, userId);
+        // Verify that repository is never called when access is denied
+        verify(eventRepository, never()).findByOrganizationIdAndSearchTermAndStatus(any(), any(), any(), any());
     }
 }

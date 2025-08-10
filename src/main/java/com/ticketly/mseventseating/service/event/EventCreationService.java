@@ -7,7 +7,7 @@ import com.ticketly.mseventseating.factory.EventFactory;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.service.LimitService;
-import com.ticketly.mseventseating.service.OrganizationOwnershipService;
+import com.ticketly.mseventseating.service.OrganizationService;
 import com.ticketly.mseventseating.service.S3StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +28,10 @@ import java.util.UUID;
 public class EventCreationService {
 
     private final EventRepository eventRepository;
-    private final OrganizationOwnershipService ownershipService;
     private final LimitService limitService;
     private final EventFactory eventFactory;
     private final S3StorageService s3StorageService;
+    private final OrganizationService organizationService;
     // private final EventSchedulingService eventSchedulingService; // This would be injected here
 
     @Transactional
@@ -42,7 +42,7 @@ public class EventCreationService {
 
         // 1. Authorization & Validation
         log.debug("Verifying organization ownership for organization ID: {}", request.getOrganizationId());
-        Organization organization = ownershipService.verifyOwnershipAndGetOrganization(request.getOrganizationId(), userId);
+        Organization organization = organizationService.verifyOwnershipAndGetOrganization(request.getOrganizationId(), userId);
 
         log.debug("Validating tier limits for organization: {}", organization.getId());
         validateTierLimits(organization.getId(), jwt, request.getSessions().size());
@@ -111,21 +111,21 @@ public class EventCreationService {
             MultipartFile file = coverImages[i];
             try {
                 log.debug("Processing cover photo {}/{}: size={}KB, contentType={}",
-                        i+1, coverImages.length, file.getSize()/1024, file.getContentType());
+                        i + 1, coverImages.length, file.getSize() / 1024, file.getContentType());
 
                 if (file.isEmpty() || !Objects.requireNonNull(file.getContentType()).startsWith("image/")) {
                     log.warn("Invalid file type detected: {}", file.getContentType());
                     throw new BadRequestException("Invalid file type detected. Please upload only image files.");
                 }
                 if (file.getSize() > maxSize) {
-                    log.warn("File size too large: {}KB, max: {}KB", file.getSize()/1024, maxSize/1024);
+                    log.warn("File size too large: {}KB, max: {}KB", file.getSize() / 1024, maxSize / 1024);
                     throw new BadRequestException("File size exceeds the maximum allowed size of " + (maxSize / (1024 * 1024)) + "MB");
                 }
                 String key = s3StorageService.uploadFile(file, "event-cover-photos");
                 log.debug("Successfully uploaded image to S3, key: {}", key);
                 keys.add(key);
             } catch (IOException e) {
-                log.error("Failed to upload cover image {}/{}", i+1, coverImages.length, e);
+                log.error("Failed to upload cover image {}/{}", i + 1, coverImages.length, e);
                 throw new RuntimeException("Failed to upload cover image.", e);
             }
         }

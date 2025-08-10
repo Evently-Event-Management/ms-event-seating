@@ -85,12 +85,14 @@ public class EventFactory {
     private List<EventSession> buildSessions(List<SessionRequest> sessionRequests, Event event, Map<String, Tier> tierIdMap) {
         List<EventSession> sessions = new ArrayList<>();
         for (SessionRequest req : sessionRequests) {
+            // Serialize the venueDetails DTO to a JSON string.
+            // This object now contains either the online link or physical address.
             String venueDetailsJson = null;
-            if (!req.isOnline() && req.getVenueDetails() != null) {
+            if (req.getVenueDetails() != null) {
                 try {
                     venueDetailsJson = objectMapper.writeValueAsString(req.getVenueDetails());
                 } catch (JsonProcessingException e) {
-                    log.error("Failed to serialize venue details", e);
+                    log.error("Failed to serialize venue details for session", e);
                     throw new BadRequestException("Invalid venue details format.");
                 }
             }
@@ -99,9 +101,8 @@ public class EventFactory {
                     .startTime(req.getStartTime())
                     .endTime(req.getEndTime())
                     .event(event)
-                    .isOnline(req.isOnline())
-                    .onlineLink(req.getOnlineLink())
-                    .venueDetails(venueDetailsJson)
+                    .sessionType(req.getSessionType()) // Use the new enum
+                    .venueDetails(venueDetailsJson) // Set the JSON string
                     .salesStartRuleType(req.getSalesStartRuleType())
                     .salesStartHoursBefore(req.getSalesStartHoursBefore())
                     .salesStartFixedDatetime(req.getSalesStartFixedDatetime())

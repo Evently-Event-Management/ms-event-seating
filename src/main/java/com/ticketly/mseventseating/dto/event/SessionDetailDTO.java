@@ -2,6 +2,7 @@ package com.ticketly.mseventseating.dto.event;
 
 import com.ticketly.mseventseating.model.SalesStartRuleType;
 import com.ticketly.mseventseating.model.SessionStatus;
+import com.ticketly.mseventseating.model.SessionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,8 +19,7 @@ public class SessionDetailDTO {
     private UUID id;
     private OffsetDateTime startTime;
     private OffsetDateTime endTime;
-    private boolean isOnline;
-    private String onlineLink;
+    private SessionType sessionType;
     private VenueDetailsDTO venueDetails;
     private SalesStartRuleType salesStartRuleType;
     private Integer salesStartHoursBefore;

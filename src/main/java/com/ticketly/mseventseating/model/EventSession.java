@@ -38,10 +38,9 @@ public class EventSession {
 
     // --- Session-Specific Location & Sales Rules ---
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean isOnline;
-
-    private String onlineLink;
+    private SessionType sessionType;
 
     // ✅ ADDED: A JSONB column to store embedded physical venue details.
     @JdbcTypeCode(SqlTypes.JSON)

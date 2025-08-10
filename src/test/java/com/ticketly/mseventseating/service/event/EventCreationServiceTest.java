@@ -9,7 +9,7 @@ import com.ticketly.mseventseating.factory.EventFactory;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.service.LimitService;
-import com.ticketly.mseventseating.service.OrganizationOwnershipService;
+import com.ticketly.mseventseating.service.OrganizationService;
 import com.ticketly.mseventseating.service.S3StorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ class EventCreationServiceTest {
     private EventRepository eventRepository;
 
     @Mock
-    private OrganizationOwnershipService ownershipService;
+    private OrganizationService organizationService;
 
     @Mock
     private LimitService limitService;
@@ -170,7 +170,7 @@ class EventCreationServiceTest {
 
         event.setCoverPhotos(expectedCoverPhotos);
 
-        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(organizationService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
@@ -192,7 +192,7 @@ class EventCreationServiceTest {
         assertEquals(organization.getId(), response.getOrganizationId());
 
         // Verify
-        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
+        verify(organizationService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(limitService).getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
         verify(limitService).getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
         verify(eventRepository).countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED);
@@ -206,7 +206,7 @@ class EventCreationServiceTest {
         // Arrange
         List<String> emptyKeys = Collections.emptyList();
 
-        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(organizationService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
@@ -221,7 +221,7 @@ class EventCreationServiceTest {
         assertEquals(event.getId(), response.getId());
 
         // Verify
-        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
+        verify(organizationService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(eventFactory).createFromRequest(createEventRequest, organization, emptyKeys);
         verify(eventRepository).save(event);
         verifyNoInteractions(s3StorageService);
@@ -233,7 +233,7 @@ class EventCreationServiceTest {
         MultipartFile[] emptyCoverImages = new MultipartFile[0];
         List<String> emptyKeys = Collections.emptyList();
 
-        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(organizationService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
@@ -248,7 +248,7 @@ class EventCreationServiceTest {
         assertEquals(event.getId(), response.getId());
 
         // Verify
-        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
+        verify(organizationService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(eventFactory).createFromRequest(createEventRequest, organization, emptyKeys);
         verify(eventRepository).save(event);
         verifyNoInteractions(s3StorageService);
@@ -272,7 +272,7 @@ class EventCreationServiceTest {
 
         event.setCoverPhotos(expectedCoverPhotos);
 
-        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(organizationService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
@@ -303,7 +303,7 @@ class EventCreationServiceTest {
     @Test
     void createEvent_ExceedsActiveEventLimit_ThrowsBadRequestException() {
         // Arrange
-        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(organizationService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
 
@@ -315,7 +315,7 @@ class EventCreationServiceTest {
         assertTrue(exception.getMessage().contains("You have reached the limit of 5 active events"));
 
         // Verify
-        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
+        verify(organizationService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(limitService).getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
         verify(eventRepository).countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED);
         verifyNoInteractions(eventFactory);
@@ -341,7 +341,7 @@ class EventCreationServiceTest {
                 .tiers(new ArrayList<>()) // Initialize empty tiers list to avoid NullPointerException
                 .build();
 
-        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(organizationService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(2); // Limit is 2, but we're trying to create 3
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
@@ -354,7 +354,7 @@ class EventCreationServiceTest {
         assertTrue(exception.getMessage().contains("You cannot create more than 2 sessions per event"));
 
         // Verify
-        verify(ownershipService).verifyOwnershipAndGetOrganization(organizationId, userId);
+        verify(organizationService).verifyOwnershipAndGetOrganization(organizationId, userId);
         verify(limitService).getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt);
         verify(limitService).getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
         verify(eventRepository).countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED);
@@ -372,7 +372,7 @@ class EventCreationServiceTest {
         MockMultipartFile image4 = new MockMultipartFile("coverImages", "image4.jpg", "image/jpeg", "content4".getBytes());
         MultipartFile[] tooManyCoverImages = {image1, image2, image3, image4}; // 4 images, but limit is 3
 
-        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(organizationService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
@@ -397,7 +397,7 @@ class EventCreationServiceTest {
         // Arrange
         MultipartFile[] coverImages = {invalidImageFile}; // PDF, not an image
 
-        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(organizationService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
@@ -422,7 +422,7 @@ class EventCreationServiceTest {
         // Arrange
         MultipartFile[] coverImages = {largeImageFile}; // 6MB, exceeds 5MB limit
 
-        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(organizationService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
@@ -448,7 +448,7 @@ class EventCreationServiceTest {
         // Arrange
         MultipartFile[] coverImages = {validImageFile};
 
-        when(ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
+        when(organizationService.verifyOwnershipAndGetOrganization(organizationId, userId)).thenReturn(organization);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_ACTIVE_EVENTS, jwt)).thenReturn(10);
         when(limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt)).thenReturn(5);
         when(eventRepository.countByOrganizationIdAndStatus(organizationId, EventStatus.APPROVED)).thenReturn(5L);
