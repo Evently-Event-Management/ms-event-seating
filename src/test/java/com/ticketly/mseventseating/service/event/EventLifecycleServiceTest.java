@@ -109,7 +109,7 @@ class EventLifecycleServiceTest {
         // Assert
         assertEquals(EventStatus.APPROVED, event.getStatus());
         assertEquals(SessionStatus.CANCELLED, pastSession.getStatus());
-        assertEquals(SessionStatus.PENDING, futureSession.getStatus()); // Future session should remain pending
+        assertEquals(SessionStatus.SCHEDULED, futureSession.getStatus()); // Future session should remain pending
         verify(eventRepository).findById(eventId);
         verify(schedulingService).scheduleOnSaleJobsForEvent(event);
         verify(eventRepository).save(event);
@@ -259,7 +259,7 @@ class EventLifecycleServiceTest {
         // Assert
         assertEquals(EventStatus.APPROVED, event.getStatus());
         assertEquals(SessionStatus.CANCELLED, pastSession.getStatus());
-        assertEquals(SessionStatus.PENDING, futureSession.getStatus());
+        assertEquals(SessionStatus.SCHEDULED, futureSession.getStatus());
         verify(schedulingService).scheduleOnSaleJobsForEvent(event);
     }
 }
