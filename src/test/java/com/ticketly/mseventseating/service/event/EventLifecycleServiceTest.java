@@ -235,13 +235,12 @@ class EventLifecycleServiceTest {
         // Arrange
         when(eventOwnershipService.isOwner(eventId, userId))
                 .thenReturn(false);
-        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
 
         // Act & Assert
         AuthorizationDeniedException exception = assertThrows(AuthorizationDeniedException.class, () ->
                 eventLifecycleService.deleteEvent(eventId, jwt));
 
-        assertEquals("User does not have access to this event", exception.getMessage());
+        assertEquals("You are not authorized to delete this event.", exception.getMessage());
         verify(eventOwnershipService).isOwner(eventId, userId);
         // Never call findById or delete on the repository
         verify(eventRepository, never()).findById(any());

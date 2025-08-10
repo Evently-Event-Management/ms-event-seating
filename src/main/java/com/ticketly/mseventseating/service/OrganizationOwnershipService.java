@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 import java.util.UUID;
@@ -22,28 +22,23 @@ public class OrganizationOwnershipService {
     private final RedisTemplate<String, Object> redisTemplate;
 
     /**
-     * Finds an organization by its ID and verifies that the given user is the owner.
-     * The result (the Organization object) is cached.
-     * Throws an exception if the organization is not found or if the user is not the owner.
+     * Verifies that a user is the owner of an organization.
+     * The boolean result of this check is cached.
      *
      * @param organizationId the organization ID
      * @param userId         the user ID
-     * @return the Organization entity if checks pass
-     * @throws ResourceNotFoundException    if the organization does not exist
-     * @throws AuthorizationDeniedException if the user does not own the organization
+     * @return true if the user is the owner
+     * @throws ResourceNotFoundException if the organization does not exist
      */
-    @Cacheable(value = "organizations", key = "#organizationId + '-' + #userId")
-    public Organization verifyOwnershipAndGetOrganization(UUID organizationId, String userId) {
-        log.info("--- DATABASE HIT: Verifying ownership and fetching org ID: {} ---", organizationId);
+    @Cacheable(value = "organizationOwnership", key = "#organizationId + '-' + #userId")
+    @Transactional(readOnly = true)
+    public boolean isOwner(UUID organizationId, String userId) {
+        log.info("--- DATABASE HIT: Verifying organization ownership for org ID: {} ---", organizationId);
 
         Organization organization = organizationRepository.findById(organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found with id: " + organizationId));
 
-        if (!organization.getUserId().equals(userId)) {
-            throw new AuthorizationDeniedException("User does not have access to this organization");
-        }
-
-        return organization;
+        return organization.getUserId().equals(userId);
     }
 
     /**
@@ -53,7 +48,7 @@ public class OrganizationOwnershipService {
      * @param organizationId the ID of the organization to evict from the cache
      */
     public void evictOrganizationCacheById(UUID organizationId) {
-        Set<String> keys = redisTemplate.keys("event-seating-ms::organizations::" + organizationId + "-*");
+        Set<String> keys = redisTemplate.keys("event-seating-ms::organizationOwnership::" + organizationId + "-*");
         if (!keys.isEmpty()) {
             redisTemplate.delete(keys);
             log.debug("Evicted organization cache for ID: {}", organizationId);

@@ -3,12 +3,14 @@ package com.ticketly.mseventseating.service;
 import com.ticketly.mseventseating.dto.organization.OrganizationRequest;
 import com.ticketly.mseventseating.dto.organization.OrganizationResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
+import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.model.SubscriptionLimitType;
 import com.ticketly.mseventseating.repository.OrganizationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +55,7 @@ public class OrganizationService {
     @Transactional(readOnly = true)
     public OrganizationResponse getOrganizationById(UUID id, String userId) {
         // A single, cached call for verification and retrieval.
-        Organization organization = ownershipService.verifyOwnershipAndGetOrganization(id, userId);
+        Organization organization = verifyOwnershipAndGetOrganization(id, userId);
         return mapToDto(organization);
     }
 
@@ -96,14 +98,13 @@ public class OrganizationService {
     @Transactional
     @CacheEvict(value = "organizations", key = "#id")
     public OrganizationResponse updateOrganization(UUID id, OrganizationRequest request, String userId) {
-        Organization organization = ownershipService.verifyOwnershipAndGetOrganization(id, userId);
+        Organization organization = verifyOwnershipAndGetOrganization(id, userId);
 
         organization.setName(request.getName());
         organization.setWebsite(request.getWebsite());
 
         Organization updatedOrganization = organizationRepository.save(organization);
         log.info("Updated organization with ID: {}", updatedOrganization.getId());
-        ownershipService.evictOrganizationCacheById(id);
         return mapToDto(updatedOrganization);
     }
 
@@ -127,7 +128,7 @@ public class OrganizationService {
                     (maxLogoSize / (1024 * 1024)) + "MB");
         }
 
-        Organization organization = ownershipService.verifyOwnershipAndGetOrganization(id, userId);
+        Organization organization = verifyOwnershipAndGetOrganization(id, userId);
 
         if (organization.getLogoUrl() != null) {
             s3StorageService.deleteFile(organization.getLogoUrl());
@@ -137,7 +138,6 @@ public class OrganizationService {
         organization.setLogoUrl(logoKey);
 
         Organization updatedOrganization = organizationRepository.save(organization);
-        ownershipService.evictOrganizationCacheById(id);
         log.info("Uploaded logo for organization with ID: {}", updatedOrganization.getId());
         return mapToDto(updatedOrganization);
     }
@@ -151,13 +151,12 @@ public class OrganizationService {
     @Transactional
     @CacheEvict(value = "organizations", key = "#id")
     public void removeLogo(UUID id, String userId) {
-        Organization organization = ownershipService.verifyOwnershipAndGetOrganization(id, userId);
+        Organization organization = verifyOwnershipAndGetOrganization(id, userId);
 
         if (organization.getLogoUrl() != null) {
             s3StorageService.deleteFile(organization.getLogoUrl());
             organization.setLogoUrl(null);
             organizationRepository.save(organization);
-            ownershipService.evictOrganizationCacheById(id);
             log.info("Removed logo for organization with ID: {}", id);
         }
     }
@@ -170,7 +169,7 @@ public class OrganizationService {
      */
     @Transactional
     public void deleteOrganization(UUID id, String userId) {
-        Organization organization = ownershipService.verifyOwnershipAndGetOrganization(id, userId);
+        Organization organization = verifyOwnershipAndGetOrganization(id, userId);
 
         if (organization.getLogoUrl() != null) {
             s3StorageService.deleteFile(organization.getLogoUrl());
@@ -202,5 +201,16 @@ public class OrganizationService {
     // Replace @Value annotation with LimitService
     private long getMaxLogoSize() {
         return limitService.getOrganizationConfig().getMaxLogoSize();
+    }
+
+    public Organization verifyOwnershipAndGetOrganization(UUID organizationId, String userId) {
+        // First check ownership using the cached method
+        if (!ownershipService.isOwner(organizationId, userId)) {
+            throw new AuthorizationDeniedException("User does not have access to this organization");
+        }
+
+        // If the user is the owner, return the organization
+        return organizationRepository.findById(organizationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found with id: " + organizationId));
     }
 }

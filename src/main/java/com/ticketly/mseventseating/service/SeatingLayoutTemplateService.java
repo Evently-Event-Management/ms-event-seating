@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +34,9 @@ public class SeatingLayoutTemplateService {
     private final SeatingLayoutTemplateRepository seatingLayoutTemplateRepository;
     private final ObjectMapper objectMapper;
     private final OrganizationOwnershipService ownershipService;
+    private final SeatingLayoutTemplateOwnershipService templateOwnershipService;
     private final LimitService limitService;
+    private final OrganizationService organizationService;
 
     private int getGap() {
         return limitService.getSeatingLayoutConfig().getDefaultGap();
@@ -52,8 +55,11 @@ public class SeatingLayoutTemplateService {
             String userId,
             int page,
             int size) {
-        // A single, cached call for both verification and existence check.
-        ownershipService.verifyOwnershipAndGetOrganization(organizationId, userId);
+
+        // Verify the user owns the organization
+        if (!ownershipService.isOwner(organizationId, userId)) {
+            throw new AuthorizationDeniedException("You don't have permission to access this organization's templates");
+        }
 
         if (size <= 0) {
             size = getDefaultPageSize();
@@ -70,9 +76,12 @@ public class SeatingLayoutTemplateService {
      */
     @Transactional(readOnly = true)
     public SeatingLayoutTemplateDTO getTemplateById(UUID id, String userId) {
+        // Check if the user is the owner of the template's organization
+        if (!templateOwnershipService.isOwner(id, userId)) {
+            throw new AuthorizationDeniedException("You don't have permission to access this template");
+        }
+
         SeatingLayoutTemplate template = findTemplateById(id);
-        // Verify the user has access to the organization that owns this template.
-        ownershipService.verifyOwnershipAndGetOrganization(template.getOrganization().getId(), userId);
         return convertToDTO(template);
     }
 
@@ -81,8 +90,8 @@ public class SeatingLayoutTemplateService {
      */
     @Transactional
     public SeatingLayoutTemplateDTO createTemplate(SeatingLayoutTemplateRequest request, String userId, Jwt jwt) {
-        // One call gets the Organization object and verifies ownership.
-        Organization organization = ownershipService.verifyOwnershipAndGetOrganization(request.getOrganizationId(), userId);
+        // Get the organization
+        Organization organization = organizationService.verifyOwnershipAndGetOrganization(request.getOrganizationId(), userId);
 
         long currentTemplateCount = seatingLayoutTemplateRepository.countByOrganizationId(organization.getId());
         int maxTemplates = limitService.getTierLimit(SubscriptionLimitType.MAX_SEATING_LAYOUTS_PER_ORG, jwt);
@@ -119,9 +128,12 @@ public class SeatingLayoutTemplateService {
      */
     @Transactional
     public SeatingLayoutTemplateDTO updateTemplate(UUID id, SeatingLayoutTemplateRequest request, String userId) {
+        // Check if the user is the owner of the template
+        if (!templateOwnershipService.isOwner(id, userId)) {
+            throw new AuthorizationDeniedException("You don't have permission to update this template");
+        }
+
         SeatingLayoutTemplate template = findTemplateById(id);
-        // Verify user has access to the template's current organization.
-        ownershipService.verifyOwnershipAndGetOrganization(template.getOrganization().getId(), userId);
 
         // Verify the requested organization ID matches the template's current organization ID.
         if (!template.getOrganization().getId().equals(request.getOrganizationId())) {
@@ -149,10 +161,16 @@ public class SeatingLayoutTemplateService {
      */
     @Transactional
     public void deleteTemplate(UUID id, String userId) {
+        // Check if the user is the owner of the template
+        if (!templateOwnershipService.isOwner(id, userId)) {
+            throw new AuthorizationDeniedException("You don't have permission to delete this template");
+        }
+
         SeatingLayoutTemplate template = findTemplateById(id);
-        // Verify user has access before deleting.
-        ownershipService.verifyOwnershipAndGetOrganization(template.getOrganization().getId(), userId);
         seatingLayoutTemplateRepository.delete(template);
+
+        // Evict the template from cache
+        templateOwnershipService.evictTemplateCacheById(id);
     }
 
     private SeatingLayoutTemplate findTemplateById(UUID id) {

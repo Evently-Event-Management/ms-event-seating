@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.*;
 import com.ticketly.mseventseating.dto.event.SessionSeatingMapDTO;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
-import com.ticketly.mseventseating.model.Event;
-import com.ticketly.mseventseating.model.EventSession;
-import com.ticketly.mseventseating.model.EventStatus;
-import com.ticketly.mseventseating.model.Tier;
+import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.service.OrganizationOwnershipService;
 import com.ticketly.mseventseating.service.S3StorageService;
@@ -34,7 +31,7 @@ public class EventQueryService {
     private final EventRepository eventRepository;
     private final EventOwnershipService eventOwnershipService;
     private final ObjectMapper objectMapper;
-    private final OrganizationOwnershipService organizationOwnershipService;
+    private final OrganizationOwnershipService ownershipService;
     private final S3StorageService s3StorageService;
 
 
@@ -160,7 +157,11 @@ public class EventQueryService {
 
         if (!isAdmin) {
             log.debug("Verifying organization ownership for user: {} on organization: {}", userId, organizationId);
-            organizationOwnershipService.verifyOwnershipAndGetOrganization(organizationId, userId);
+            // Verify ownership using the cached method
+            if (!ownershipService.isOwner(organizationId, userId)) {
+                log.warn("User: {} does not have access to organization: {}", userId, organizationId);
+                throw new AuthorizationDeniedException("User does not have access to this organization");
+            }
         }
 
         searchTerm = (searchTerm != null && !searchTerm.trim().isEmpty())
