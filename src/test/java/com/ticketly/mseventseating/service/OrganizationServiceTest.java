@@ -108,14 +108,14 @@ class OrganizationServiceTest {
     }
 
     @Test
-    void getOrganizationById_whenUserIsOwner_shouldReturnOrganization() {
+    void getOrganizationById_whenUserIsOwner_shouldReturnOrganizationAndUser() {
         // Arrange
         when(ownershipService.isOwner(ORG_ID, USER_ID)).thenReturn(true);
         when(organizationRepository.findById(ORG_ID)).thenReturn(Optional.of(organization));
         when(s3StorageService.generatePresignedUrl(LOGO_URL, 60)).thenReturn(PRESIGNED_URL);
 
         // Act
-        OrganizationResponse result = organizationService.getOrganizationById(ORG_ID, USER_ID);
+        OrganizationResponse result = organizationService.getOrganizationByIdOwner(ORG_ID, USER_ID);
 
         // Assert
         assertNotNull(result);
@@ -127,13 +127,13 @@ class OrganizationServiceTest {
     }
 
     @Test
-    void getOrganizationById_whenUserIsNotOwner_shouldThrowAuthorizationDeniedException() {
+    void getOrganizationById_AndUser_whenUserIsNotOwner_shouldThrowAuthorizationDeniedException() {
         // Arrange
         when(ownershipService.isOwner(ORG_ID, USER_ID)).thenReturn(false);
 
         // Act & Assert
         assertThrows(AuthorizationDeniedException.class, () ->
-                organizationService.getOrganizationById(ORG_ID, USER_ID));
+                organizationService.getOrganizationByIdOwner(ORG_ID, USER_ID));
 
         verify(ownershipService).isOwner(ORG_ID, USER_ID);
         verifyNoMoreInteractions(organizationRepository);

@@ -99,10 +99,9 @@ public class EventLifecycleService {
      * Only events with PENDING status can be deleted, and only by the organization owner.
      *
      * @param eventId the event to delete
-     * @param jwt     the JWT containing user information
+     * @param userId  the ID of the user performing the deletion
      */
-    public void deleteEvent(UUID eventId, Jwt jwt) {
-        String userId = jwt.getSubject();
+    public void deleteEvent(UUID eventId, String userId) {
         log.info("Deleting event ID: {} by user: {}", eventId, userId);
 
         // Only organization owners can delete events, no admin bypass

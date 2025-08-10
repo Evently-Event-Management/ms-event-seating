@@ -33,37 +33,50 @@ public class OrganizationService {
     private final LimitService limitService;
 
     /**
-     * Get all organizations for the current user.
+     * Get all organizations owned by the specified user.
      *
-     * @param userId the ID of the current user
+     * @param userId the ID of the user
      * @return List of organization responses
      */
     @Transactional(readOnly = true)
     public List<OrganizationResponse> getAllOrganizationsForUser(String userId) {
+        // No misleading log here, so unchanged.
         return organizationRepository.findByUserId(userId).stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Get an organization by ID, ensuring the requesting user is the owner.
+     * Get organization details by ID (admin access, no ownership check).
+     *
+     * @param id the organization ID
+     * @return the organization response
+     */
+    public OrganizationResponse getOrganizationById(UUID id) {
+        // No misleading log here, so unchanged.
+        return organizationRepository.findById(id)
+                .map(this::mapToDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found with id: " + id));
+    }
+
+    /**
+     * Get organization details by ID for the owner.
      *
      * @param id     the organization ID
      * @param userId the ID of the requesting user
      * @return the organization response
      */
     @Transactional(readOnly = true)
-    public OrganizationResponse getOrganizationById(UUID id, String userId) {
-        // A single, cached call for verification and retrieval.
+    public OrganizationResponse getOrganizationByIdOwner(UUID id, String userId) {
         Organization organization = verifyOwnershipAndGetOrganization(id, userId);
         return mapToDto(organization);
     }
 
     /**
-     * Create a new organization for the current user.
+     * Create a new organization for the specified user.
      *
      * @param request the organization request
-     * @param userId  the ID of the current user
+     * @param userId  the ID of the user
      * @param jwt     the user's JWT for tier checking
      * @return the created organization response
      */
@@ -83,16 +96,16 @@ public class OrganizationService {
                 .build();
 
         Organization savedOrganization = organizationRepository.save(organization);
-        log.info("Created new organization with ID: {}", savedOrganization.getId());
+        log.info("Organization created. ID: {}, Owner: {}", savedOrganization.getId(), userId);
         return mapToDto(savedOrganization);
     }
 
     /**
-     * Update an existing organization. Evicts the cache for this organization.
+     * Update organization details for the owner. Evicts the cache for this organization.
      *
      * @param id      the organization ID
      * @param request the updated organization details
-     * @param userId  the ID of the current user
+     * @param userId  the ID of the user
      * @return the updated organization response
      */
     @Transactional
@@ -104,16 +117,16 @@ public class OrganizationService {
         organization.setWebsite(request.getWebsite());
 
         Organization updatedOrganization = organizationRepository.save(organization);
-        log.info("Updated organization with ID: {}", updatedOrganization.getId());
+        log.info("Organization updated. ID: {}, Owner: {}", updatedOrganization.getId(), userId);
         return mapToDto(updatedOrganization);
     }
 
     /**
-     * Upload a logo for an organization. Evicts the cache for this organization.
+     * Upload a logo for the organization. Evicts the cache for this organization.
      *
      * @param id       the organization ID
      * @param logoFile the logo file to upload
-     * @param userId   the ID of the current user
+     * @param userId   the ID of the user
      * @return the updated organization response
      */
     @Transactional
@@ -138,15 +151,15 @@ public class OrganizationService {
         organization.setLogoUrl(logoKey);
 
         Organization updatedOrganization = organizationRepository.save(organization);
-        log.info("Uploaded logo for organization with ID: {}", updatedOrganization.getId());
+        log.info("Logo uploaded for organization. ID: {}, Owner: {}", updatedOrganization.getId(), userId);
         return mapToDto(updatedOrganization);
     }
 
     /**
-     * Remove the logo for an organization. Evicts the cache for this organization.
+     * Remove the logo from the organization. Evicts the cache for this organization.
      *
      * @param id     the organization ID
-     * @param userId the ID of the current user
+     * @param userId the ID of the user
      */
     @Transactional
     @CacheEvict(value = "organizations", key = "#id")
@@ -157,15 +170,15 @@ public class OrganizationService {
             s3StorageService.deleteFile(organization.getLogoUrl());
             organization.setLogoUrl(null);
             organizationRepository.save(organization);
-            log.info("Removed logo for organization with ID: {}", id);
+            log.info("Logo removed from organization. ID: {}, Owner: {}", id, userId);
         }
     }
 
     /**
-     * Delete an organization. Evicts the cache for this organization.
+     * Delete the organization for the owner. Evicts the cache for this organization.
      *
      * @param id     the organization ID
-     * @param userId the ID of the current user
+     * @param userId the ID of the user
      */
     @Transactional
     public void deleteOrganization(UUID id, String userId) {
@@ -177,7 +190,7 @@ public class OrganizationService {
 
         organizationRepository.delete(organization);
         ownershipService.evictOrganizationCacheById(id);
-        log.info("Deleted organization with ID: {}", id);
+        log.info("Organization deleted. ID: {}, Owner: {}", id, userId);
     }
 
     /**

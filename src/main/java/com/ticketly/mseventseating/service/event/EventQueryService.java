@@ -34,33 +34,9 @@ public class EventQueryService {
     private final OrganizationOwnershipService ownershipService;
     private final S3StorageService s3StorageService;
 
-
-    /**
-     * Finds all events with optional status filtering
-     *
-     * @param status   Filter by status (optional)
-     * @param pageable Pagination information
-     * @return Page of event summaries
-     */
-    @Transactional(readOnly = true)
-    public Page<EventSummaryDTO> findAllEvents(EventStatus status, Pageable pageable) {
-        log.info("Finding events with status: {}, page: {}, size: {}", status,
-                pageable.getPageNumber(), pageable.getPageSize());
-        Page<Event> eventPage;
-
-        if (status != null) {
-            eventPage = eventRepository.findAllByStatus(status, pageable);
-        } else {
-            eventPage = eventRepository.findAll(pageable);
-        }
-
-        Page<EventSummaryDTO> result = eventPage.map(this::mapToEventSummary);
-        log.debug("Found {} events in page {}", result.getNumberOfElements(), result.getNumber());
-        return result;
-    }
-
     /**
      * Finds all events with optional status filtering and search term
+     * This method is typically used by admin users who can view all events across organizations
      *
      * @param status     Filter by status (optional)
      * @param searchTerm Search in title and description (optional)
@@ -69,80 +45,108 @@ public class EventQueryService {
      */
     @Transactional(readOnly = true)
     public Page<EventSummaryDTO> findAllEvents(EventStatus status, String searchTerm, Pageable pageable) {
-        log.info("Finding events with status: {}, searchTerm: '{}', page: {}, size: {}",
+        log.info("Admin query: Finding all events with status: {}, searchTerm: '{}', page: {}, size: {}",
                 status, searchTerm, pageable.getPageNumber(), pageable.getPageSize());
         Page<Event> eventPage;
 
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
             // If search term is provided, use the search method
             eventPage = eventRepository.findBySearchTermAndStatus(searchTerm.trim(), status, pageable);
-            log.debug("Searching with term: '{}'", searchTerm.trim());
+            log.debug("Admin search with term: '{}'", searchTerm.trim());
         } else if (status != null) {
             // If only status filter is provided
             eventPage = eventRepository.findAllByStatus(status, pageable);
-            log.debug("Filtering by status: {}", status);
+            log.debug("Admin filtering by status: {}", status);
         } else {
             // No filters
             eventPage = eventRepository.findAll(pageable);
-            log.debug("No search filters applied");
+            log.debug("Admin retrieving all events without filters");
         }
 
         Page<EventSummaryDTO> result = eventPage.map(this::mapToEventSummary);
-        log.debug("Found {} events in page {} matching criteria", result.getNumberOfElements(), result.getNumber());
+        log.debug("Admin query found {} events in page {} matching criteria", result.getNumberOfElements(), result.getNumber());
         return result;
     }
 
     /**
      * Finds a specific event by ID with all its details
-     * Checks if the user has permission to access this event.
-     * Admin users bypass the organization ownership check.
+     * Performs ownership verification to ensure the user has permission to access this event
      *
      * @param eventId Event ID
      * @param userId  The ID of the requesting user
-     * @param isAdmin Whether the user has admin privileges
      * @return Detailed event information
+     * @throws AuthorizationDeniedException if the user doesn't own the event
+     * @throws ResourceNotFoundException if the event doesn't exist
      */
     @Transactional(readOnly = true)
-    public EventDetailDTO findEventById(UUID eventId, String userId, boolean isAdmin) {
-        log.info("Finding event details for ID: {} by user: {} (admin: {})", eventId, userId, isAdmin);
+    public EventDetailDTO findEventByIdOwner(UUID eventId, String userId) {
+        log.info("User {} requesting event details for ID: {}", userId, eventId);
 
-        if (!isAdmin) {
-            // 1. Perform the fast, cached ownership check first.
-            if (!eventOwnershipService.isOwner(eventId, userId)) {
-                // If the cached check fails, we know they don't have access.
-                throw new AuthorizationDeniedException("You don't have permission to access this event");
-            }
+        // 1. Perform the fast, cached ownership check first.
+        if (!eventOwnershipService.isOwner(eventId, userId)) {
+            log.warn("Access denied: User {} is not authorized to access event {}", userId, eventId);
+            throw new AuthorizationDeniedException("You don't have permission to access this event");
         }
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with ID: " + eventId));
 
-        log.debug("Successfully retrieved event: {}", eventId);
+        log.debug("User {} successfully retrieved owned event: {}", userId, eventId);
         return mapToEventDetail(event);
     }
 
     /**
-     * Finds a specific event by ID with all its details (simplified method without authorization)
-     * This should only be used when authorization is already handled at the controller level or for M2M queries.
+     * Finds a specific event by ID with all its details without authorization checks
+     * This method is intended for admin-level access only
      *
      * @param eventId Event ID
      * @return Detailed event information
+     * @throws ResourceNotFoundException if the event doesn't exist
      */
     @Transactional(readOnly = true)
     public EventDetailDTO findEventById(UUID eventId) {
-        log.info("Finding event details for ID: {} (no authorization check)", eventId);
+        log.info("Admin query: Finding event details for ID: {}", eventId);
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> {
                     log.warn("Event not found with ID: {}", eventId);
                     return new ResourceNotFoundException("Event not found with ID: " + eventId);
                 });
 
-        log.debug("Successfully retrieved event: {} with title: '{}'", eventId, event.getTitle());
+        log.debug("Admin successfully retrieved event: {} with title: '{}'", eventId, event.getTitle());
         return mapToEventDetail(event);
     }
 
     /**
-     * Finds events for a specific organization with optional search term and status filtering
+     * Finds events for a specific organization with ownership verification
+     * Ensures the requesting user has permission to access this organization's events
+     *
+     * @param organizationId The organization ID
+     * @param userId         The ID of the requesting user
+     * @param status         Filter by status (optional)
+     * @param searchTerm     Search in title and description (optional)
+     * @param pageable       Pagination information
+     * @return Page of event summaries
+     * @throws AuthorizationDeniedException if the user doesn't have access to the organization
+     */
+    @Transactional(readOnly = true)
+    public Page<EventSummaryDTO> findEventsByOrganizationOwner(UUID organizationId, String userId, EventStatus status, String searchTerm, Pageable pageable) {
+        log.info("User {} requesting events for organization: {}, status: {}, searchTerm: '{}'",
+                userId, organizationId, status, searchTerm);
+
+        log.debug("Verifying organization ownership for user: {} on organization: {}", userId, organizationId);
+        // Verify ownership using the cached method
+        if (!ownershipService.isOwner(organizationId, userId)) {
+            log.warn("Access denied: User {} is not authorized to access organization {}", userId, organizationId);
+            throw new AuthorizationDeniedException("User does not have access to this organization");
+        }
+
+        return getEventSummaryDTOS(organizationId, status, searchTerm, pageable);
+    }
+
+
+    /**
+     * Finds events for a specific organization without ownership verification
+     * This method is intended for admin-level access only
      *
      * @param organizationId The organization ID
      * @param status         Filter by status (optional)
@@ -151,19 +155,14 @@ public class EventQueryService {
      * @return Page of event summaries
      */
     @Transactional(readOnly = true)
-    public Page<EventSummaryDTO> findEventsByOrganization(UUID organizationId, String userId, boolean isAdmin, EventStatus status, String searchTerm, Pageable pageable) {
-        log.info("Finding events for organization: {}, by user: {} (admin: {}), status: {}, searchTerm: '{}'",
-                organizationId, userId, isAdmin, status, searchTerm);
+    public Page<EventSummaryDTO> findEventsByOrganization(UUID organizationId, EventStatus status, String searchTerm, Pageable pageable) {
+        log.info("Admin query: Finding events for organization: {} status: {}, searchTerm: '{}'",
+                organizationId, status, searchTerm);
 
-        if (!isAdmin) {
-            log.debug("Verifying organization ownership for user: {} on organization: {}", userId, organizationId);
-            // Verify ownership using the cached method
-            if (!ownershipService.isOwner(organizationId, userId)) {
-                log.warn("User: {} does not have access to organization: {}", userId, organizationId);
-                throw new AuthorizationDeniedException("User does not have access to this organization");
-            }
-        }
+        return getEventSummaryDTOS(organizationId, status, searchTerm, pageable);
+    }
 
+    private Page<EventSummaryDTO> getEventSummaryDTOS(UUID organizationId, EventStatus status, String searchTerm, Pageable pageable) {
         searchTerm = (searchTerm != null && !searchTerm.trim().isEmpty())
                 ? searchTerm.trim()
                 : null;
