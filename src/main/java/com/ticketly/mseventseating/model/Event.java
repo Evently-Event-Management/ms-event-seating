@@ -1,12 +1,14 @@
 package com.ticketly.mseventseating.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -24,11 +26,8 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false)
+    @JsonBackReference("organization-events")
     private Organization organization;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "venue_id")
-    private Venue venue;
 
     @Column(nullable = false)
     private String title;
@@ -39,10 +38,10 @@ public class Event {
     @Column(columnDefinition = "TEXT")
     private String overview;
 
-    @ElementCollection
-    @CollectionTable(name = "event_cover_photos", joinColumns = @JoinColumn(name = "event_id"))
-    @Column(name = "photo_url")
-    private List<String> coverPhotos;
+    // ✅ Changed from @ElementCollection to @OneToMany
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("event-photos")
+    private List<EventCoverPhoto> coverPhotos;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -51,45 +50,21 @@ public class Event {
 
     private String rejectionReason;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private boolean isOnline = false;
-
-    private String onlineLink;
-
-    private String locationDescription;
-
-    // --- Rolling Sales Window Rules ---
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Builder.Default
-    private SalesStartRuleType salesStartRuleType = SalesStartRuleType.IMMEDIATE;
-
-    @Column(name = "sales_start_days_before")
-    private Integer salesStartDaysBefore;
-
-    @Column(name = "sales_start_fixed_datetime")
-    private OffsetDateTime salesStartFixedDatetime;
-    // --- End of Sales Window Rules ---
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
+    @UpdateTimestamp
+    private OffsetDateTime updatedAt;
+
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("event-tiers")
     private List<Tier> tiers;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "event_categories",
-            joinColumns = @JoinColumn(name = "event_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
-    private Set<Category> categories;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EventSession> sessions;
-
-    @OneToOne(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private EventSeatingMap eventSeatingMap;
 }

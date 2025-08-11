@@ -1,0 +1,4627 @@
+{
+  "title": "Weekly Party",
+  "description": "This is a weekley Event",
+  "overview": "Drink what ever you want and 18+",
+  "organizationId": "1214e2f4-7d3a-4b5f-9ea9-59897e8eab97",
+  "categoryId": "2d70bece-b651-49d9-99ea-b1e1655ad77d",
+  "tiers": [
+    {
+      "id": "default_tier_1754683849610",
+      "name": "General",
+      "price": 100,
+      "color": "#3B82F6"
+    },
+    {
+      "id": "temp_tier_1754683864818",
+      "name": "VIP",
+      "price": 200,
+      "color": "#a16a1b"
+    }
+  ],
+  "sessions": [
+    {
+      "startTime": "2025-08-11T12:30:00.000Z",
+      "endTime": "2025-08-11T16:30:00.000Z",
+      "isOnline": true,
+      "salesStartRuleType": "ROLLING",
+      "salesStartHoursBefore": 168,
+      "salesStartFixedDatetime": "2025-08-08T20:11:24.793Z",
+      "layoutData": {
+        "name": "Online Event Capacity",
+        "layout": {
+          "blocks": [
+            {
+              "id": "temp_block_1754683977789",
+              "name": "Online Attendees",
+              "type": "standing_capacity",
+              "position": {
+                "x": 0,
+                "y": 0
+              },
+              "capacity": 100,
+              "seats": [
+                {
+                  "id": "temp_seat_0",
+                  "label": "Slot 1",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_1",
+                  "label": "Slot 2",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_2",
+                  "label": "Slot 3",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_3",
+                  "label": "Slot 4",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_4",
+                  "label": "Slot 5",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_5",
+                  "label": "Slot 6",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_6",
+                  "label": "Slot 7",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_7",
+                  "label": "Slot 8",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_8",
+                  "label": "Slot 9",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_9",
+                  "label": "Slot 10",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_10",
+                  "label": "Slot 11",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_11",
+                  "label": "Slot 12",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_12",
+                  "label": "Slot 13",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_13",
+                  "label": "Slot 14",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_14",
+                  "label": "Slot 15",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_15",
+                  "label": "Slot 16",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_16",
+                  "label": "Slot 17",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_17",
+                  "label": "Slot 18",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_18",
+                  "label": "Slot 19",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_19",
+                  "label": "Slot 20",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_20",
+                  "label": "Slot 21",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_21",
+                  "label": "Slot 22",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_22",
+                  "label": "Slot 23",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_23",
+                  "label": "Slot 24",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_24",
+                  "label": "Slot 25",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_25",
+                  "label": "Slot 26",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_26",
+                  "label": "Slot 27",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_27",
+                  "label": "Slot 28",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_28",
+                  "label": "Slot 29",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_29",
+                  "label": "Slot 30",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_30",
+                  "label": "Slot 31",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_31",
+                  "label": "Slot 32",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_32",
+                  "label": "Slot 33",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_33",
+                  "label": "Slot 34",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_34",
+                  "label": "Slot 35",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_35",
+                  "label": "Slot 36",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_36",
+                  "label": "Slot 37",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_37",
+                  "label": "Slot 38",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_38",
+                  "label": "Slot 39",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_39",
+                  "label": "Slot 40",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_40",
+                  "label": "Slot 41",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_41",
+                  "label": "Slot 42",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_42",
+                  "label": "Slot 43",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_43",
+                  "label": "Slot 44",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_44",
+                  "label": "Slot 45",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_45",
+                  "label": "Slot 46",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_46",
+                  "label": "Slot 47",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_47",
+                  "label": "Slot 48",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_48",
+                  "label": "Slot 49",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_49",
+                  "label": "Slot 50",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_50",
+                  "label": "Slot 51",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_51",
+                  "label": "Slot 52",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_52",
+                  "label": "Slot 53",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_53",
+                  "label": "Slot 54",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_54",
+                  "label": "Slot 55",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_55",
+                  "label": "Slot 56",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_56",
+                  "label": "Slot 57",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_57",
+                  "label": "Slot 58",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_58",
+                  "label": "Slot 59",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_59",
+                  "label": "Slot 60",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_60",
+                  "label": "Slot 61",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_61",
+                  "label": "Slot 62",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_62",
+                  "label": "Slot 63",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_63",
+                  "label": "Slot 64",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_64",
+                  "label": "Slot 65",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_65",
+                  "label": "Slot 66",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_66",
+                  "label": "Slot 67",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_67",
+                  "label": "Slot 68",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_68",
+                  "label": "Slot 69",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_69",
+                  "label": "Slot 70",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_70",
+                  "label": "Slot 71",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_71",
+                  "label": "Slot 72",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_72",
+                  "label": "Slot 73",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_73",
+                  "label": "Slot 74",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_74",
+                  "label": "Slot 75",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_75",
+                  "label": "Slot 76",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_76",
+                  "label": "Slot 77",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_77",
+                  "label": "Slot 78",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_78",
+                  "label": "Slot 79",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_79",
+                  "label": "Slot 80",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_80",
+                  "label": "Slot 81",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_81",
+                  "label": "Slot 82",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_82",
+                  "label": "Slot 83",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_83",
+                  "label": "Slot 84",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_84",
+                  "label": "Slot 85",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_85",
+                  "label": "Slot 86",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_86",
+                  "label": "Slot 87",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_87",
+                  "label": "Slot 88",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_88",
+                  "label": "Slot 89",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_89",
+                  "label": "Slot 90",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_90",
+                  "label": "Slot 91",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_91",
+                  "label": "Slot 92",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_92",
+                  "label": "Slot 93",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_93",
+                  "label": "Slot 94",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_94",
+                  "label": "Slot 95",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_95",
+                  "label": "Slot 96",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_96",
+                  "label": "Slot 97",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_97",
+                  "label": "Slot 98",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_98",
+                  "label": "Slot 99",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                },
+                {
+                  "id": "temp_seat_99",
+                  "label": "Slot 100",
+                  "tierId": "default_tier_1754683849610",
+                  "status": "AVAILABLE"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "onlineLink": "https://zoom.com"
+    },
+    {
+      "startTime": "2025-08-18T12:30:00.000Z",
+      "endTime": "2025-08-18T16:30:00.000Z",
+      "isOnline": false,
+      "salesStartRuleType": "ROLLING",
+      "salesStartHoursBefore": 168,
+      "salesStartFixedDatetime": "2025-08-08T20:11:24.793Z",
+      "layoutData": {
+        "name": "Main Hall - Ananda College",
+        "layout": {
+          "blocks": [
+            {
+              "id": "71a1c1b3-8a9c-454f-888a-6803d9bfe512",
+              "name": "New seated grid",
+              "type": "seated_grid",
+              "position": {
+                "x": 144.20001220703125,
+                "y": 131.39999389648438
+              },
+              "rows": [
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0",
+                  "label": "A",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_0",
+                      "label": "1A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_1",
+                      "label": "2A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_2",
+                      "label": "3A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_3",
+                      "label": "4A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_4",
+                      "label": "5A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_5",
+                      "label": "6A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_6",
+                      "label": "7A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_7",
+                      "label": "8A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_8",
+                      "label": "9A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_9",
+                      "label": "10A",
+                      "status": "RESERVED"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1",
+                  "label": "B",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_0",
+                      "label": "1B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_1",
+                      "label": "2B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_2",
+                      "label": "3B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_3",
+                      "label": "4B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_4",
+                      "label": "5B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_5",
+                      "label": "6B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_6",
+                      "label": "7B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_7",
+                      "label": "8B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_8",
+                      "label": "9B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_9",
+                      "label": "10B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2",
+                  "label": "C",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_0",
+                      "label": "1C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_1",
+                      "label": "2C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_2",
+                      "label": "3C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_3",
+                      "label": "4C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_4",
+                      "label": "5C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_5",
+                      "label": "6C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_6",
+                      "label": "7C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_7",
+                      "label": "8C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_8",
+                      "label": "9C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_9",
+                      "label": "10C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3",
+                  "label": "D",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_0",
+                      "label": "1D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_1",
+                      "label": "2D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_2",
+                      "label": "3D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_3",
+                      "label": "4D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_4",
+                      "label": "5D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_5",
+                      "label": "6D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_6",
+                      "label": "7D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_7",
+                      "label": "8D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_8",
+                      "label": "9D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_9",
+                      "label": "10D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4",
+                  "label": "E",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_0",
+                      "label": "1E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_1",
+                      "label": "2E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_2",
+                      "label": "3E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_3",
+                      "label": "4E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_4",
+                      "label": "5E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_5",
+                      "label": "6E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_6",
+                      "label": "7E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_7",
+                      "label": "8E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_8",
+                      "label": "9E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_9",
+                      "label": "10E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    }
+                  ]
+                }
+              ],
+              "columns": 10,
+              "startRowLabel": "A",
+              "startColumnLabel": 1,
+              "width": null,
+              "height": null,
+              "capacity": null,
+              "seats": []
+            },
+            {
+              "id": "e29eca0b-b058-4340-aed8-224f54570f59",
+              "name": "Stage",
+              "type": "non_sellable",
+              "position": {
+                "x": 25,
+                "y": 25
+              },
+              "rows": [],
+              "columns": null,
+              "startRowLabel": null,
+              "startColumnLabel": null,
+              "width": 565,
+              "height": 70,
+              "capacity": null,
+              "seats": []
+            },
+            {
+              "id": "e96d55ec-297b-4098-a7ca-d34d5b816e64",
+              "name": "New standing capacity",
+              "type": "standing_capacity",
+              "position": {
+                "x": 64.20001220703125,
+                "y": 345.00001525878906
+              },
+              "rows": [],
+              "columns": null,
+              "startRowLabel": null,
+              "startColumnLabel": null,
+              "width": 476,
+              "height": 190,
+              "capacity": 100,
+              "seats": [
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_0",
+                  "label": "Slot 1",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_1",
+                  "label": "Slot 2",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_2",
+                  "label": "Slot 3",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_3",
+                  "label": "Slot 4",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_4",
+                  "label": "Slot 5",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_5",
+                  "label": "Slot 6",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_6",
+                  "label": "Slot 7",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_7",
+                  "label": "Slot 8",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_8",
+                  "label": "Slot 9",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_9",
+                  "label": "Slot 10",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_10",
+                  "label": "Slot 11",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_11",
+                  "label": "Slot 12",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_12",
+                  "label": "Slot 13",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_13",
+                  "label": "Slot 14",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_14",
+                  "label": "Slot 15",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_15",
+                  "label": "Slot 16",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_16",
+                  "label": "Slot 17",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_17",
+                  "label": "Slot 18",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_18",
+                  "label": "Slot 19",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_19",
+                  "label": "Slot 20",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_20",
+                  "label": "Slot 21",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_21",
+                  "label": "Slot 22",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_22",
+                  "label": "Slot 23",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_23",
+                  "label": "Slot 24",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_24",
+                  "label": "Slot 25",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_25",
+                  "label": "Slot 26",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_26",
+                  "label": "Slot 27",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_27",
+                  "label": "Slot 28",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_28",
+                  "label": "Slot 29",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_29",
+                  "label": "Slot 30",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_30",
+                  "label": "Slot 31",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_31",
+                  "label": "Slot 32",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_32",
+                  "label": "Slot 33",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_33",
+                  "label": "Slot 34",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_34",
+                  "label": "Slot 35",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_35",
+                  "label": "Slot 36",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_36",
+                  "label": "Slot 37",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_37",
+                  "label": "Slot 38",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_38",
+                  "label": "Slot 39",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_39",
+                  "label": "Slot 40",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_40",
+                  "label": "Slot 41",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_41",
+                  "label": "Slot 42",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_42",
+                  "label": "Slot 43",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_43",
+                  "label": "Slot 44",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_44",
+                  "label": "Slot 45",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_45",
+                  "label": "Slot 46",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_46",
+                  "label": "Slot 47",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_47",
+                  "label": "Slot 48",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_48",
+                  "label": "Slot 49",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_49",
+                  "label": "Slot 50",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_50",
+                  "label": "Slot 51",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_51",
+                  "label": "Slot 52",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_52",
+                  "label": "Slot 53",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_53",
+                  "label": "Slot 54",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_54",
+                  "label": "Slot 55",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_55",
+                  "label": "Slot 56",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_56",
+                  "label": "Slot 57",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_57",
+                  "label": "Slot 58",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_58",
+                  "label": "Slot 59",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_59",
+                  "label": "Slot 60",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_60",
+                  "label": "Slot 61",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_61",
+                  "label": "Slot 62",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_62",
+                  "label": "Slot 63",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_63",
+                  "label": "Slot 64",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_64",
+                  "label": "Slot 65",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_65",
+                  "label": "Slot 66",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_66",
+                  "label": "Slot 67",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_67",
+                  "label": "Slot 68",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_68",
+                  "label": "Slot 69",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_69",
+                  "label": "Slot 70",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_70",
+                  "label": "Slot 71",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_71",
+                  "label": "Slot 72",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_72",
+                  "label": "Slot 73",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_73",
+                  "label": "Slot 74",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_74",
+                  "label": "Slot 75",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_75",
+                  "label": "Slot 76",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_76",
+                  "label": "Slot 77",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_77",
+                  "label": "Slot 78",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_78",
+                  "label": "Slot 79",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_79",
+                  "label": "Slot 80",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_80",
+                  "label": "Slot 81",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_81",
+                  "label": "Slot 82",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_82",
+                  "label": "Slot 83",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_83",
+                  "label": "Slot 84",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_84",
+                  "label": "Slot 85",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_85",
+                  "label": "Slot 86",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_86",
+                  "label": "Slot 87",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_87",
+                  "label": "Slot 88",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_88",
+                  "label": "Slot 89",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_89",
+                  "label": "Slot 90",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_90",
+                  "label": "Slot 91",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_91",
+                  "label": "Slot 92",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_92",
+                  "label": "Slot 93",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_93",
+                  "label": "Slot 94",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_94",
+                  "label": "Slot 95",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_95",
+                  "label": "Slot 96",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_96",
+                  "label": "Slot 97",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_97",
+                  "label": "Slot 98",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_98",
+                  "label": "Slot 99",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_99",
+                  "label": "Slot 100",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "venueDetails": {
+        "latitude": 6.9246375537629445,
+        "longitude": 79.86854553222656,
+        "name": "Second Floor, Main Hall",
+        "address": "Ananda College, Maradana"
+      }
+    },
+    {
+      "startTime": "2025-08-25T12:30:00.000Z",
+      "endTime": "2025-08-25T16:30:00.000Z",
+      "isOnline": false,
+      "salesStartRuleType": "ROLLING",
+      "salesStartHoursBefore": 168,
+      "salesStartFixedDatetime": "2025-08-08T20:11:24.793Z",
+      "layoutData": {
+        "name": "Main Hall - Ananda College",
+        "layout": {
+          "blocks": [
+            {
+              "id": "71a1c1b3-8a9c-454f-888a-6803d9bfe512",
+              "name": "New seated grid",
+              "type": "seated_grid",
+              "position": {
+                "x": 144.20001220703125,
+                "y": 131.39999389648438
+              },
+              "rows": [
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0",
+                  "label": "A",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_0",
+                      "label": "1A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_1",
+                      "label": "2A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_2",
+                      "label": "3A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_3",
+                      "label": "4A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_4",
+                      "label": "5A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_5",
+                      "label": "6A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_6",
+                      "label": "7A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_7",
+                      "label": "8A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_8",
+                      "label": "9A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_9",
+                      "label": "10A",
+                      "status": "RESERVED"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1",
+                  "label": "B",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_0",
+                      "label": "1B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_1",
+                      "label": "2B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_2",
+                      "label": "3B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_3",
+                      "label": "4B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_4",
+                      "label": "5B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_5",
+                      "label": "6B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_6",
+                      "label": "7B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_7",
+                      "label": "8B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_8",
+                      "label": "9B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_9",
+                      "label": "10B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2",
+                  "label": "C",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_0",
+                      "label": "1C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_1",
+                      "label": "2C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_2",
+                      "label": "3C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_3",
+                      "label": "4C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_4",
+                      "label": "5C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_5",
+                      "label": "6C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_6",
+                      "label": "7C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_7",
+                      "label": "8C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_8",
+                      "label": "9C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_9",
+                      "label": "10C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3",
+                  "label": "D",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_0",
+                      "label": "1D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_1",
+                      "label": "2D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_2",
+                      "label": "3D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_3",
+                      "label": "4D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_4",
+                      "label": "5D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_5",
+                      "label": "6D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_6",
+                      "label": "7D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_7",
+                      "label": "8D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_8",
+                      "label": "9D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_9",
+                      "label": "10D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4",
+                  "label": "E",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_0",
+                      "label": "1E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_1",
+                      "label": "2E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_2",
+                      "label": "3E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_3",
+                      "label": "4E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_4",
+                      "label": "5E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_5",
+                      "label": "6E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_6",
+                      "label": "7E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_7",
+                      "label": "8E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_8",
+                      "label": "9E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_9",
+                      "label": "10E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    }
+                  ]
+                }
+              ],
+              "columns": 10,
+              "startRowLabel": "A",
+              "startColumnLabel": 1,
+              "width": null,
+              "height": null,
+              "capacity": null,
+              "seats": []
+            },
+            {
+              "id": "e29eca0b-b058-4340-aed8-224f54570f59",
+              "name": "Stage",
+              "type": "non_sellable",
+              "position": {
+                "x": 25,
+                "y": 25
+              },
+              "rows": [],
+              "columns": null,
+              "startRowLabel": null,
+              "startColumnLabel": null,
+              "width": 565,
+              "height": 70,
+              "capacity": null,
+              "seats": []
+            },
+            {
+              "id": "e96d55ec-297b-4098-a7ca-d34d5b816e64",
+              "name": "New standing capacity",
+              "type": "standing_capacity",
+              "position": {
+                "x": 64.20001220703125,
+                "y": 345.00001525878906
+              },
+              "rows": [],
+              "columns": null,
+              "startRowLabel": null,
+              "startColumnLabel": null,
+              "width": 476,
+              "height": 190,
+              "capacity": 100,
+              "seats": [
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_0",
+                  "label": "Slot 1",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_1",
+                  "label": "Slot 2",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_2",
+                  "label": "Slot 3",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_3",
+                  "label": "Slot 4",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_4",
+                  "label": "Slot 5",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_5",
+                  "label": "Slot 6",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_6",
+                  "label": "Slot 7",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_7",
+                  "label": "Slot 8",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_8",
+                  "label": "Slot 9",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_9",
+                  "label": "Slot 10",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_10",
+                  "label": "Slot 11",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_11",
+                  "label": "Slot 12",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_12",
+                  "label": "Slot 13",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_13",
+                  "label": "Slot 14",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_14",
+                  "label": "Slot 15",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_15",
+                  "label": "Slot 16",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_16",
+                  "label": "Slot 17",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_17",
+                  "label": "Slot 18",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_18",
+                  "label": "Slot 19",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_19",
+                  "label": "Slot 20",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_20",
+                  "label": "Slot 21",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_21",
+                  "label": "Slot 22",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_22",
+                  "label": "Slot 23",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_23",
+                  "label": "Slot 24",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_24",
+                  "label": "Slot 25",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_25",
+                  "label": "Slot 26",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_26",
+                  "label": "Slot 27",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_27",
+                  "label": "Slot 28",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_28",
+                  "label": "Slot 29",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_29",
+                  "label": "Slot 30",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_30",
+                  "label": "Slot 31",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_31",
+                  "label": "Slot 32",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_32",
+                  "label": "Slot 33",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_33",
+                  "label": "Slot 34",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_34",
+                  "label": "Slot 35",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_35",
+                  "label": "Slot 36",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_36",
+                  "label": "Slot 37",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_37",
+                  "label": "Slot 38",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_38",
+                  "label": "Slot 39",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_39",
+                  "label": "Slot 40",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_40",
+                  "label": "Slot 41",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_41",
+                  "label": "Slot 42",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_42",
+                  "label": "Slot 43",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_43",
+                  "label": "Slot 44",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_44",
+                  "label": "Slot 45",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_45",
+                  "label": "Slot 46",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_46",
+                  "label": "Slot 47",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_47",
+                  "label": "Slot 48",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_48",
+                  "label": "Slot 49",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_49",
+                  "label": "Slot 50",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_50",
+                  "label": "Slot 51",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_51",
+                  "label": "Slot 52",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_52",
+                  "label": "Slot 53",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_53",
+                  "label": "Slot 54",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_54",
+                  "label": "Slot 55",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_55",
+                  "label": "Slot 56",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_56",
+                  "label": "Slot 57",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_57",
+                  "label": "Slot 58",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_58",
+                  "label": "Slot 59",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_59",
+                  "label": "Slot 60",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_60",
+                  "label": "Slot 61",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_61",
+                  "label": "Slot 62",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_62",
+                  "label": "Slot 63",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_63",
+                  "label": "Slot 64",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_64",
+                  "label": "Slot 65",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_65",
+                  "label": "Slot 66",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_66",
+                  "label": "Slot 67",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_67",
+                  "label": "Slot 68",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_68",
+                  "label": "Slot 69",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_69",
+                  "label": "Slot 70",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_70",
+                  "label": "Slot 71",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_71",
+                  "label": "Slot 72",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_72",
+                  "label": "Slot 73",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_73",
+                  "label": "Slot 74",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_74",
+                  "label": "Slot 75",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_75",
+                  "label": "Slot 76",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_76",
+                  "label": "Slot 77",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_77",
+                  "label": "Slot 78",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_78",
+                  "label": "Slot 79",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_79",
+                  "label": "Slot 80",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_80",
+                  "label": "Slot 81",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_81",
+                  "label": "Slot 82",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_82",
+                  "label": "Slot 83",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_83",
+                  "label": "Slot 84",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_84",
+                  "label": "Slot 85",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_85",
+                  "label": "Slot 86",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_86",
+                  "label": "Slot 87",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_87",
+                  "label": "Slot 88",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_88",
+                  "label": "Slot 89",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_89",
+                  "label": "Slot 90",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_90",
+                  "label": "Slot 91",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_91",
+                  "label": "Slot 92",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_92",
+                  "label": "Slot 93",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_93",
+                  "label": "Slot 94",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_94",
+                  "label": "Slot 95",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_95",
+                  "label": "Slot 96",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_96",
+                  "label": "Slot 97",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_97",
+                  "label": "Slot 98",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_98",
+                  "label": "Slot 99",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_99",
+                  "label": "Slot 100",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "venueDetails": {
+        "latitude": 6.9246375537629445,
+        "longitude": 79.86854553222656,
+        "name": "Second Floor, Main Hall",
+        "address": "Ananda College, Maradana"
+      }
+    },
+    {
+      "startTime": "2025-09-01T12:30:00.000Z",
+      "endTime": "2025-09-01T16:30:00.000Z",
+      "isOnline": false,
+      "salesStartRuleType": "ROLLING",
+      "salesStartHoursBefore": 168,
+      "salesStartFixedDatetime": "2025-08-08T20:11:24.793Z",
+      "layoutData": {
+        "name": "Main Hall - Ananda College",
+        "layout": {
+          "blocks": [
+            {
+              "id": "71a1c1b3-8a9c-454f-888a-6803d9bfe512",
+              "name": "New seated grid",
+              "type": "seated_grid",
+              "position": {
+                "x": 144.20001220703125,
+                "y": 131.39999389648438
+              },
+              "rows": [
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0",
+                  "label": "A",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_0",
+                      "label": "1A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_1",
+                      "label": "2A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_2",
+                      "label": "3A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_3",
+                      "label": "4A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_4",
+                      "label": "5A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_5",
+                      "label": "6A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_6",
+                      "label": "7A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_7",
+                      "label": "8A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_8",
+                      "label": "9A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_9",
+                      "label": "10A",
+                      "status": "RESERVED"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1",
+                  "label": "B",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_0",
+                      "label": "1B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_1",
+                      "label": "2B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_2",
+                      "label": "3B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_3",
+                      "label": "4B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_4",
+                      "label": "5B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_5",
+                      "label": "6B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_6",
+                      "label": "7B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_7",
+                      "label": "8B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_8",
+                      "label": "9B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_9",
+                      "label": "10B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2",
+                  "label": "C",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_0",
+                      "label": "1C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_1",
+                      "label": "2C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_2",
+                      "label": "3C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_3",
+                      "label": "4C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_4",
+                      "label": "5C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_5",
+                      "label": "6C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_6",
+                      "label": "7C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_7",
+                      "label": "8C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_8",
+                      "label": "9C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_9",
+                      "label": "10C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3",
+                  "label": "D",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_0",
+                      "label": "1D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_1",
+                      "label": "2D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_2",
+                      "label": "3D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_3",
+                      "label": "4D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_4",
+                      "label": "5D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_5",
+                      "label": "6D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_6",
+                      "label": "7D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_7",
+                      "label": "8D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_8",
+                      "label": "9D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_9",
+                      "label": "10D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4",
+                  "label": "E",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_0",
+                      "label": "1E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_1",
+                      "label": "2E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_2",
+                      "label": "3E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_3",
+                      "label": "4E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_4",
+                      "label": "5E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_5",
+                      "label": "6E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_6",
+                      "label": "7E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_7",
+                      "label": "8E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_8",
+                      "label": "9E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_9",
+                      "label": "10E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    }
+                  ]
+                }
+              ],
+              "columns": 10,
+              "startRowLabel": "A",
+              "startColumnLabel": 1,
+              "width": null,
+              "height": null,
+              "capacity": null,
+              "seats": []
+            },
+            {
+              "id": "e29eca0b-b058-4340-aed8-224f54570f59",
+              "name": "Stage",
+              "type": "non_sellable",
+              "position": {
+                "x": 25,
+                "y": 25
+              },
+              "rows": [],
+              "columns": null,
+              "startRowLabel": null,
+              "startColumnLabel": null,
+              "width": 565,
+              "height": 70,
+              "capacity": null,
+              "seats": []
+            },
+            {
+              "id": "e96d55ec-297b-4098-a7ca-d34d5b816e64",
+              "name": "New standing capacity",
+              "type": "standing_capacity",
+              "position": {
+                "x": 64.20001220703125,
+                "y": 345.00001525878906
+              },
+              "rows": [],
+              "columns": null,
+              "startRowLabel": null,
+              "startColumnLabel": null,
+              "width": 476,
+              "height": 190,
+              "capacity": 100,
+              "seats": [
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_0",
+                  "label": "Slot 1",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_1",
+                  "label": "Slot 2",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_2",
+                  "label": "Slot 3",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_3",
+                  "label": "Slot 4",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_4",
+                  "label": "Slot 5",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_5",
+                  "label": "Slot 6",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_6",
+                  "label": "Slot 7",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_7",
+                  "label": "Slot 8",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_8",
+                  "label": "Slot 9",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_9",
+                  "label": "Slot 10",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_10",
+                  "label": "Slot 11",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_11",
+                  "label": "Slot 12",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_12",
+                  "label": "Slot 13",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_13",
+                  "label": "Slot 14",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_14",
+                  "label": "Slot 15",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_15",
+                  "label": "Slot 16",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_16",
+                  "label": "Slot 17",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_17",
+                  "label": "Slot 18",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_18",
+                  "label": "Slot 19",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_19",
+                  "label": "Slot 20",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_20",
+                  "label": "Slot 21",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_21",
+                  "label": "Slot 22",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_22",
+                  "label": "Slot 23",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_23",
+                  "label": "Slot 24",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_24",
+                  "label": "Slot 25",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_25",
+                  "label": "Slot 26",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_26",
+                  "label": "Slot 27",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_27",
+                  "label": "Slot 28",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_28",
+                  "label": "Slot 29",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_29",
+                  "label": "Slot 30",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_30",
+                  "label": "Slot 31",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_31",
+                  "label": "Slot 32",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_32",
+                  "label": "Slot 33",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_33",
+                  "label": "Slot 34",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_34",
+                  "label": "Slot 35",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_35",
+                  "label": "Slot 36",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_36",
+                  "label": "Slot 37",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_37",
+                  "label": "Slot 38",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_38",
+                  "label": "Slot 39",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_39",
+                  "label": "Slot 40",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_40",
+                  "label": "Slot 41",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_41",
+                  "label": "Slot 42",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_42",
+                  "label": "Slot 43",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_43",
+                  "label": "Slot 44",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_44",
+                  "label": "Slot 45",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_45",
+                  "label": "Slot 46",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_46",
+                  "label": "Slot 47",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_47",
+                  "label": "Slot 48",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_48",
+                  "label": "Slot 49",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_49",
+                  "label": "Slot 50",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_50",
+                  "label": "Slot 51",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_51",
+                  "label": "Slot 52",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_52",
+                  "label": "Slot 53",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_53",
+                  "label": "Slot 54",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_54",
+                  "label": "Slot 55",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_55",
+                  "label": "Slot 56",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_56",
+                  "label": "Slot 57",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_57",
+                  "label": "Slot 58",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_58",
+                  "label": "Slot 59",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_59",
+                  "label": "Slot 60",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_60",
+                  "label": "Slot 61",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_61",
+                  "label": "Slot 62",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_62",
+                  "label": "Slot 63",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_63",
+                  "label": "Slot 64",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_64",
+                  "label": "Slot 65",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_65",
+                  "label": "Slot 66",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_66",
+                  "label": "Slot 67",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_67",
+                  "label": "Slot 68",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_68",
+                  "label": "Slot 69",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_69",
+                  "label": "Slot 70",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_70",
+                  "label": "Slot 71",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_71",
+                  "label": "Slot 72",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_72",
+                  "label": "Slot 73",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_73",
+                  "label": "Slot 74",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_74",
+                  "label": "Slot 75",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_75",
+                  "label": "Slot 76",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_76",
+                  "label": "Slot 77",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_77",
+                  "label": "Slot 78",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_78",
+                  "label": "Slot 79",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_79",
+                  "label": "Slot 80",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_80",
+                  "label": "Slot 81",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_81",
+                  "label": "Slot 82",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_82",
+                  "label": "Slot 83",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_83",
+                  "label": "Slot 84",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_84",
+                  "label": "Slot 85",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_85",
+                  "label": "Slot 86",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_86",
+                  "label": "Slot 87",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_87",
+                  "label": "Slot 88",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_88",
+                  "label": "Slot 89",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_89",
+                  "label": "Slot 90",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_90",
+                  "label": "Slot 91",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_91",
+                  "label": "Slot 92",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_92",
+                  "label": "Slot 93",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_93",
+                  "label": "Slot 94",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_94",
+                  "label": "Slot 95",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_95",
+                  "label": "Slot 96",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_96",
+                  "label": "Slot 97",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_97",
+                  "label": "Slot 98",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_98",
+                  "label": "Slot 99",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_99",
+                  "label": "Slot 100",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "venueDetails": {
+        "latitude": 6.9246375537629445,
+        "longitude": 79.86854553222656,
+        "name": "Second Floor, Main Hall",
+        "address": "Ananda College, Maradana"
+      }
+    },
+    {
+      "startTime": "2025-09-08T12:30:00.000Z",
+      "endTime": "2025-09-08T16:30:00.000Z",
+      "isOnline": false,
+      "salesStartRuleType": "ROLLING",
+      "salesStartHoursBefore": 168,
+      "salesStartFixedDatetime": "2025-08-08T20:11:24.793Z",
+      "layoutData": {
+        "name": "Main Hall - Ananda College",
+        "layout": {
+          "blocks": [
+            {
+              "id": "71a1c1b3-8a9c-454f-888a-6803d9bfe512",
+              "name": "New seated grid",
+              "type": "seated_grid",
+              "position": {
+                "x": 144.20001220703125,
+                "y": 131.39999389648438
+              },
+              "rows": [
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0",
+                  "label": "A",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_0",
+                      "label": "1A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_1",
+                      "label": "2A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_2",
+                      "label": "3A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_3",
+                      "label": "4A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_4",
+                      "label": "5A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_5",
+                      "label": "6A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_6",
+                      "label": "7A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_7",
+                      "label": "8A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_8",
+                      "label": "9A",
+                      "status": "RESERVED"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_0_9",
+                      "label": "10A",
+                      "status": "RESERVED"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1",
+                  "label": "B",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_0",
+                      "label": "1B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_1",
+                      "label": "2B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_2",
+                      "label": "3B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_3",
+                      "label": "4B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_4",
+                      "label": "5B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_5",
+                      "label": "6B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_6",
+                      "label": "7B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_7",
+                      "label": "8B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_8",
+                      "label": "9B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_1_9",
+                      "label": "10B",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2",
+                  "label": "C",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_0",
+                      "label": "1C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_1",
+                      "label": "2C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_2",
+                      "label": "3C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_3",
+                      "label": "4C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_4",
+                      "label": "5C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_5",
+                      "label": "6C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_6",
+                      "label": "7C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_7",
+                      "label": "8C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_8",
+                      "label": "9C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_2_9",
+                      "label": "10C",
+                      "status": "AVAILABLE",
+                      "tierId": "temp_tier_1754683864818"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3",
+                  "label": "D",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_0",
+                      "label": "1D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_1",
+                      "label": "2D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_2",
+                      "label": "3D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_3",
+                      "label": "4D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_4",
+                      "label": "5D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_5",
+                      "label": "6D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_6",
+                      "label": "7D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_7",
+                      "label": "8D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_8",
+                      "label": "9D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_3_9",
+                      "label": "10D",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    }
+                  ]
+                },
+                {
+                  "id": "temp_row_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4",
+                  "label": "E",
+                  "seats": [
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_0",
+                      "label": "1E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_1",
+                      "label": "2E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_2",
+                      "label": "3E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_3",
+                      "label": "4E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_4",
+                      "label": "5E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_5",
+                      "label": "6E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_6",
+                      "label": "7E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_7",
+                      "label": "8E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_8",
+                      "label": "9E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    },
+                    {
+                      "id": "temp_seat_71a1c1b3-8a9c-454f-888a-6803d9bfe512_4_9",
+                      "label": "10E",
+                      "status": "AVAILABLE",
+                      "tierId": "default_tier_1754683849610"
+                    }
+                  ]
+                }
+              ],
+              "columns": 10,
+              "startRowLabel": "A",
+              "startColumnLabel": 1,
+              "width": null,
+              "height": null,
+              "capacity": null,
+              "seats": []
+            },
+            {
+              "id": "e29eca0b-b058-4340-aed8-224f54570f59",
+              "name": "Stage",
+              "type": "non_sellable",
+              "position": {
+                "x": 25,
+                "y": 25
+              },
+              "rows": [],
+              "columns": null,
+              "startRowLabel": null,
+              "startColumnLabel": null,
+              "width": 565,
+              "height": 70,
+              "capacity": null,
+              "seats": []
+            },
+            {
+              "id": "e96d55ec-297b-4098-a7ca-d34d5b816e64",
+              "name": "New standing capacity",
+              "type": "standing_capacity",
+              "position": {
+                "x": 64.20001220703125,
+                "y": 345.00001525878906
+              },
+              "rows": [],
+              "columns": null,
+              "startRowLabel": null,
+              "startColumnLabel": null,
+              "width": 476,
+              "height": 190,
+              "capacity": 100,
+              "seats": [
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_0",
+                  "label": "Slot 1",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_1",
+                  "label": "Slot 2",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_2",
+                  "label": "Slot 3",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_3",
+                  "label": "Slot 4",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_4",
+                  "label": "Slot 5",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_5",
+                  "label": "Slot 6",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_6",
+                  "label": "Slot 7",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_7",
+                  "label": "Slot 8",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_8",
+                  "label": "Slot 9",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_9",
+                  "label": "Slot 10",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_10",
+                  "label": "Slot 11",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_11",
+                  "label": "Slot 12",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_12",
+                  "label": "Slot 13",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_13",
+                  "label": "Slot 14",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_14",
+                  "label": "Slot 15",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_15",
+                  "label": "Slot 16",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_16",
+                  "label": "Slot 17",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_17",
+                  "label": "Slot 18",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_18",
+                  "label": "Slot 19",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_19",
+                  "label": "Slot 20",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_20",
+                  "label": "Slot 21",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_21",
+                  "label": "Slot 22",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_22",
+                  "label": "Slot 23",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_23",
+                  "label": "Slot 24",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_24",
+                  "label": "Slot 25",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_25",
+                  "label": "Slot 26",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_26",
+                  "label": "Slot 27",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_27",
+                  "label": "Slot 28",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_28",
+                  "label": "Slot 29",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_29",
+                  "label": "Slot 30",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_30",
+                  "label": "Slot 31",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_31",
+                  "label": "Slot 32",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_32",
+                  "label": "Slot 33",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_33",
+                  "label": "Slot 34",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_34",
+                  "label": "Slot 35",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_35",
+                  "label": "Slot 36",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_36",
+                  "label": "Slot 37",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_37",
+                  "label": "Slot 38",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_38",
+                  "label": "Slot 39",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_39",
+                  "label": "Slot 40",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_40",
+                  "label": "Slot 41",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_41",
+                  "label": "Slot 42",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_42",
+                  "label": "Slot 43",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_43",
+                  "label": "Slot 44",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_44",
+                  "label": "Slot 45",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_45",
+                  "label": "Slot 46",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_46",
+                  "label": "Slot 47",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_47",
+                  "label": "Slot 48",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_48",
+                  "label": "Slot 49",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_49",
+                  "label": "Slot 50",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_50",
+                  "label": "Slot 51",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_51",
+                  "label": "Slot 52",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_52",
+                  "label": "Slot 53",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_53",
+                  "label": "Slot 54",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_54",
+                  "label": "Slot 55",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_55",
+                  "label": "Slot 56",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_56",
+                  "label": "Slot 57",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_57",
+                  "label": "Slot 58",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_58",
+                  "label": "Slot 59",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_59",
+                  "label": "Slot 60",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_60",
+                  "label": "Slot 61",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_61",
+                  "label": "Slot 62",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_62",
+                  "label": "Slot 63",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_63",
+                  "label": "Slot 64",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_64",
+                  "label": "Slot 65",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_65",
+                  "label": "Slot 66",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_66",
+                  "label": "Slot 67",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_67",
+                  "label": "Slot 68",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_68",
+                  "label": "Slot 69",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_69",
+                  "label": "Slot 70",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_70",
+                  "label": "Slot 71",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_71",
+                  "label": "Slot 72",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_72",
+                  "label": "Slot 73",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_73",
+                  "label": "Slot 74",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_74",
+                  "label": "Slot 75",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_75",
+                  "label": "Slot 76",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_76",
+                  "label": "Slot 77",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_77",
+                  "label": "Slot 78",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_78",
+                  "label": "Slot 79",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_79",
+                  "label": "Slot 80",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_80",
+                  "label": "Slot 81",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_81",
+                  "label": "Slot 82",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_82",
+                  "label": "Slot 83",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_83",
+                  "label": "Slot 84",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_84",
+                  "label": "Slot 85",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_85",
+                  "label": "Slot 86",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_86",
+                  "label": "Slot 87",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_87",
+                  "label": "Slot 88",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_88",
+                  "label": "Slot 89",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_89",
+                  "label": "Slot 90",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_90",
+                  "label": "Slot 91",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_91",
+                  "label": "Slot 92",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_92",
+                  "label": "Slot 93",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_93",
+                  "label": "Slot 94",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_94",
+                  "label": "Slot 95",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_95",
+                  "label": "Slot 96",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_96",
+                  "label": "Slot 97",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_97",
+                  "label": "Slot 98",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_98",
+                  "label": "Slot 99",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                },
+                {
+                  "id": "temp_seat_e96d55ec-297b-4098-a7ca-d34d5b816e64_99",
+                  "label": "Slot 100",
+                  "status": "AVAILABLE",
+                  "tierId": "default_tier_1754683849610"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "venueDetails": {
+        "latitude": 6.9246375537629445,
+        "longitude": 79.86854553222656,
+        "name": "Second Floor, Main Hall",
+        "address": "Ananda College, Maradana"
+      }
+    }
+  ]
+}

@@ -1,22 +1,31 @@
 spring:
+  # --- Database Configuration ---
   datasource:
     url: jdbc:postgresql://localhost:5433/event_seating
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
+
+  # --- Redis Configuration ---
   data:
     redis:
       host: localhost
       port: 6379
-      #      password: ${REDIS_PASSWORD:} # Leave empty if no password
       timeout: 2000
-      # Uncomment if using Redis SSL
-      # ssl: true
 
+# --- AWS Configuration for Local Development ---
+# This single block now configures all AWS clients (S3, Scheduler, etc.)
+# to point to your LocalStack container.
 aws:
+  region: us-east-1
   s3:
-    region: us-east-1
-    endpoint: http://localhost:4566
     bucket-name: event-seating-uploads
+  local:
+    endpoint: http://localhost:4566
     access-key: test
     secret-key: test
+  # Local development EventBridge Scheduler configuration
+  scheduler:
+    sqs-queue-arn: arn:aws:sqs:us-east-1:000000000000:session-on-sale-queue
+    role-arn: arn:aws:iam::000000000000:role/EventBridgeSchedulerRole
+    group-name: event-ticketing-schedules

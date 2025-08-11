@@ -35,8 +35,12 @@ spring:
     validate-on-migrate: true
   cache:
     redis:
-      time-to-live: 3600
+      time-to-live: 3600s
       key-prefix: "event-seating-ms::"
+  data:
+    redis:
+      repositories:
+        enabled: false
 
 logging:
   level:
@@ -47,16 +51,21 @@ logging:
 app:
   tier:
     limits:
-      # ✅ Corrected Structure: Limits are nested under the tier name
       FREE:
         max-organizations-per-user: 3
         max-seating-layouts-per-org: 5
+        max-active-events: 1
+        max-sessions-per-event: 5
       PRO:
         max-organizations-per-user: 10
         max-seating-layouts-per-org: 25
+        max-active-events: 10
+        max-sessions-per-event: 52
       ENTERPRISE:
         max-organizations-per-user: 100
         max-seating-layouts-per-org: 200
+        max-active-events: 1000
+        max-sessions-per-event: 200
 
   # General app config
   seating_layout:
@@ -64,3 +73,13 @@ app:
     default-gap: 25
   organization:
     max-logo-size: 1048576 # 1MB
+  event:
+    max-cover-photos: 5
+    max-cover-photo-size: 31457280 # 3MB
+
+# AWS EventBridge Scheduler configuration
+aws:
+  scheduler:
+    sqs-queue-arn: ${AWS_SQS_QUEUE_ARN:arn:aws:sqs:us-east-1:000000000000:session-on-sale-queue}
+    role-arn: ${AWS_SCHEDULER_ROLE_ARN:arn:aws:iam::000000000000:role/EventBridgeSchedulerRole}
+    group-name: ${AWS_SCHEDULER_GROUP_NAME:event-ticketing-schedules}

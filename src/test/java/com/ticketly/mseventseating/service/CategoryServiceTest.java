@@ -1,7 +1,7 @@
 package com.ticketly.mseventseating.service;
 
-import com.ticketly.mseventseating.dto.CategoryRequest;
-import com.ticketly.mseventseating.dto.CategoryResponse;
+import com.ticketly.mseventseating.dto.category.CategoryRequest;
+import com.ticketly.mseventseating.dto.category.CategoryResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Category;
@@ -73,8 +73,8 @@ class CategoryServiceTest {
 
         // Then
         assertEquals(1, result.size());
-        assertEquals(parentCategory.getName(), result.get(0).getName());
-        assertEquals(1, result.get(0).getSubCategories().size());
+        assertEquals(parentCategory.getName(), result.getFirst().getName());
+        assertEquals(1, result.getFirst().getSubCategories().size());
         verify(categoryRepository).findByParentIsNull();
     }
 

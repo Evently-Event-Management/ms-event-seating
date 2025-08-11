@@ -74,13 +74,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAuthorizationDenied(AuthorizationDeniedException ex) {
         log.error("Authorization denied: {}", ex.getMessage());
-        return buildResponse(HttpStatus.FORBIDDEN, "Access denied. You do not have permission to perform this action.");
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex) {
         log.error("Authentication exception: {}", ex.getMessage());
         return buildResponse(HttpStatus.UNAUTHORIZED, "Authentication failed. Please check your credentials and try again.");
+    }
+
+    @ExceptionHandler(InvalidStateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidState(InvalidStateException ex) {
+        log.error("Invalid state exception: {}", ex.getMessage());
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String message) {
