@@ -151,7 +151,6 @@ class EventCreationServiceTest {
 //        when(limitService.getAppConfiguration()).thenReturn(appConfig);
 //        when(appConfig.getEventLimits()).thenReturn(eventConfig);
 //        when(eventConfig.getMaxCoverPhotos()).thenReturn(3);
-//        when(eventConfig.getMaxCoverPhotoSize()).thenReturn(5L * 1024 * 1024); // 5MB
     }
 
     @Test
