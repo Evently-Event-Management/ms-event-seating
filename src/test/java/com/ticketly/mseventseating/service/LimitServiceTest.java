@@ -59,7 +59,6 @@ class LimitServiceTest {
         enterpriseTier.setMaxSessionsPerEvent(100);
         tierLimits.put("ENTERPRISE", enterpriseTier);
 
-        // ✅ Corrected Mocking: Mock the chain of calls
         when(appLimitsConfig.getTier()).thenReturn(tierConfig);
         when(tierConfig.getLimits()).thenReturn(tierLimits);
     }
