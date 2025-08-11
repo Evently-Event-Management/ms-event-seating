@@ -11,12 +11,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -63,25 +57,25 @@ public class SecurityConfig {
         return jwtConverter;
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        // Define the allowed origins (your frontend URLs)
-        configuration.setAllowedOrigins(List.of("http://localhost:8090"));
-        // Define the allowed HTTP methods
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        // Define the allowed headers from the client
-        configuration.setAllowedHeaders(List.of("*"));
-        // Define the exposed headers (headers that browsers are allowed to access)
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        // Allow credentials (e.g., cookies, authorization headers)
-        configuration.setAllowCredentials(true);
-        // Max age for CORS preflight requests caching (in seconds)
-        configuration.setMaxAge(3600L);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Apply this configuration to all endpoints in your application
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        // Define the allowed origins (your frontend URLs)
+//        configuration.setAllowedOrigins(List.of("http://localhost:8090"));
+//        // Define the allowed HTTP methods
+//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+//        // Define the allowed headers from the client
+//        configuration.setAllowedHeaders(List.of("*"));
+//        // Define the exposed headers (headers that browsers are allowed to access)
+//        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+//        // Allow credentials (e.g., cookies, authorization headers)
+//        configuration.setAllowCredentials(true);
+//        // Max age for CORS preflight requests caching (in seconds)
+//        configuration.setMaxAge(3600L);
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        // Apply this configuration to all endpoints in your application
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
 }
