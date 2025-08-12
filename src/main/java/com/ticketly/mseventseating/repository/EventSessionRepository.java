@@ -11,7 +11,24 @@ import java.util.UUID;
 
 @Repository
 public interface EventSessionRepository extends JpaRepository<EventSession, UUID> {
+    /**
+     * Find all sessions for a specific event
+     */
     List<EventSession> findByEventId(UUID eventId);
+
+    /**
+     * Find all sessions for a specific event with a given status
+     */
     List<EventSession> findByEventIdAndStatus(UUID eventId, SessionStatus status);
-    List<EventSession> findByStartTimeBetween(OffsetDateTime start, OffsetDateTime end);
+
+    /**
+     * Find sessions scheduled to start between specified dates
+     */
+    List<EventSession> findByStartTimeBetween(OffsetDateTime startDate, OffsetDateTime endDate);
+
+    /**
+     * Find sessions that should be put on sale at or before the given time
+     */
+    List<EventSession> findByStatusAndSalesStartFixedDatetimeLessThanEqual(
+            SessionStatus status, OffsetDateTime dateTime);
 }

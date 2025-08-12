@@ -4,7 +4,7 @@ import com.ticketly.mseventseating.exception.InvalidStateException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
-import com.ticketly.mseventseating.service.LimitService;
+import com.ticketly.mseventseating.repository.EventSessionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -21,9 +21,9 @@ import java.util.UUID;
 public class EventLifecycleService {
 
     private final EventRepository eventRepository;
+    private final EventSessionRepository eventSessionRepository;
     private final EventSchedulingService schedulingService;
     private final EventOwnershipService eventOwnershipService;
-    private final LimitService limitService;
 
 
     /**
@@ -141,5 +141,27 @@ public class EventLifecycleService {
                     log.warn("Event not found with ID: {}", eventId);
                     return new ResourceNotFoundException("Event not found with ID: " + eventId);
                 });
+    }
+
+    public void putSessionOnSale(UUID sessionId) {
+        EventSession session = eventSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("EventSession not found with ID: " + sessionId));
+
+        // You can add extra checks here, e.g., ensure the parent event is APPROVED
+        if (session.getEvent().getStatus() != EventStatus.APPROVED) {
+            log.warn("Attempted to put session {} on sale, but parent event {} is not APPROVED.",
+                    sessionId, session.getEvent().getId());
+            throw new InvalidStateException("Cannot put session on sale because the parent event is not APPROVED.");
+        }
+
+        // Check weather session start time is in  the past
+        if (session.getStartTime().isBefore(OffsetDateTime.now())) {
+            log.warn("Cannot put session {} on sale because its start time is in the past.", sessionId);
+            throw new InvalidStateException("Cannot put session on sale because its start time is in the past.");
+        }
+
+        session.setStatus(SessionStatus.ON_SALE);
+        eventSessionRepository.save(session);
+        log.info("Session {} has been successfully put ON_SALE.", sessionId);
     }
 }
