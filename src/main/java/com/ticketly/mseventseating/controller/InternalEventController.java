@@ -24,7 +24,7 @@ public class InternalEventController {
      * @return A response entity indicating success.
      */
     @PatchMapping("/{sessionId}/on-sale")
-    @PreAuthorize("hasAuthority('SCOPE_internal-api')") // ✅ The security check
+//    @PreAuthorize("hasAuthority('SCOPE_internal-api')") // ✅ The security check
     public ResponseEntity<Void> putSessionOnSale(@PathVariable UUID sessionId) {
         eventLifecycleService.putSessionOnSale(sessionId);
         return ResponseEntity.ok().build();
