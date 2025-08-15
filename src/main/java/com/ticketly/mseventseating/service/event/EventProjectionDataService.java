@@ -6,6 +6,7 @@ import com.ticketly.mseventseating.dto.event.VenueDetailsDTO;
 import com.ticketly.mseventseating.dto.projection.EventProjectionDTO;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Event;
+import com.ticketly.mseventseating.model.EventStatus;
 import com.ticketly.mseventseating.model.Tier;
 import com.ticketly.mseventseating.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,11 @@ public class EventProjectionDataService {
     public EventProjectionDTO getEventProjectionData(UUID eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found for projection: " + eventId));
+        if (event.getStatus() != EventStatus.APPROVED) {
+            log.warn("Attempted to fetch projection data for event {} with status {}", eventId, event.getStatus());
+            throw new ResourceNotFoundException("Event is not approved for projection: " + eventId);
+        }
+
         return mapToProjectionDTO(event);
     }
 
