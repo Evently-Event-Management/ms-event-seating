@@ -85,7 +85,6 @@ public class EventFactory {
     private List<EventSession> buildSessions(List<SessionRequest> sessionRequests, Event event, Map<String, Tier> tierIdMap) {
         List<EventSession> sessions = new ArrayList<>();
         for (SessionRequest req : sessionRequests) {
-            // Serialize the venueDetails DTO to a JSON string.
             // This object now contains either the online link or physical address.
             String venueDetailsJson = null;
             if (req.getVenueDetails() != null) {
