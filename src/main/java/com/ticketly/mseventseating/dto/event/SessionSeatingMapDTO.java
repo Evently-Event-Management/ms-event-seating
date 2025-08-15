@@ -54,8 +54,6 @@ public class SessionSeatingMapDTO {
         private String id;
         private String label;
         private String tierId;
-        // Status can be 'AVAILABLE', 'RESERVED', 'BOOKED', etc.
-        // The backend will validate the initial state.
         private String status;
     }
 
