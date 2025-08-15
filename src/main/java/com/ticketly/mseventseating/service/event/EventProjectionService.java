@@ -4,6 +4,7 @@ import com.ticketly.mseventseating.dto.projection.EventProjectionDTO;
 import com.ticketly.mseventseating.dto.projection.SessionProjectionDTO;
 import com.ticketly.mseventseating.dto.projection.TierInfo;
 import com.ticketly.mseventseating.model.Event;
+import com.ticketly.mseventseating.model.EventCoverPhoto;
 import com.ticketly.mseventseating.model.EventStatus;
 import com.ticketly.mseventseating.model.Tier;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
@@ -53,7 +54,8 @@ public class EventProjectionService {
 
         return EventProjectionDTO.builder()
                 .id(event.getId()).title(event.getTitle()).description(event.getDescription())
-                .overview(event.getOverview()).status(event.getStatus()).coverPhotos(null)
+                .overview(event.getOverview()).status(event.getStatus()).coverPhotos(event.getCoverPhotos().stream()
+                        .map(EventCoverPhoto::getPhotoUrl).collect(Collectors.toList()))
                 .organization(orgInfo).category(catInfo)
                 .tiers(tierInfoList)
                 .sessions(sessionInfo)

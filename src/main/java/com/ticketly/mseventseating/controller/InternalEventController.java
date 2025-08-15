@@ -56,4 +56,6 @@ public class InternalEventController {
     public ResponseEntity<SeatingMapProjectionDTO> getSeatingMapProjectionData(@PathVariable UUID seatingMapId) {
         return ResponseEntity.ok(seatingMapProjectionService.projectSeatingMap(seatingMapId));
     }
+
+
 }
