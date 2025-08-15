@@ -21,7 +21,7 @@ public class EventProjectionDTO {
     private List<String> coverPhotos;
     private OrganizationInfo organization;
     private CategoryInfo category;
-    private List<TierInfo> tiers;
+    private List<TierInfo> tiers; // Keep this for a summary view of all available tiers
     private List<SessionInfo> sessions;
 
     @Data
@@ -58,6 +58,8 @@ public class EventProjectionDTO {
         private String status;
         private SessionType sessionType;
         private VenueDetailsInfo venueDetails;
+        // ✅ Updated to use the new, fully denormalized seating map structure
+        private SessionSeatingMapInfo layoutData;
     }
 
     @Data
@@ -73,6 +75,58 @@ public class EventProjectionDTO {
     @Builder
     public static class GeoJsonPoint {
         private final String type = "Point";
-        private double[] coordinates = new double[2]; // [longitude, latitude]
+        private double[] coordinates; // [longitude, latitude]
+    }
+
+    // ✅ NEW: Redefined DTOs for the seating map are now nested here for clarity.
+    @Data
+    @Builder
+    public static class SessionSeatingMapInfo {
+        private String name;
+        private LayoutInfo layout;
+    }
+
+    @Data
+    @Builder
+    public static class LayoutInfo {
+        private List<BlockInfo> blocks;
+    }
+
+    @Data
+    @Builder
+    public static class BlockInfo {
+        private String id;
+        private String name;
+        private String type;
+        private PositionInfo position;
+        private List<RowInfo> rows;
+        private List<SeatInfo> seats; // For standing capacity blocks
+        private Integer capacity;
+        private Integer width;
+        private Integer height;
+    }
+
+    @Data
+    @Builder
+    public static class RowInfo {
+        private String id;
+        private String label;
+        private List<SeatInfo> seats;
+    }
+
+    @Data
+    @Builder
+    public static class SeatInfo {
+        private String id;
+        private String label;
+        private String status;
+        private TierInfo tier;
+    }
+
+    @Data
+    @Builder
+    public static class PositionInfo {
+        private Double x;
+        private Double y;
     }
 }

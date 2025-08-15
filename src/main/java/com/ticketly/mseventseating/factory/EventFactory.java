@@ -162,6 +162,8 @@ public class EventFactory {
                 }
                 // Now we can use the permanent ID from the Tier object
                 seat.setTierId(realTier.getId().toString());
+            } else {
+                throw new BadRequestException("Seat must be assigned to a valid Tier ID.");
             }
         }
     }

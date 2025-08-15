@@ -1,9 +1,10 @@
 package com.ticketly.mseventseating.controller;
 
+import com.ticketly.mseventseating.dto.projection.EventProjectionDTO;
 import com.ticketly.mseventseating.service.event.EventLifecycleService;
+import com.ticketly.mseventseating.service.event.EventProjectionDataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -14,6 +15,7 @@ import java.util.UUID;
 public class InternalEventController {
 
     private final EventLifecycleService eventLifecycleService;
+    private final EventProjectionDataService projectionDataService;
 
     /**
      * Secure M2M endpoint for the Scheduler Service to put a session on sale.
@@ -28,5 +30,12 @@ public class InternalEventController {
     public ResponseEntity<Void> putSessionOnSale(@PathVariable UUID sessionId) {
         eventLifecycleService.putSessionOnSale(sessionId);
         return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping("/{eventId}/projection-data")
+//    @PreAuthorize("hasAuthority('SCOPE_internal-api')") // Secured by a specific scope
+    public ResponseEntity<EventProjectionDTO> getEventProjectionData(@PathVariable UUID eventId) {
+        return ResponseEntity.ok(projectionDataService.getEventProjectionData(eventId));
     }
 }
