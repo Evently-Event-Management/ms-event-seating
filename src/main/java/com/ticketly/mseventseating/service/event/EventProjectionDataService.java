@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.SessionSeatingMapDTO;
 import com.ticketly.mseventseating.dto.event.VenueDetailsDTO;
 import com.ticketly.mseventseating.dto.projection.EventProjectionDTO;
+import com.ticketly.mseventseating.dto.projection.SeatingMapProjectionDTO;
+import com.ticketly.mseventseating.dto.projection.SessionProjectionDTO;
+import com.ticketly.mseventseating.dto.projection.TierInfo;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Event;
 import com.ticketly.mseventseating.model.EventStatus;
@@ -54,24 +57,24 @@ public class EventProjectionDataService {
                 .parentName(event.getCategory().getParent() != null ? event.getCategory().getParent().getName() : null)
                 .build();
 
-        List<EventProjectionDTO.TierInfo> tierInfoList = event.getTiers().stream()
+        List<TierInfo> tierInfoList = event.getTiers().stream()
                 .map(this::mapToTierInfo)
                 .collect(Collectors.toList());
 
         // Create a lookup map for efficient tier embedding
-        Map<UUID, EventProjectionDTO.TierInfo> tierInfoMap = tierInfoList.stream()
-                .collect(Collectors.toMap(EventProjectionDTO.TierInfo::getId, Function.identity()));
+        Map<UUID, TierInfo> tierInfoMap = tierInfoList.stream()
+                .collect(Collectors.toMap(TierInfo::getId, Function.identity()));
 
         // --- Map Sessions with Denormalized Seating Maps ---
-        List<EventProjectionDTO.SessionInfo> sessionInfo = event.getSessions().stream()
+        List<SessionProjectionDTO> sessionInfo = event.getSessions().stream()
                 .map(s -> {
                     VenueDetailsDTO venueDetails = parseVenueDetails(s.getVenueDetails());
-                    EventProjectionDTO.SessionSeatingMapInfo layoutData = mapToSessionSeatingMapInfo(
+                    SeatingMapProjectionDTO layoutData = mapToSessionSeatingMapInfo(
                             s.getSessionSeatingMap().getLayoutData(),
                             tierInfoMap
                     );
 
-                    return EventProjectionDTO.SessionInfo.builder()
+                    return SessionProjectionDTO.builder()
                             .id(s.getId()).startTime(s.getStartTime()).endTime(s.getEndTime())
                             .status(s.getStatus().name()).sessionType(s.getSessionType())
                             .venueDetails(mapToVenueDetailsInfo(venueDetails))
@@ -93,26 +96,26 @@ public class EventProjectionDataService {
      * The core denormalization logic. It takes the seating map JSON and the tier lookup map,
      * then builds a new seating map object with the full tier details embedded in each seat.
      */
-    private EventProjectionDTO.SessionSeatingMapInfo mapToSessionSeatingMapInfo(String layoutJson, Map<UUID, EventProjectionDTO.TierInfo> tierInfoMap) {
+    private SeatingMapProjectionDTO mapToSessionSeatingMapInfo(String layoutJson, Map<UUID, TierInfo> tierInfoMap) {
         SessionSeatingMapDTO sourceDto = parseLayoutData(layoutJson);
         if (sourceDto == null) return null;
 
-        List<EventProjectionDTO.BlockInfo> blockInfos = sourceDto.getLayout().getBlocks().stream()
+        List<SeatingMapProjectionDTO.BlockInfo> blockInfos = sourceDto.getLayout().getBlocks().stream()
                 .map(blockDto -> {
-                    List<EventProjectionDTO.RowInfo> rowInfos = blockDto.getRows() != null ? blockDto.getRows().stream()
-                            .map(rowDto -> EventProjectionDTO.RowInfo.builder()
+                    List<SeatingMapProjectionDTO.RowInfo> rowInfos = blockDto.getRows() != null ? blockDto.getRows().stream()
+                            .map(rowDto -> SeatingMapProjectionDTO.RowInfo.builder()
                                     .id(rowDto.getId())
                                     .label(rowDto.getLabel())
                                     .seats(mapSeatsWithTiers(rowDto.getSeats(), tierInfoMap))
                                     .build())
                             .collect(Collectors.toList()) : null;
 
-                    List<EventProjectionDTO.SeatInfo> seatInfos = blockDto.getSeats() != null ?
+                    List<SeatingMapProjectionDTO.SeatInfo> seatInfos = blockDto.getSeats() != null ?
                             mapSeatsWithTiers(blockDto.getSeats(), tierInfoMap) : null;
 
-                    return EventProjectionDTO.BlockInfo.builder()
+                    return SeatingMapProjectionDTO.BlockInfo.builder()
                             .id(blockDto.getId()).name(blockDto.getName()).type(blockDto.getType())
-                            .position(EventProjectionDTO.PositionInfo.builder()
+                            .position(SeatingMapProjectionDTO.PositionInfo.builder()
                                     .x(blockDto.getPosition().getX())
                                     .y(blockDto.getPosition().getY())
                                     .build())
@@ -121,18 +124,18 @@ public class EventProjectionDataService {
                             .build();
                 }).collect(Collectors.toList());
 
-        return EventProjectionDTO.SessionSeatingMapInfo.builder()
+        return SeatingMapProjectionDTO.builder()
                 .name(sourceDto.getName())
-                .layout(EventProjectionDTO.LayoutInfo.builder().blocks(blockInfos).build())
+                .layout(SeatingMapProjectionDTO.LayoutInfo.builder().blocks(blockInfos).build())
                 .build();
     }
 
-    private List<EventProjectionDTO.SeatInfo> mapSeatsWithTiers(List<SessionSeatingMapDTO.Seat> seatDtos, Map<UUID, EventProjectionDTO.TierInfo> tierInfoMap) {
+    private List<SeatingMapProjectionDTO.SeatInfo> mapSeatsWithTiers(List<SessionSeatingMapDTO.Seat> seatDtos, Map<UUID, TierInfo> tierInfoMap) {
         return seatDtos.stream().map(seatDto -> {
-            EventProjectionDTO.TierInfo embeddedTier = seatDto.getTierId() != null
+            TierInfo embeddedTier = seatDto.getTierId() != null
                     ? tierInfoMap.get(UUID.fromString(seatDto.getTierId()))
                     : null;
-            return EventProjectionDTO.SeatInfo.builder()
+            return SeatingMapProjectionDTO.SeatInfo.builder()
                     .id(seatDto.getId())
                     .label(seatDto.getLabel())
                     .status(seatDto.getStatus())
@@ -163,21 +166,21 @@ public class EventProjectionDataService {
         }
     }
 
-    private EventProjectionDTO.VenueDetailsInfo mapToVenueDetailsInfo(VenueDetailsDTO dto) {
+    private SessionProjectionDTO.VenueDetailsInfo mapToVenueDetailsInfo(VenueDetailsDTO dto) {
         if (dto == null) return null;
-        EventProjectionDTO.GeoJsonPoint point = null;
+        SessionProjectionDTO.GeoJsonPoint point = null;
         if (dto.getLongitude() != null && dto.getLatitude() != null) {
-            point = EventProjectionDTO.GeoJsonPoint.builder()
+            point = SessionProjectionDTO.GeoJsonPoint.builder()
                     .coordinates(new double[]{dto.getLongitude(), dto.getLatitude()})
                     .build();
         }
-        return EventProjectionDTO.VenueDetailsInfo.builder()
+        return SessionProjectionDTO.VenueDetailsInfo.builder()
                 .name(dto.getName()).address(dto.getAddress()).onlineLink(dto.getOnlineLink()).location(point)
                 .build();
     }
 
-    private EventProjectionDTO.TierInfo mapToTierInfo(Tier tier) {
-        return EventProjectionDTO.TierInfo.builder()
+    private TierInfo mapToTierInfo(Tier tier) {
+        return TierInfo.builder()
                 .id(tier.getId()).name(tier.getName()).price(tier.getPrice()).color(tier.getColor())
                 .build();
     }
