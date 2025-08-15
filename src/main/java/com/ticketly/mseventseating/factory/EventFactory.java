@@ -153,9 +153,14 @@ public class EventFactory {
     private void prepareSeats(List<SessionSeatingMapDTO.Seat> seats, Map<String, Tier> tierIdMap) {
         for (SessionSeatingMapDTO.Seat seat : seats) {
             seat.setId(UUID.randomUUID().toString());
-            seat.setStatus("AVAILABLE"); // Always initialize as AVAILABLE
+            if (seat.getStatus() == SeatStatus.RESERVED) {
+                continue;
+            }
+
+            seat.setStatus(SeatStatus.AVAILABLE);
 
             if (seat.getTierId() != null) {
+                seat.setStatus(SeatStatus.AVAILABLE);
                 Tier realTier = tierIdMap.get(seat.getTierId());
                 if (realTier == null) {
                     throw new BadRequestException("Seat/slot is assigned to an invalid Tier ID: " + seat.getTierId());
