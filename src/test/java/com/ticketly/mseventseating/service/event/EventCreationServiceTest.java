@@ -11,6 +11,7 @@ import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.service.LimitService;
 import com.ticketly.mseventseating.service.OrganizationService;
 import com.ticketly.mseventseating.service.S3StorageService;
+import model.EventStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
