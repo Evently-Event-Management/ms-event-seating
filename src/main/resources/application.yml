@@ -12,8 +12,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/event-ticketing}
-          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8080/realms/event-ticketing/protocol/openid-connect/certs}
+          issuer-uri: ${JWT_ISSUER_URI:http://auth.ticketly.com:8080/realms/event-ticketing}
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://auth.ticketly.com:8080/realms/event-ticketing/protocol/openid-connect/certs}
   servlet:
     multipart:
       enabled: true
@@ -46,6 +46,7 @@ logging:
   level:
     root: INFO
     com.ticketly: DEBUG
+    org.springframework.security: DEBUG
 
 # Application specific configurations
 app:
@@ -83,3 +84,4 @@ aws:
     sqs-queue-arn: ${AWS_SQS_QUEUE_ARN:arn:aws:sqs:us-east-1:000000000000:session-on-sale-queue}
     role-arn: ${AWS_SCHEDULER_ROLE_ARN:arn:aws:iam::000000000000:role/EventBridgeSchedulerRole}
     group-name: ${AWS_SCHEDULER_GROUP_NAME:event-ticketing-schedules}
+

@@ -1,14 +1,15 @@
 package com.ticketly.mseventseating.service.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ticketly.mseventseating.dto.event.SessionSeatingMapDTO;
-import com.ticketly.mseventseating.dto.projection.SeatingMapProjectionDTO;
-import com.ticketly.mseventseating.dto.projection.TierInfo;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.SessionSeatingMapRepository;
+import dto.SessionSeatingMapDTO;
+import dto.projection.SeatingMapProjectionDTO;
+import dto.projection.TierInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.EventStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

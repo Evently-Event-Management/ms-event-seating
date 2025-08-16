@@ -1,7 +1,7 @@
 package com.ticketly.mseventseating.repository;
 
 import com.ticketly.mseventseating.model.EventSession;
-import com.ticketly.mseventseating.model.SessionStatus;
+import model.SessionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

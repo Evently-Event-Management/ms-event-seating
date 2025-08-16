@@ -1,10 +1,10 @@
 package com.ticketly.mseventseating.dto.event;
 
-import com.ticketly.mseventseating.model.EventStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import model.EventStatus;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

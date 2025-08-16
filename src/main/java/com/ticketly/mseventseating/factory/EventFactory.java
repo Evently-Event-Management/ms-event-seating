@@ -4,14 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.CreateEventRequest;
 import com.ticketly.mseventseating.dto.event.SessionRequest;
-import com.ticketly.mseventseating.dto.event.SessionSeatingMapDTO;
 import com.ticketly.mseventseating.dto.event.TierRequest;
 import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.CategoryRepository;
+import dto.SessionSeatingMapDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.SeatStatus;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;

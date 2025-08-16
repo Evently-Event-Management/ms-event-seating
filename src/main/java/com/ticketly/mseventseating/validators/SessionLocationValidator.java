@@ -1,9 +1,9 @@
 package com.ticketly.mseventseating.validators;
 
 import com.ticketly.mseventseating.dto.event.SessionRequest;
-import com.ticketly.mseventseating.model.SessionType;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import model.SessionType;
 
 public class SessionLocationValidator implements ConstraintValidator<ValidSessionLocation, SessionRequest> {
 

@@ -2,12 +2,12 @@ package com.ticketly.mseventseating.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.*;
-import com.ticketly.mseventseating.model.EventStatus;
 import com.ticketly.mseventseating.service.event.EventCreationService;
 import com.ticketly.mseventseating.service.event.EventLifecycleService;
 import com.ticketly.mseventseating.service.event.EventQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import model.EventStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;

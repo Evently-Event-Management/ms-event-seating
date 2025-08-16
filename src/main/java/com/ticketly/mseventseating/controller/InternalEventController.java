@@ -1,12 +1,13 @@
 package com.ticketly.mseventseating.controller;
 
-import com.ticketly.mseventseating.dto.projection.EventProjectionDTO;
-import com.ticketly.mseventseating.dto.projection.SeatingMapProjectionDTO;
-import com.ticketly.mseventseating.dto.projection.SessionProjectionDTO;
+
 import com.ticketly.mseventseating.service.event.EventLifecycleService;
 import com.ticketly.mseventseating.service.event.EventProjectionService;
 import com.ticketly.mseventseating.service.event.SeatingMapProjectionService;
 import com.ticketly.mseventseating.service.event.SessionProjectionService;
+import dto.projection.EventProjectionDTO;
+import dto.projection.SeatingMapProjectionDTO;
+import dto.projection.SessionProjectionDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

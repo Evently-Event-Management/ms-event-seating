@@ -1,7 +1,7 @@
 package com.ticketly.mseventseating.repository;
 
 import com.ticketly.mseventseating.model.Event;
-import com.ticketly.mseventseating.model.EventStatus;
+import model.EventStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

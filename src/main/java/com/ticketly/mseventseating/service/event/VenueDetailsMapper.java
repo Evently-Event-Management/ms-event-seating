@@ -2,7 +2,7 @@ package com.ticketly.mseventseating.service.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.VenueDetailsDTO;
-import com.ticketly.mseventseating.dto.projection.SessionProjectionDTO;
+import dto.projection.SessionProjectionDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

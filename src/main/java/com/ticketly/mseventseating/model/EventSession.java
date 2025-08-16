@@ -2,6 +2,8 @@ package com.ticketly.mseventseating.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import model.SessionStatus;
+import model.SessionType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 

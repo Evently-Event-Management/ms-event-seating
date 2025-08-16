@@ -7,6 +7,8 @@ import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.repository.EventSessionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.EventStatus;
+import model.SessionStatus;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
