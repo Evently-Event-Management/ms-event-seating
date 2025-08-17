@@ -133,9 +133,8 @@
         <dependency>
             <groupId>com.github.Evently-Event-Management</groupId>
             <artifactId>ticketly-shared-dto</artifactId>
-            <version>V1.0.2</version>
+            <version>V1.0.6</version>
         </dependency>
-
     </dependencies>
 
     <build>
