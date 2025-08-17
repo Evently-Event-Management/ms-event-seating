@@ -1,10 +1,10 @@
 package com.ticketly.mseventseating.dto.event;
 
 import com.ticketly.mseventseating.model.SalesStartRuleType;
-import com.ticketly.mseventseating.model.SessionType;
 import com.ticketly.mseventseating.validators.ValidSalesStartTime;
 import com.ticketly.mseventseating.validators.ValidSessionDuration;
 import com.ticketly.mseventseating.validators.ValidSessionLocation;
+import dto.SessionSeatingMapDTO;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,6 +12,7 @@ import lombok.Builder;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import lombok.NoArgsConstructor;
+import model.SessionType;
 
 import java.time.OffsetDateTime;
 

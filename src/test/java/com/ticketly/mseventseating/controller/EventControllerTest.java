@@ -2,10 +2,10 @@ package com.ticketly.mseventseating.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.*;
-import com.ticketly.mseventseating.model.EventStatus;
 import com.ticketly.mseventseating.service.event.EventCreationService;
 import com.ticketly.mseventseating.service.event.EventLifecycleService;
 import com.ticketly.mseventseating.service.event.EventQueryService;
+import model.EventStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

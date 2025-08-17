@@ -1,29 +1,33 @@
 server:
   port: ${SERVER_PORT:8081}
   servlet:
-    context-path: ${SERVER_SERVLET_CONTEXT_PATH:/api/event-seating}
+    context-path: /api/event-seating
 
 spring:
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
   application:
     name: ms-event-seating
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/event-ticketing}
-          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8080/realms/event-ticketing/protocol/openid-connect/certs}
+          issuer-uri: ${JWT_ISSUER_URI:http://auth.ticketly.com:8080/realms/event-ticketing}
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://auth.ticketly.com:8080/realms/event-ticketing/protocol/openid-connect/certs}
   servlet:
     multipart:
       enabled: true
       max-file-size: ${MAX_FILE_SIZE:5MB}
       max-request-size: ${MAX_REQUEST_SIZE:15MB}
       file-size-threshold: 2KB
+  # Database Configuration
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/event_seating}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: ${SHOW_SQL:true}
     properties:
       hibernate:
         format_sql: true
@@ -33,19 +37,24 @@ spring:
     baseline-on-migrate: true
     locations: classpath:db/migration
     validate-on-migrate: true
+  # Redis Configuration
   cache:
     redis:
       time-to-live: 3600s
       key-prefix: "event-seating-ms::"
   data:
     redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: ${REDIS_TIMEOUT:2000}
       repositories:
         enabled: false
 
 logging:
   level:
-    root: INFO
-    com.ticketly: DEBUG
+    root: ${LOG_LEVEL_ROOT:INFO}
+    com.ticketly: ${LOG_LEVEL_APP:DEBUG}
+    org.springframework.security: ${LOG_LEVEL_SECURITY:DEBUG}
 
 # Application specific configurations
 app:
@@ -77,8 +86,17 @@ app:
     max-cover-photos: 5
     max-cover-photo-size: 31457280 # 3MB
 
-# AWS EventBridge Scheduler configuration
+# AWS Configuration
 aws:
+  region: ${AWS_REGION:us-east-1}
+  s3:
+    bucket-name: ${AWS_S3_BUCKET_NAME:event-seating-uploads}
+  # Local development settings (used only when needed)
+  local:
+    endpoint: ${AWS_LOCAL_ENDPOINT:http://localhost:4566}
+    access-key: ${AWS_LOCAL_ACCESS_KEY:test}
+    secret-key: ${AWS_LOCAL_SECRET_KEY:test}
+  # EventBridge Scheduler configuration
   scheduler:
     sqs-queue-arn: ${AWS_SQS_QUEUE_ARN:arn:aws:sqs:us-east-1:000000000000:session-on-sale-queue}
     role-arn: ${AWS_SCHEDULER_ROLE_ARN:arn:aws:iam::000000000000:role/EventBridgeSchedulerRole}

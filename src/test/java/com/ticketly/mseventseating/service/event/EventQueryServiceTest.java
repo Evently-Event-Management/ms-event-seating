@@ -7,6 +7,8 @@ import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.service.OrganizationOwnershipService;
 import com.ticketly.mseventseating.service.S3StorageService;
+import model.EventStatus;
+import model.SessionStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

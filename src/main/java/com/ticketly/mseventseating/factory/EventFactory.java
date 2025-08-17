@@ -4,14 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.CreateEventRequest;
 import com.ticketly.mseventseating.dto.event.SessionRequest;
-import com.ticketly.mseventseating.dto.event.SessionSeatingMapDTO;
 import com.ticketly.mseventseating.dto.event.TierRequest;
 import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.CategoryRepository;
+import dto.SessionSeatingMapDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.SeatStatus;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -153,15 +154,22 @@ public class EventFactory {
     private void prepareSeats(List<SessionSeatingMapDTO.Seat> seats, Map<String, Tier> tierIdMap) {
         for (SessionSeatingMapDTO.Seat seat : seats) {
             seat.setId(UUID.randomUUID().toString());
-            seat.setStatus("AVAILABLE"); // Always initialize as AVAILABLE
+            if (seat.getStatus() == SeatStatus.RESERVED) {
+                continue;
+            }
+
+            seat.setStatus(SeatStatus.AVAILABLE);
 
             if (seat.getTierId() != null) {
+                seat.setStatus(SeatStatus.AVAILABLE);
                 Tier realTier = tierIdMap.get(seat.getTierId());
                 if (realTier == null) {
                     throw new BadRequestException("Seat/slot is assigned to an invalid Tier ID: " + seat.getTierId());
                 }
                 // Now we can use the permanent ID from the Tier object
                 seat.setTierId(realTier.getId().toString());
+            } else {
+                throw new BadRequestException("Seat must be assigned to a valid Tier ID.");
             }
         }
     }
