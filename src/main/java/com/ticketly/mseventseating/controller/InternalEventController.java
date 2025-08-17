@@ -1,10 +1,12 @@
 package com.ticketly.mseventseating.controller;
 
 
+import com.ticketly.mseventseating.service.CategoryProjectionDataService;
 import com.ticketly.mseventseating.service.event.EventLifecycleService;
 import com.ticketly.mseventseating.service.event.EventProjectionService;
 import com.ticketly.mseventseating.service.event.SeatingMapProjectionService;
 import com.ticketly.mseventseating.service.event.SessionProjectionService;
+import dto.projection.CategoryProjectionDTO;
 import dto.projection.EventProjectionDTO;
 import dto.projection.SeatingMapProjectionDTO;
 import dto.projection.SessionProjectionDTO;
@@ -23,6 +25,7 @@ public class InternalEventController {
     private final EventProjectionService eventProjectionService;
     private final SessionProjectionService sessionProjectionService;
     private final SeatingMapProjectionService seatingMapProjectionService;
+    private final CategoryProjectionDataService categoryProjectionService;
 
     /**
      * Secure M2M endpoint for the Scheduler Service to put a session on sale.
@@ -58,5 +61,8 @@ public class InternalEventController {
         return ResponseEntity.ok(seatingMapProjectionService.projectSeatingMap(seatingMapId));
     }
 
-
+    @GetMapping("/categories/{categoryId}/projection-data")
+    public ResponseEntity<CategoryProjectionDTO> getCategoryProjectionData(@PathVariable UUID categoryId) {
+        return ResponseEntity.ok(categoryProjectionService.getCategoryProjectionData(categoryId));
+    }
 }
