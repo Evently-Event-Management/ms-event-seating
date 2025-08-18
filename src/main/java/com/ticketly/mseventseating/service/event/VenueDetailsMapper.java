@@ -21,15 +21,13 @@ public class VenueDetailsMapper {
     }
 
     public SessionProjectionDTO.VenueDetailsInfo mapToVenueDetailsInfo(VenueDetailsDTO dto) {
-        if (dto == null) return null;
-        SessionProjectionDTO.GeoJsonPoint point = null;
-        if (dto.getLongitude() != null && dto.getLatitude() != null) {
-            point = SessionProjectionDTO.GeoJsonPoint.builder()
-                    .coordinates(new double[]{dto.getLongitude(), dto.getLatitude()})
-                    .build();
-        }
+        return getVenueDetailsInfo(dto);
+    }
+
+    static SessionProjectionDTO.VenueDetailsInfo getVenueDetailsInfo(VenueDetailsDTO dto) {
         return SessionProjectionDTO.VenueDetailsInfo.builder()
-                .name(dto.getName()).address(dto.getAddress()).onlineLink(dto.getOnlineLink()).location(point)
+                .name(dto.getName()).address(dto.getAddress()).onlineLink(dto.getOnlineLink()).latitude(dto.getLatitude())
+                .longitude(dto.getLongitude())
                 .build();
     }
 }
