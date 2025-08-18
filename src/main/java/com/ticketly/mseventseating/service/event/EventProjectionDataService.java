@@ -78,7 +78,7 @@ public class EventProjectionDataService {
 
                     return SessionProjectionDTO.builder()
                             .id(s.getId()).startTime(s.getStartTime()).endTime(s.getEndTime())
-                            .status(s.getStatus().name()).sessionType(s.getSessionType())
+                            .sessionType(s.getSessionType())
                             .venueDetails(mapToVenueDetailsInfo(venueDetails))
                             .layoutData(layoutData)
                             .build();

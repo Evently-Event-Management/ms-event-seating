@@ -37,7 +37,7 @@ public class SessionProjectionService {
                 .id(session.getId())
                 .startTime(session.getStartTime())
                 .endTime(session.getEndTime())
-                .status(session.getStatus().name())
+                .sessionStatus(session.getStatus())
                 .sessionType(session.getSessionType())
                 .venueDetails(venueDetailsMapper.mapToVenueDetailsInfo(venueDetails))
                 .layoutData(layoutData)
