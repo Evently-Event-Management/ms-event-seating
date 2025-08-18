@@ -23,6 +23,8 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.ticketly.mseventseating.service.event.VenueDetailsMapper.getVenueDetailsInfo;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -167,16 +169,7 @@ public class EventProjectionDataService {
     }
 
     private SessionProjectionDTO.VenueDetailsInfo mapToVenueDetailsInfo(VenueDetailsDTO dto) {
-        if (dto == null) return null;
-        SessionProjectionDTO.GeoJsonPoint point = null;
-        if (dto.getLongitude() != null && dto.getLatitude() != null) {
-            point = SessionProjectionDTO.GeoJsonPoint.builder()
-                    .coordinates(new double[]{dto.getLongitude(), dto.getLatitude()})
-                    .build();
-        }
-        return SessionProjectionDTO.VenueDetailsInfo.builder()
-                .name(dto.getName()).address(dto.getAddress()).onlineLink(dto.getOnlineLink()).location(point)
-                .build();
+        return getVenueDetailsInfo(dto);
     }
 
     private TierInfo mapToTierInfo(Tier tier) {
