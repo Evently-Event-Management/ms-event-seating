@@ -36,6 +36,10 @@ public class Organization {
     @JsonManagedReference("organization-events") // Give it a unique name
     private List<Event> events;
 
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("organization-members")
+    private List<OrganizationMember> members;
+
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private OffsetDateTime createdAt;
