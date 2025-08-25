@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -30,7 +32,13 @@ public class OrganizationMember {
     @Column(name = "user_id", nullable = false)
     private String userId; // The user's ID from Keycloak
 
-    @Enumerated(EnumType.STRING) // Store the role as a string
-    @Column(nullable = false)
-    private OrganizationRole role;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+        name = "organization_member_roles",
+        joinColumns = @JoinColumn(name = "organization_member_id")
+    )
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    @Builder.Default
+    private Set<OrganizationRole> roles = new HashSet<>();
 }

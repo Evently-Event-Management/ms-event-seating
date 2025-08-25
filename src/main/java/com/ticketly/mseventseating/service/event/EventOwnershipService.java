@@ -61,4 +61,14 @@ public class EventOwnershipService {
             log.debug("No cache keys found for event ID: {}", eventId);
         }
     }
+
+    public void evictEventCacheByUser(String userId) {
+        Set<String> keys = redisTemplate.keys("event-seating-ms::eventOwnership::*-" + userId);
+        if (!keys.isEmpty()) {
+            redisTemplate.delete(keys);
+            log.debug("Evicted event cache for user ID: {}", userId);
+        } else {
+            log.debug("No cache entries found for user ID: {}", userId);
+        }
+    }
 }

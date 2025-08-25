@@ -3,8 +3,10 @@ package com.ticketly.mseventseating.dto.organization;
 import com.ticketly.mseventseating.model.OrganizationRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
+
+import java.util.Set;
 
 // Request to invite a new member
 @Data
@@ -13,6 +15,6 @@ public class InviteStaffRequest {
     @Email
     private String email;
 
-    @NotNull
-    private OrganizationRole role; // e.g., "ADMIN" or "MEMBER"
+    @NotEmpty
+    private Set<OrganizationRole> roles; // Now supporting multiple roles
 }

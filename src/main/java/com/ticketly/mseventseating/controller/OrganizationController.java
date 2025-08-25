@@ -140,6 +140,22 @@ public class OrganizationController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Get all staff members of an organization.
+     */
+    @GetMapping("/{organizationId}/staff")
+    public ResponseEntity<List<OrganizationMemberResponse>> getAllStaffMembers(
+            @PathVariable UUID organizationId,
+            @AuthenticationPrincipal Jwt jwt) {
+        String ownerUserId = jwt.getSubject();
+        log.info("User {} fetching all staff members for organization {}", ownerUserId, organizationId);
+        List<OrganizationMemberResponse> members = organizationStaffService.getAllOrganizationMembers(organizationId, ownerUserId);
+        return ResponseEntity.ok(members);
+    }
+
+    /**
+     * Invite a new staff member to an organization or update an existing member's roles.
+     */
     @PostMapping("/{organizationId}/staff")
     public ResponseEntity<OrganizationMemberResponse> inviteStaff(
             @PathVariable UUID organizationId,
@@ -149,5 +165,19 @@ public class OrganizationController {
         log.info("User {} inviting staff member with email {} to organization {}", ownerUserId, request.getEmail(), organizationId);
         OrganizationMemberResponse newMember = organizationStaffService.inviteStaff(organizationId, request, ownerUserId);
         return ResponseEntity.status(HttpStatus.CREATED).body(newMember);
+    }
+
+    /**
+     * Remove a staff member from an organization.
+     */
+    @DeleteMapping("/{organizationId}/staff/{userId}")
+    public ResponseEntity<Void> removeStaff(
+            @PathVariable UUID organizationId,
+            @PathVariable String userId,
+            @AuthenticationPrincipal Jwt jwt) {
+        String ownerUserId = jwt.getSubject();
+        log.info("User {} removing staff member {} from organization {}", ownerUserId, userId, organizationId);
+        organizationStaffService.removeStaff(organizationId, userId, ownerUserId);
+        return ResponseEntity.noContent().build();
     }
 }

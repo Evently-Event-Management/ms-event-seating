@@ -56,4 +56,14 @@ public class OrganizationOwnershipService {
             log.debug("No cache entries found for organization ID: {}", organizationId);
         }
     }
+
+    public void evictOrganizationCacheByUser(UUID userId) {
+        Set<String> keys = redisTemplate.keys("event-seating-ms::organizationOwnership::*-" + userId);
+        if (!keys.isEmpty()) {
+            redisTemplate.delete(keys);
+            log.debug("Evicted organization cache for user ID: {}", userId);
+        } else {
+            log.debug("No cache entries found for user ID: {}", userId);
+        }
+    }
 }
