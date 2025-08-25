@@ -140,7 +140,7 @@ public class SeatValidationService {
                 }
             } catch (IllegalArgumentException e) {
                 log.warn("Invalid seat ID format: {}", seat.getId());
-                // Skip this seat if ID is not a valid UUID
+                throw new BadRequestException("Invalid seat ID format: " + seat.getId());
             }
         }
     }

@@ -51,7 +51,7 @@ public class EventSchedulingService {
         log.debug("Found {} sessions to process for event ID: {}", event.getSessions().size(), event.getId());
 
         for (EventSession session : event.getSessions()) {
-            // Skip already cancelled sessions
+            // Skip non-pending sessions
             if (session.getStatus() != SessionStatus.PENDING) {
                 log.debug("Skipping session ID: {} with status: {}", session.getId(), session.getStatus());
                 continue;
