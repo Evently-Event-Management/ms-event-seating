@@ -50,11 +50,19 @@ spring:
       repositories:
         enabled: false
 
+# Keycloak Admin Client Configuration
+keycloak:
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://auth.ticketly.com:8080}
+  realm: ${KEYCLOAK_REALM:event-ticketing}
+  resource: ${KEYCLOAK_CLIENT_ID:events-service}
+  credentials:
+    secret: ${KEYCLOAK_CLIENT_SECRET:}
+
 logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
     com.ticketly: ${LOG_LEVEL_APP:INFO}
-    org.springframework.security: ${LOG_LEVEL_SECURITY:WARN}
+    org.springframework.security: ${LOG_LEVEL_SECURITY:DEBUG}
 
 # Application specific configurations
 app:
@@ -98,6 +106,7 @@ aws:
     secret-key: ${AWS_LOCAL_SECRET_KEY:}
   # EventBridge Scheduler configuration
   scheduler:
-    sqs-queue-arn: ${AWS_SQS_QUEUE_ARN}
+    sqs-session-on-sale-queue-arn: ${AWS_SQS_SESSION_ON_SALE_QUEUE_ARN}
+    sqs-session-closed-queue-arn: ${AWS_SQS_SESSION_CLOSED_QUEUE_ARN}
     role-arn: ${AWS_SCHEDULER_ROLE_ARN}
     group-name: ${AWS_SCHEDULER_GROUP_NAME:event-ticketing-schedules}

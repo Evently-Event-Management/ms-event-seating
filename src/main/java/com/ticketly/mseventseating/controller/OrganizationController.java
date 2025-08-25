@@ -1,8 +1,11 @@
 package com.ticketly.mseventseating.controller;
 
+import com.ticketly.mseventseating.dto.organization.InviteStaffRequest;
+import com.ticketly.mseventseating.dto.organization.OrganizationMemberResponse;
 import com.ticketly.mseventseating.dto.organization.OrganizationRequest;
 import com.ticketly.mseventseating.dto.organization.OrganizationResponse;
 import com.ticketly.mseventseating.service.OrganizationService;
+import com.ticketly.mseventseating.service.OrganizationStaffService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +29,7 @@ import java.util.UUID;
 public class OrganizationController {
 
     private final OrganizationService organizationService;
+    private final OrganizationStaffService organizationStaffService;
 
     /**
      * Get all organizations owned by the authenticated user.
@@ -133,6 +137,47 @@ public class OrganizationController {
         String userId = jwt.getSubject();
         log.info("User {} deleting organization ID: {}", userId, id);
         organizationService.deleteOrganization(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Get all staff members of an organization.
+     */
+    @GetMapping("/{organizationId}/staff")
+    public ResponseEntity<List<OrganizationMemberResponse>> getAllStaffMembers(
+            @PathVariable UUID organizationId,
+            @AuthenticationPrincipal Jwt jwt) {
+        String ownerUserId = jwt.getSubject();
+        log.info("User {} fetching all staff members for organization {}", ownerUserId, organizationId);
+        List<OrganizationMemberResponse> members = organizationStaffService.getAllOrganizationMembers(organizationId, ownerUserId);
+        return ResponseEntity.ok(members);
+    }
+
+    /**
+     * Invite a new staff member to an organization or update an existing member's roles.
+     */
+    @PostMapping("/{organizationId}/staff")
+    public ResponseEntity<OrganizationMemberResponse> inviteStaff(
+            @PathVariable UUID organizationId,
+            @Valid @RequestBody InviteStaffRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        String ownerUserId = jwt.getSubject();
+        log.info("User {} inviting staff member with email {} to organization {}", ownerUserId, request.getEmail(), organizationId);
+        OrganizationMemberResponse newMember = organizationStaffService.inviteStaff(organizationId, request, ownerUserId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newMember);
+    }
+
+    /**
+     * Remove a staff member from an organization.
+     */
+    @DeleteMapping("/{organizationId}/staff/{userId}")
+    public ResponseEntity<Void> removeStaff(
+            @PathVariable UUID organizationId,
+            @PathVariable String userId,
+            @AuthenticationPrincipal Jwt jwt) {
+        String ownerUserId = jwt.getSubject();
+        log.info("User {} removing staff member {} from organization {}", ownerUserId, userId, organizationId);
+        organizationStaffService.removeStaff(organizationId, userId, ownerUserId);
         return ResponseEntity.noContent().build();
     }
 }

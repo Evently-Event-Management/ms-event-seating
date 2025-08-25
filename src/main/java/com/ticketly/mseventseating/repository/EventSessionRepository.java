@@ -3,32 +3,33 @@ package com.ticketly.mseventseating.repository;
 import com.ticketly.mseventseating.model.EventSession;
 import model.SessionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface EventSessionRepository extends JpaRepository<EventSession, UUID> {
-    /**
-     * Find all sessions for a specific event
-     */
-    List<EventSession> findByEventId(UUID eventId);
 
     /**
-     * Find all sessions for a specific event with a given status
+     * Counts the number of sessions for an event that are NOT in the completed states (SOLD_OUT or CANCELLED).
+     * Returns 0 if all sessions are in completed states.
+     *
+     * @param eventId The event ID to check
+     * @param completedStatuses List of session statuses considered as completed
+     * @return Count of sessions that are not in completed states
      */
-    List<EventSession> findByEventIdAndStatus(UUID eventId, SessionStatus status);
+    @Query("SELECT COUNT(s) FROM EventSession s WHERE s.event.id = :eventId AND s.status NOT IN :completedStatuses")
+    long countByEventIdAndStatusNotIn(@Param("eventId") UUID eventId, @Param("completedStatuses") List<SessionStatus> completedStatuses);
 
     /**
-     * Find sessions scheduled to start between specified dates
+     * Checks if an event has any sessions (returns true if it has at least one session).
+     *
+     * @param eventId The event ID to check
+     * @return true if the event has at least one session, false otherwise
      */
-    List<EventSession> findByStartTimeBetween(OffsetDateTime startDate, OffsetDateTime endDate);
-
-    /**
-     * Find sessions that should be put on sale at or before the given time
-     */
-    List<EventSession> findByStatusAndSalesStartFixedDatetimeLessThanEqual(
-            SessionStatus status, OffsetDateTime dateTime);
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM EventSession s WHERE s.event.id = :eventId")
+    boolean existsByEventId(@Param("eventId") UUID eventId);
 }
