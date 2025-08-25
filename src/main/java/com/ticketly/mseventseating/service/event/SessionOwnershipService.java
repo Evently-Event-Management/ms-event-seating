@@ -89,12 +89,12 @@ public class SessionOwnershipService {
         Set<String> ownershipKeys = redisTemplate.keys("event-seating-ms::sessionOwnership::" + sessionId + "-*");
         Set<String> roleKeys = redisTemplate.keys("event-seating-ms::sessionRoleAccess::" + sessionId + "-*");
 
-        if (ownershipKeys != null && !ownershipKeys.isEmpty()) {
+        if (!ownershipKeys.isEmpty()) {
             redisTemplate.delete(ownershipKeys);
             log.debug("Evicted ownership cache keys: {}", ownershipKeys);
         }
 
-        if (roleKeys != null && !roleKeys.isEmpty()) {
+        if (!roleKeys.isEmpty()) {
             redisTemplate.delete(roleKeys);
             log.debug("Evicted role access cache keys: {}", roleKeys);
         }
@@ -110,12 +110,12 @@ public class SessionOwnershipService {
         Set<String> ownershipKeys = redisTemplate.keys("event-seating-ms::sessionOwnership::*-" + userId);
         Set<String> roleKeys = redisTemplate.keys("event-seating-ms::sessionRoleAccess::*-" + userId + "-*");
 
-        if (ownershipKeys != null && !ownershipKeys.isEmpty()) {
+        if (!ownershipKeys.isEmpty()) {
             redisTemplate.delete(ownershipKeys);
             log.debug("Evicted ownership cache keys: {}", ownershipKeys);
         }
 
-        if (roleKeys != null && !roleKeys.isEmpty()) {
+        if (!roleKeys.isEmpty()) {
             redisTemplate.delete(roleKeys);
             log.debug("Evicted role access cache keys: {}", roleKeys);
         }
