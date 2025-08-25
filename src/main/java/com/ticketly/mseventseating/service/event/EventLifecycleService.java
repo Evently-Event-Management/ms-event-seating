@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -165,5 +166,72 @@ public class EventLifecycleService {
         session.setStatus(SessionStatus.ON_SALE);
         eventSessionRepository.save(session);
         log.info("Session {} has been successfully put ON_SALE.", sessionId);
+    }
+
+    /**
+     * Marks a session as CLOSED. This is typically called by the scheduled job after a session ends.
+     * If all sessions for the parent event are now either CLOSED or CANCELLED, the event is marked as COMPLETED.
+     *
+     * @param sessionId The ID of the session to mark as CLOSED
+     */
+    public void markSessionAsClosed(UUID sessionId) {
+        log.info("Marking session ID: {} as CLOSED", sessionId);
+        EventSession session = eventSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("EventSession not found with ID: " + sessionId));
+
+        // Check if session can be marked as CLOSED
+        if (session.getStatus() != SessionStatus.ON_SALE && session.getStatus() != SessionStatus.SCHEDULED) {
+            log.warn("Cannot mark session {} as CLOSED because its status is {}", sessionId, session.getStatus());
+            throw new InvalidStateException("Cannot mark session as CLOSED because its current status is " + session.getStatus());
+        }
+
+        // Update session status
+        session.setStatus(SessionStatus.CLOSED);
+        eventSessionRepository.save(session);
+        log.info("Session {} has been successfully marked as CLOSED", sessionId);
+
+        // Check if the parent event should be marked as COMPLETED
+        checkAndUpdateEventCompletion(session.getEvent().getId());
+    }
+
+    /**
+     * Checks if all sessions for an event are either CLOSED or CANCELLED, and if so,
+     * marks the event as COMPLETED.
+     *
+     * @param eventId The ID of the event to check
+     */
+    private void checkAndUpdateEventCompletion(UUID eventId) {
+        log.debug("Checking if event ID: {} should be marked as COMPLETED", eventId);
+        Event event = findEventById(eventId);
+
+        // Only APPROVED events can be marked as COMPLETED
+        if (event.getStatus() != EventStatus.APPROVED) {
+            log.debug("Event {} has status {}, so it cannot be marked as COMPLETED yet", eventId, event.getStatus());
+            return;
+        }
+
+        // Check if the event has any sessions
+        boolean hasAnySessions = eventSessionRepository.existsByEventId(eventId);
+        if (!hasAnySessions) {
+            log.debug("Event {} has no sessions, cannot mark as COMPLETED", eventId);
+            return;
+        }
+
+        // Define the completed session statuses
+        List<SessionStatus> completedStatuses = List.of(SessionStatus.CLOSED, SessionStatus.CANCELLED);
+
+        // Count sessions that are not in completed states
+        long incompleteSessionsCount = eventSessionRepository.countByEventIdAndStatusNotIn(eventId, completedStatuses);
+
+        // If no incomplete sessions are found, mark the event as COMPLETED
+        if (incompleteSessionsCount == 0) {
+            log.info("All sessions for event ID: {} are either CLOSED or CANCELLED, marking event as COMPLETED", eventId);
+            event.setStatus(EventStatus.COMPLETED);
+            eventRepository.save(event);
+            log.info("Event with ID {} has been successfully marked as COMPLETED", eventId);
+        } else {
+            log.debug("Event ID: {} still has {} active sessions, status remains {}",
+                    eventId, incompleteSessionsCount, event.getStatus());
+        }
     }
 }

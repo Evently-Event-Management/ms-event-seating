@@ -48,6 +48,18 @@ public class InternalEventController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Secure M2M endpoint for the Scheduler Service to mark a session as SOLD_OUT.
+     * This is called when a session ends or when all tickets are sold.
+     *
+     * @param sessionId The ID of the session to mark as SOLD_OUT.
+     * @return A response entity indicating success.
+     */
+    @PatchMapping("sessions/{sessionId}/closed")
+    public ResponseEntity<Void> markSessionAsClosed(@PathVariable UUID sessionId) {
+        eventLifecycleService.markSessionAsClosed(sessionId);
+        return ResponseEntity.ok().build();
+    }
 
     @GetMapping("events/{eventId}/projection-data")
     public ResponseEntity<EventProjectionDTO> getEventProjectionData(@PathVariable UUID eventId) {
