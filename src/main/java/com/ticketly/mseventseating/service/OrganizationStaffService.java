@@ -6,10 +6,8 @@ import com.ticketly.mseventseating.dto.organization.OrganizationMemberResponse;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.model.OrganizationMember;
-import com.ticketly.mseventseating.model.OrganizationRole;
 import com.ticketly.mseventseating.repository.OrganizationMemberRepository;
 import com.ticketly.mseventseating.repository.OrganizationRepository;
-import com.ticketly.mseventseating.service.event.EventOwnershipService;
 import com.ticketly.mseventseating.service.event.SessionOwnershipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +15,6 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,12 +28,10 @@ import java.util.UUID;
 @Slf4j
 public class OrganizationStaffService {
 
-    private final OrganizationOwnershipService ownershipService;
+    private final OrganizationOwnershipService organizationOwnershipService;
     private final OrganizationMemberRepository memberRepository;
     private final OrganizationRepository organizationRepository;
-    private final OrganizationService organizationService;
     private final Keycloak keycloakAdminClient;
-    private final EventOwnershipService eventOwnershipService;
     private final SessionOwnershipService sessionOwnershipService;
 
     @Value("${keycloak.realm:event-ticketing}")
@@ -55,7 +50,7 @@ public class OrganizationStaffService {
     @CacheEvict(value = {"organizationMemberRoles"}, allEntries = true)
     public OrganizationMemberResponse inviteStaff(UUID organizationId, InviteStaffRequest request, String ownerUserId) {
         // 1. Verify the person sending the invite owns the organization
-        if (!ownershipService.isOwner(organizationId, ownerUserId)) {
+        if (!organizationOwnershipService.isOwner(organizationId, ownerUserId)) {
             throw new AuthorizationDeniedException("Only the organization owner can invite staff.");
         }
 
@@ -106,8 +101,7 @@ public class OrganizationStaffService {
         memberRepository.save(member);
 
         // Evict related caches for this user
-        ownershipService.evictOrganizationCacheByUser(UUID.fromString(user.getId()));
-        eventOwnershipService.evictEventCacheByUser(user.getId());
+        organizationOwnershipService.evictMemberRoleCacheByUser(UUID.fromString(user.getId()));
         sessionOwnershipService.evictSessionCacheByUser(user.getId());
 
         // 4. Return the response
@@ -120,29 +114,6 @@ public class OrganizationStaffService {
     }
 
     /**
-     * Checks if a user has a specific role in an organization.
-     *
-     * @param organizationId the organization ID
-     * @param userId         the user ID
-     * @param role           the role to check for
-     * @return true if the user has the specified role
-     */
-    @Transactional(readOnly = true)
-    @Cacheable(value = "organizationMemberRoles", key = "#organizationId + '-' + #userId + '-' + #role")
-    public boolean hasRole(UUID organizationId, String userId, OrganizationRole role) {
-        log.info("--- DATABASE HIT: Checking if user {} has role {} in organization {} ---", userId, role, organizationId);
-
-        // First check if user is the owner (owners have all privileges)
-        if (ownershipService.isOwner(organizationId, userId)) {
-            return true;
-        }
-
-        // Then check for specific role in the set of roles
-        Optional<OrganizationMember> member = memberRepository.findByOrganizationIdAndUserId(organizationId, userId);
-        return member.isPresent() && member.get().getRoles().contains(role);
-    }
-
-    /**
      * Gets a user's roles in an organization.
      *
      * @param organizationId the organization ID
@@ -150,8 +121,13 @@ public class OrganizationStaffService {
      * @return the set of user roles or empty set if they have no roles
      */
     @Transactional(readOnly = true)
-    public Optional<OrganizationMemberResponse> getMemberWithRoles(UUID organizationId, String userId) {
-        log.info("--- DATABASE HIT: Fetching roles for user {} in organization {} ---", userId, organizationId);
+    public Optional<OrganizationMemberResponse> getMemberWithRoles(UUID organizationId, String userId, String requesterUserId) {
+
+        // Verify the requester is either the organization owner or the user themselves
+        if (!requesterUserId.equals(userId) && !organizationOwnershipService.isOwner(organizationId, requesterUserId)) {
+            throw new AuthorizationDeniedException("Access denied to view member roles.");
+        }
+
 
         // Check if user is the organization member
         Optional<OrganizationMember> member = memberRepository.findByOrganizationIdAndUserId(organizationId, userId);
@@ -160,9 +136,6 @@ public class OrganizationStaffService {
                 .userId(organizationMember.getUserId())
                 .roles(organizationMember.getRoles())
                 .build());
-
-        // Convert to response DTO
-        // For a full implementation, you'd fetch user details from Keycloak
     }
 
     /**
@@ -175,10 +148,9 @@ public class OrganizationStaffService {
      * @throws ResourceNotFoundException    if the organization or member is not found
      */
     @Transactional
-    @CacheEvict(value = {"organizationMemberRoles", "organizationMemberDetails"}, allEntries = true)
     public void removeStaff(UUID organizationId, String userIdToRemove, String ownerUserId) {
         // Verify the person removing the staff owns the organization
-        if (!ownershipService.isOwner(organizationId, ownerUserId)) {
+        if (!organizationOwnershipService.isOwner(organizationId, ownerUserId)) {
             throw new AuthorizationDeniedException("Only the organization owner can remove staff members.");
         }
 
@@ -198,9 +170,6 @@ public class OrganizationStaffService {
         memberRepository.delete(member.get());
         log.info("Removed user {} from organization {}", userIdToRemove, organizationId);
 
-        // Evict related caches for this user
-        ownershipService.evictOrganizationCacheByUser(UUID.fromString(userIdToRemove));
-        eventOwnershipService.evictEventCacheByUser(userIdToRemove);
         sessionOwnershipService.evictSessionCacheByUser(userIdToRemove);
     }
 
@@ -213,25 +182,26 @@ public class OrganizationStaffService {
      * @throws AuthorizationDeniedException if the requester is not the organization owner
      */
     @Transactional(readOnly = true)
-    @Cacheable(value = "organizationAllMembers", key = "#organizationId")
     public List<OrganizationMemberResponse> getAllOrganizationMembers(UUID organizationId, String ownerUserId) {
-        log.info("--- DATABASE HIT: Fetching all members for organization {} ---", organizationId);
-
         // Verify the person is the organization owner or a member with appropriate role
-        if (!ownershipService.isOwner(organizationId, ownerUserId)) {
+        if (!organizationOwnershipService.isOwner(organizationId, ownerUserId)) {
             throw new AuthorizationDeniedException("Only the organization owner can view all staff members.");
         }
 
-        // Get the organization to verify it exists
-        Organization organization = organizationRepository.findById(organizationId)
+        organizationRepository.findById(organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found with id: " + organizationId));
 
         // Get all members and convert to response DTOs
         return memberRepository.findByOrganizationId(organizationId).stream()
                 .map(member -> {
-                    // Ideally fetch user details from Keycloak for each member
-                    List<UserRepresentation> users = keycloakAdminClient.realm(realm).users().search(null, null, null, member.getUserId(), 0, 1);
-                    UserRepresentation user = users.isEmpty() ? null : users.getFirst();
+                    // Fetch user by ID directly instead of searching by email
+                    UserRepresentation user = null;
+                    try {
+                        user = keycloakAdminClient.realm(realm).users().get(member.getUserId()).toRepresentation();
+                        log.debug("Found Keycloak user: {} for member ID: {}", user.getUsername(), member.getUserId());
+                    } catch (Exception e) {
+                        log.warn("Could not fetch Keycloak user with ID: {}. Error: {}", member.getUserId(), e.getMessage());
+                    }
 
                     return OrganizationMemberResponse.builder()
                             .userId(member.getUserId())

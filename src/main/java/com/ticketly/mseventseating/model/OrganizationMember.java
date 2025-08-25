@@ -34,8 +34,8 @@ public class OrganizationMember {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
-        name = "organization_member_roles",
-        joinColumns = @JoinColumn(name = "organization_member_id")
+            name = "organization_member_roles",
+            joinColumns = @JoinColumn(name = "organization_member_id")
     )
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
