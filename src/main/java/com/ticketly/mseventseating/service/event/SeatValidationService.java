@@ -15,6 +15,7 @@ import dto.SessionSeatingMapDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.SeatStatus;
+import model.SessionStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +36,7 @@ public class SeatValidationService {
      * If any seat is not available or not found, an exception is thrown.
      *
      * @param sessionId The ID of the session the seats belong to
-     * @param request The request containing seat IDs to validate
+     * @param request   The request containing seat IDs to validate
      * @return List of SeatDetailsResponse for all valid seats
      */
     @Transactional(readOnly = true)
@@ -47,6 +48,10 @@ public class SeatValidationService {
         // Get the session
         EventSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Session not found: " + sessionId));
+
+        if (!(session.getStatus() == SessionStatus.ON_SALE)) {
+            throw new BadRequestException("Session is not on sale: " + sessionId);
+        }
 
         // Get the seating map for this session
         SessionSeatingMap seatingMap = session.getSessionSeatingMap();
@@ -85,7 +90,7 @@ public class SeatValidationService {
     }
 
     private void processSeatsByBlock(SessionSeatingMapDTO.Block block, Set<UUID> seatIds,
-                                    Map<String, Tier> tiersById, List<SeatDetailsResponse> results) {
+                                     Map<String, Tier> tiersById, List<SeatDetailsResponse> results) {
         // Process individual seats in the block
         if (block.getSeats() != null) {
             processSeatsList(block.getSeats(), seatIds, tiersById, results);
@@ -102,7 +107,7 @@ public class SeatValidationService {
     }
 
     private void processSeatsList(List<SessionSeatingMapDTO.Seat> seats, Set<UUID> seatIds,
-                                 Map<String, Tier> tiersById, List<SeatDetailsResponse> results) {
+                                  Map<String, Tier> tiersById, List<SeatDetailsResponse> results) {
         for (SessionSeatingMapDTO.Seat seat : seats) {
             try {
                 UUID seatUUID = UUID.fromString(seat.getId());
