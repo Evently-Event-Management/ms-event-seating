@@ -62,7 +62,7 @@ logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
     com.ticketly: ${LOG_LEVEL_APP:INFO}
-    org.springframework.security: ${LOG_LEVEL_SECURITY:WARN}
+    org.springframework.security: ${LOG_LEVEL_SECURITY:DEBUG}
 
 # Application specific configurations
 app:
