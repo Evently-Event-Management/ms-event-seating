@@ -1,8 +1,11 @@
 package com.ticketly.mseventseating.controller;
 
+import com.ticketly.mseventseating.dto.organization.InviteStaffRequest;
+import com.ticketly.mseventseating.dto.organization.OrganizationMemberResponse;
 import com.ticketly.mseventseating.dto.organization.OrganizationRequest;
 import com.ticketly.mseventseating.dto.organization.OrganizationResponse;
 import com.ticketly.mseventseating.service.OrganizationService;
+import com.ticketly.mseventseating.service.OrganizationStaffService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +29,7 @@ import java.util.UUID;
 public class OrganizationController {
 
     private final OrganizationService organizationService;
+    private final OrganizationStaffService organizationStaffService;
 
     /**
      * Get all organizations owned by the authenticated user.
@@ -134,5 +138,16 @@ public class OrganizationController {
         log.info("User {} deleting organization ID: {}", userId, id);
         organizationService.deleteOrganization(id, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{organizationId}/staff")
+    public ResponseEntity<OrganizationMemberResponse> inviteStaff(
+            @PathVariable UUID organizationId,
+            @Valid @RequestBody InviteStaffRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        String ownerUserId = jwt.getSubject();
+        log.info("User {} inviting staff member with email {} to organization {}", ownerUserId, request.getEmail(), organizationId);
+        OrganizationMemberResponse newMember = organizationStaffService.inviteStaff(organizationId, request, ownerUserId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newMember);
     }
 }

@@ -50,6 +50,14 @@ spring:
       repositories:
         enabled: false
 
+# Keycloak Admin Client Configuration
+keycloak:
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://auth.ticketly.com:8080}
+  realm: ${KEYCLOAK_REALM:event-ticketing}
+  resource: ${KEYCLOAK_CLIENT_ID:events-service}
+  credentials:
+    secret: ${KEYCLOAK_CLIENT_SECRET:}
+
 logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}

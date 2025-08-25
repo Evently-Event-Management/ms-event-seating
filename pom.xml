@@ -135,6 +135,12 @@
             <artifactId>ticketly-shared-dto</artifactId>
             <version>V1.1.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-admin-client</artifactId>
+            <version>26.0.6</version>
+        </dependency>
     </dependencies>
 
     <build>
