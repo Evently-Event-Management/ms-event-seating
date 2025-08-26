@@ -52,7 +52,7 @@ public class EventSchedulingService {
 
         for (EventSession session : event.getSessions()) {
             // Skip non-pending sessions
-            if (session.getStatus() != SessionStatus.PENDING) {
+            if (session.getStatus() == SessionStatus.CANCELLED || session.getStatus() == SessionStatus.SOLD_OUT || session.getStatus() == SessionStatus.CLOSED) {
                 log.debug("Skipping session ID: {} with status: {}", session.getId(), session.getStatus());
                 continue;
             }
