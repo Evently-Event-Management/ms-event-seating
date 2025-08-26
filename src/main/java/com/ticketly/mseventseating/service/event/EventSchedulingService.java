@@ -1,6 +1,5 @@
 package com.ticketly.mseventseating.service.event;
 
-import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.model.Event;
 import com.ticketly.mseventseating.model.EventSession;
 import lombok.RequiredArgsConstructor;
@@ -65,16 +64,18 @@ public class EventSchedulingService {
             }
 
             if (session.getStartTime().toInstant().isAfter(Instant.now())) {
-                log.debug("Session ID: {} is in the future, calculating sale start time", session.getId());
-                Instant scheduleTime = calculateSaleStartTime(session);
+                log.debug("Session ID: {} is in the future, using provided sale start time", session.getId());
 
-                log.debug("Calculated sale start time for session ID: {} is: {}", session.getId(), scheduleTime);
+                // Use the sales start time directly provided by the frontend
+                Instant scheduleTime = session.getSalesStartTime() != null ?
+                    session.getSalesStartTime().toInstant() : Instant.now();
 
-                // For future sessions, we schedule regardless of whether the calculated start time is in the past
-                // If start time is in the past, we'll need to make tickets available immediately
+                log.debug("Using sales start time for session ID: {} is: {}", session.getId(), scheduleTime);
+
+                // If the sales start time is in the past, make tickets available immediately
                 createEventBridgeSchedule(session, scheduleTime.isAfter(Instant.now()) ? scheduleTime : Instant.now());
 
-                // Also schedule a job to mark the session as SOLD_OUT once it ends
+                // Also schedule a job to mark the session as CLOSED once it ends
                 if (session.getEndTime() != null) {
                     scheduleSessionClosedJob(session);
                 }
@@ -132,43 +133,6 @@ public class EventSchedulingService {
         } catch (Exception e) {
             log.error("Failed to create EventBridge schedule for closed job for session {}", session.getId(), e);
         }
-    }
-
-    private Instant calculateSaleStartTime(EventSession session) {
-        log.debug("Calculating sale start time for session ID: {} with rule type: {}",
-                session.getId(), session.getSalesStartRuleType());
-
-        Instant result = switch (session.getSalesStartRuleType()) {
-            case IMMEDIATE -> {
-                log.debug("Using IMMEDIATE rule type for session ID: {}", session.getId());
-                yield Instant.now();
-            }
-            case FIXED -> {
-                if (session.getSalesStartFixedDatetime() == null) {
-                    log.debug("Fixed sale start time is null for session ID: {}, defaulting to now", session.getId());
-                    yield Instant.now();
-                }
-                log.debug("Using FIXED rule type for session ID: {}, time: {}",
-                        session.getId(), session.getSalesStartFixedDatetime());
-                yield session.getSalesStartFixedDatetime().toInstant();
-            }
-            case ROLLING -> {
-                log.debug("Using ROLLING rule type for session ID: {}, hours before: {}",
-                        session.getId(), session.getSalesStartHoursBefore());
-
-                if (session.getSalesStartHoursBefore() == null) {
-                    log.debug("Sales start hours is null for ROLLING rule in session ID: {}, throwing exception", session.getId());
-                    throw new BadRequestException("Sales start hours must be provided for rolling sales rule.");
-                }
-
-                Instant calculatedTime = session.getStartTime().minusHours(session.getSalesStartHoursBefore()).toInstant();
-                log.debug("Calculated ROLLING sale time for session ID: {} is: {}", session.getId(), calculatedTime);
-                yield calculatedTime;
-            }
-        };
-
-        log.debug("Final sale start time for session ID: {} is: {}", session.getId(), result);
-        return result;
     }
 
     private void createEventBridgeSchedule(EventSession session, Instant scheduleTime) {

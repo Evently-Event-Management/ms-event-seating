@@ -38,7 +38,7 @@ public class EventSession {
     @Builder.Default
     private SessionStatus status = SessionStatus.PENDING;
 
-    // --- Session-Specific Location & Sales Rules ---
+    // --- Session-Specific Location & Sales Information ---
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -49,16 +49,9 @@ public class EventSession {
     @Column(name = "venue_details", columnDefinition = "jsonb")
     private String venueDetails; // Stores a JSON string of a VenueDetailsDTO
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Builder.Default
-    private SalesStartRuleType salesStartRuleType = SalesStartRuleType.IMMEDIATE;
-
-    @Column(name = "sales_start_hours_before")
-    private Integer salesStartHoursBefore;
-
-    @Column(name = "sales_start_fixed_datetime")
-    private OffsetDateTime salesStartFixedDatetime;
+    // ✅ UPDATED: Simplified to a single sales start time field that the frontend must calculate
+    @Column(name = "sales_start_time")
+    private OffsetDateTime salesStartTime;
 
     @OneToOne(mappedBy = "eventSession", cascade = CascadeType.ALL, orphanRemoval = true)
     private SessionSeatingMap sessionSeatingMap;

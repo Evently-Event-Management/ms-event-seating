@@ -40,6 +40,7 @@ public class SessionProjectionService {
                 .sessionStatus(session.getStatus())
                 .sessionType(session.getSessionType())
                 .venueDetails(venueDetailsMapper.mapToVenueDetailsInfo(venueDetails))
+                .salesStartTime(session.getSalesStartTime())
                 .layoutData(layoutData)
                 .build();
     }

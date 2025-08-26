@@ -103,9 +103,7 @@ public class EventFactory {
                     .event(event)
                     .sessionType(req.getSessionType()) // Use the new enum
                     .venueDetails(venueDetailsJson) // Set the JSON string
-                    .salesStartRuleType(req.getSalesStartRuleType())
-                    .salesStartHoursBefore(req.getSalesStartHoursBefore())
-                    .salesStartFixedDatetime(req.getSalesStartFixedDatetime())
+                    .salesStartTime(req.getSalesStartTime()) // Set the direct sales start time from frontend
                     .build();
 
             String validatedLayoutData = prepareSessionLayout(req.getLayoutData(), tierIdMap);

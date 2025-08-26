@@ -77,7 +77,7 @@ public class EventQueryService {
      * @param userId  The ID of the requesting user
      * @return Detailed event information
      * @throws AuthorizationDeniedException if the user doesn't own the event
-     * @throws ResourceNotFoundException if the event doesn't exist
+     * @throws ResourceNotFoundException    if the event doesn't exist
      */
     @Transactional(readOnly = true)
     public EventDetailDTO findEventByIdOwner(UUID eventId, String userId) {
@@ -291,9 +291,7 @@ public class EventQueryService {
                 .startTime(session.getStartTime())
                 .endTime(session.getEndTime())
                 .venueDetails(venueDetails)
-                .salesStartRuleType(session.getSalesStartRuleType())
-                .salesStartHoursBefore(session.getSalesStartHoursBefore())
-                .salesStartFixedDatetime(session.getSalesStartFixedDatetime())
+                .salesStartTime(session.getSalesStartTime())
                 .status(session.getStatus())
                 .layoutData(layoutData)
                 .build();
