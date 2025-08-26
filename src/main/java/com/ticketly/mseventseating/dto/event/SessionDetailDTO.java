@@ -1,6 +1,5 @@
 package com.ticketly.mseventseating.dto.event;
 
-import com.ticketly.mseventseating.model.SalesStartRuleType;
 import dto.SessionSeatingMapDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,9 +21,7 @@ public class SessionDetailDTO {
     private OffsetDateTime endTime;
     private SessionType sessionType;
     private VenueDetailsDTO venueDetails;
-    private SalesStartRuleType salesStartRuleType;
-    private Integer salesStartHoursBefore;
-    private OffsetDateTime salesStartFixedDatetime;
+    private OffsetDateTime salesStartTime;
     private SessionStatus status;
     private SessionSeatingMapDTO layoutData;
 }

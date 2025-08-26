@@ -1,6 +1,5 @@
 package com.ticketly.mseventseating.dto.event;
 
-import com.ticketly.mseventseating.model.SalesStartRuleType;
 import com.ticketly.mseventseating.validators.ValidSalesStartTime;
 import com.ticketly.mseventseating.validators.ValidSessionDuration;
 import com.ticketly.mseventseating.validators.ValidSessionLocation;
@@ -21,8 +20,8 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ValidSessionLocation // ✅ Apply the custom class-level validator
-@ValidSalesStartTime // Validate sales start time rules
-@ValidSessionDuration(minMinutes = 30, maxHours = 12) // Validate session duration
+@ValidSessionDuration(minMinutes = 30, maxHours = 12)
+@ValidSalesStartTime
 public class SessionRequest {
     @NotNull
     @Future
@@ -32,11 +31,10 @@ public class SessionRequest {
     @Future
     private OffsetDateTime endTime;
 
+    // ✅ UPDATED: Single sales start time field calculated by frontend
     @NotNull
-    private SalesStartRuleType salesStartRuleType;
-
-    private Integer salesStartHoursBefore;
-    private OffsetDateTime salesStartFixedDatetime;
+    @Future
+    private OffsetDateTime salesStartTime;
 
     @NotNull
     private SessionType sessionType;

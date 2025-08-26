@@ -6,14 +6,15 @@ import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * Validator for the {@link ValidSalesStartTime} annotation.
- * Validates sales start time rules and other temporal constraints for sessions.
+ * Validates that the sales start time is before the session start time.
  */
 public class SalesStartTimeValidator implements ConstraintValidator<ValidSalesStartTime, SessionRequest> {
 
     @Override
     public boolean isValid(SessionRequest session, ConstraintValidatorContext context) {
         // Skip validation if essential fields are null - let @NotNull handle these cases
-        if (session == null || session.getStartTime() == null || session.getEndTime() == null) {
+        if (session == null || session.getStartTime() == null || session.getEndTime() == null
+                || session.getSalesStartTime() == null) {
             return true;
         }
 
@@ -30,56 +31,13 @@ public class SalesStartTimeValidator implements ConstraintValidator<ValidSalesSt
             isValid = false;
         }
 
-        // Skip further validation if sales start rule type is null
-        if (session.getSalesStartRuleType() == null) {
-            return isValid;
-        }
-
-        // Custom validation for each sales start rule type
-        switch (session.getSalesStartRuleType()) {
-            case IMMEDIATE:
-                // For IMMEDIATE sales, we simply ignore salesStartFixedDatetime if it's set
-                // No validation errors needed - this is more tolerant of frontend behavior
-                break;
-                
-            case ROLLING:
-                // For ROLLING sales, hours before must be specified and positive
-                if (session.getSalesStartHoursBefore() == null) {
-                    context.buildConstraintViolationWithTemplate(
-                                    "For ROLLING sales, hours before the event must be specified")
-                            .addPropertyNode("salesStartHoursBefore")
-                            .addConstraintViolation();
-                    
-                    isValid = false;
-                } else if (session.getSalesStartHoursBefore() <= 0) {
-                    context.buildConstraintViolationWithTemplate(
-                                    "For ROLLING sales, hours before the event must be positive")
-                            .addPropertyNode("salesStartHoursBefore")
-                            .addConstraintViolation();
-                    
-                    isValid = false;
-                }
-                break;
-                
-            case FIXED:
-                // For FIXED sales, a fixed datetime must be specified
-                if (session.getSalesStartFixedDatetime() == null) {
-                    context.buildConstraintViolationWithTemplate(
-                                    "For FIXED sales, a sales start date and time must be specified")
-                            .addPropertyNode("salesStartFixedDatetime")
-                            .addConstraintViolation();
-                    
-                    isValid = false;
-                } else if (!session.getSalesStartFixedDatetime().isBefore(session.getStartTime())) {
-                    // For FIXED sales, the fixed datetime must be before the session start time
-                    context.buildConstraintViolationWithTemplate(
-                                    "For FIXED sales, the sales start time must be before the session start time")
-                            .addPropertyNode("salesStartFixedDatetime")
-                            .addConstraintViolation();
-                    
-                    isValid = false;
-                }
-                break;
+        // Validate that sales start time is before session start time
+        if (!session.getSalesStartTime().isBefore(session.getStartTime())) {
+            context.buildConstraintViolationWithTemplate(
+                            "Sales start time must be before the session start time")
+                    .addPropertyNode("salesStartTime")
+                    .addConstraintViolation();
+            isValid = false;
         }
         
         return isValid;
