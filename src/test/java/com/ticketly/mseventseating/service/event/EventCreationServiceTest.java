@@ -98,8 +98,7 @@ class EventCreationServiceTest {
                 SessionRequest.builder()
                         .startTime(OffsetDateTime.now().plusDays(10))
                         .endTime(OffsetDateTime.now().plusDays(10).plusHours(3))
-                        .salesStartRuleType(SalesStartRuleType.FIXED)
-                        .salesStartFixedDatetime(OffsetDateTime.now().plusDays(1))
+                        .salesStartTime(OffsetDateTime.now().plusDays(1))
                         .build()
         );
 
@@ -162,11 +161,11 @@ class EventCreationServiceTest {
 
         // Prepare expected EventCoverPhoto entities
         List<EventCoverPhoto> expectedCoverPhotos = uploadedKeys.stream()
-            .map(key -> EventCoverPhoto.builder()
-                .photoUrl(key)
-                .event(event)
-                .build())
-            .collect(Collectors.toList());
+                .map(key -> EventCoverPhoto.builder()
+                        .photoUrl(key)
+                        .event(event)
+                        .build())
+                .collect(Collectors.toList());
 
         event.setCoverPhotos(expectedCoverPhotos);
 
@@ -264,11 +263,11 @@ class EventCreationServiceTest {
 
         // Prepare expected EventCoverPhoto entities
         List<EventCoverPhoto> expectedCoverPhotos = uploadedKeys.stream()
-            .map(key -> EventCoverPhoto.builder()
-                .photoUrl(key)
-                .event(event)
-                .build())
-            .collect(Collectors.toList());
+                .map(key -> EventCoverPhoto.builder()
+                        .photoUrl(key)
+                        .event(event)
+                        .build())
+                .collect(Collectors.toList());
 
         event.setCoverPhotos(expectedCoverPhotos);
 
