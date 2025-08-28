@@ -14,7 +14,7 @@ public class AppLimitsConfig {
     private TierConfig tier;
     private OrganizationConfig organization;
     private EventConfig event;
-    private SeatingLayoutConfig seatingLayout; // Match the YAML property "seating_layout" (Spring Boot converts underscores)
+    private SeatingLayoutConfig seatingLayout;
 
     @Data
     public static class TierConfig {
@@ -40,7 +40,7 @@ public class AppLimitsConfig {
         private long maxCoverPhotoSize;
     }
     
-    @Data // Added the @Data annotation that was missing
+    @Data
     public static class SeatingLayoutConfig {
         private int defaultPageSize;
         private int defaultGap;

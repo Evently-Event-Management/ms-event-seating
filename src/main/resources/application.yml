@@ -49,6 +49,18 @@ spring:
       timeout: ${REDIS_TIMEOUT:2000}
       repositories:
         enabled: false
+  kafka:
+    consumer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+      group-id: ${KAFKA_GROUP_ID:event-command-service}
+      properties:
+        spring.json.trusted.packages: "com.ticketly.mseventseating.dto.event"
+        spring.json.value.default.type: "com.ticketly.mseventseating.dto.event.SeatStatusChangeEventDto"
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+    listener:
+      ack-mode: MANUAL_IMMEDIATE
 
 # Keycloak Admin Client Configuration
 keycloak:

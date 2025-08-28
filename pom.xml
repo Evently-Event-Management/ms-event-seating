@@ -141,6 +141,16 @@
             <artifactId>keycloak-admin-client</artifactId>
             <version>26.0.6</version>
         </dependency>
+
+        <!-- Kafka dependencies -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-messaging</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
