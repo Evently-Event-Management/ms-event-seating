@@ -4,10 +4,8 @@ import com.ticketly.mseventseating.model.SessionSeatingMap;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.UUID;
 
 @Repository
@@ -22,10 +20,10 @@ public interface SessionSeatingMapRepository extends JpaRepository<SessionSeatin
      * @param status    The new status to set for the specified seats (e.g., "BOOKED").
      */
     @Modifying
-    @Query(value = "SELECT update_seat_statuses(:sessionId, :seatIds, :status)", nativeQuery = true)
+    @Query(value = "CALL update_seat_statuses(?1, ?2, ?3)", nativeQuery = true)
     void updateSeatStatusesInLayout(
-            @Param("sessionId") UUID sessionId,
-            @Param("seatIds") List<UUID> seatIds,
-            @Param("status") String status
+            UUID sessionId,
+            UUID[] seatIds,
+            String status
     );
 }

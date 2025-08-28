@@ -1,10 +1,10 @@
-CREATE OR REPLACE FUNCTION update_seat_statuses(
+CREATE OR REPLACE PROCEDURE update_seat_statuses(
     p_session_id UUID,
     p_seat_ids UUID[],
     p_new_status TEXT
 )
-    RETURNS VOID AS
-$$
+LANGUAGE plpgsql
+AS $$
 DECLARE
     v_current_layout JSONB;
     v_updated_layout JSONB;
@@ -48,9 +48,10 @@ BEGIN
 
             -- 4. If a path was found, update the status using jsonb_set
             IF v_seat_path IS NOT NULL THEN
+                -- Explicitly convert p_new_status to jsonb to avoid any casting issues
                 v_updated_layout := jsonb_set(
                         v_updated_layout,
-                        v_seat_path || 'status',
+                        v_seat_path || ARRAY['status'],
                         to_jsonb(p_new_status),
                         false
                                     );
@@ -63,4 +64,4 @@ BEGIN
     WHERE event_session_id = p_session_id;
 
 END;
-$$ LANGUAGE plpgsql;
+$$;

@@ -8,6 +8,8 @@ import model.SeatStatus; // Assuming your enum is in this package
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -33,9 +35,11 @@ public class SeatBookingService {
 
         log.info("Processing booking for {} seats in session {}", event.seatIds().size(), event.sessionId());
 
+        UUID[] seatIdsArray = event.seatIds().toArray(new UUID[0]);
+
         seatingMapRepository.updateSeatStatusesInLayout(
                 event.sessionId(),
-                event.seatIds(),
+                seatIdsArray, // Pass the new array
                 SeatStatus.BOOKED.name()
         );
 
