@@ -1,5 +1,6 @@
 package com.ticketly.mseventseating.service.event;
 
+import com.ticketly.mseventseating.exception.SchedulingException;
 import com.ticketly.mseventseating.model.Event;
 import com.ticketly.mseventseating.model.EventSession;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import model.SessionStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.services.scheduler.SchedulerClient;
 import software.amazon.awssdk.services.scheduler.model.*;
@@ -14,6 +16,8 @@ import software.amazon.awssdk.services.scheduler.model.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,10 +41,14 @@ public class EventSchedulingService {
     /**
      * Schedules on-sale jobs for all valid sessions of an event.
      * This operation should be part of a transaction when the event status changes.
+     * If any scheduling fails, the entire operation will be rolled back.
+     *
+     * @throws SchedulingException if there's any failure in the scheduling process
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void scheduleOnSaleJobsForEvent(Event event) {
         log.debug("Starting to schedule on-sale jobs for event ID: {}, title: {}", event.getId(), event.getTitle());
+        List<Exception> schedulingErrors = new ArrayList<>();
 
         if (event.getSessions() == null || event.getSessions().isEmpty()) {
             log.debug("No sessions found for event ID: {}, skipping scheduling", event.getId());
@@ -72,16 +80,28 @@ public class EventSchedulingService {
 
                 log.debug("Using sales start time for session ID: {} is: {}", session.getId(), scheduleTime);
 
-                // If the sales start time is in the past, make tickets available immediately
-                createEventBridgeSchedule(session, scheduleTime.isAfter(Instant.now()) ? scheduleTime : Instant.now());
+                try {
+                    // If the sales start time is in the past, make tickets available immediately
+                    createEventBridgeSchedule(session, scheduleTime.isAfter(Instant.now()) ? scheduleTime : Instant.now());
 
-                // Also schedule a job to mark the session as CLOSED once it ends
-                if (session.getEndTime() != null) {
-                    scheduleSessionClosedJob(session);
+                    // Also schedule a job to mark the session as CLOSED once it ends
+                    if (session.getEndTime() != null) {
+                        scheduleSessionClosedJob(session);
+                    }
+                } catch (Exception e) {
+                    schedulingErrors.add(e);
                 }
             } else {
                 log.debug("Session ID: {} has already started or is in the past, skipping", session.getId());
             }
+        }
+
+        // If there were any errors during scheduling, throw an exception to roll back the transaction
+        if (!schedulingErrors.isEmpty()) {
+            String errorMessage = String.format("Failed to schedule one or more sessions for event %s. %d error(s) occurred.",
+                event.getId(), schedulingErrors.size());
+            log.error(errorMessage);
+            throw new SchedulingException(errorMessage, schedulingErrors.getFirst());
         }
 
         log.debug("Completed scheduling on-sale jobs for event ID: {}", event.getId());
@@ -89,6 +109,7 @@ public class EventSchedulingService {
 
     /**
      * Schedules a job to mark a session as CLOSED once it ends
+     *
      */
     private void scheduleSessionClosedJob(EventSession session) {
         if (session.getEndTime() == null) {
@@ -132,9 +153,14 @@ public class EventSchedulingService {
             log.info("Successfully created EventBridge schedule for closed job for session {}", session.getId());
         } catch (Exception e) {
             log.error("Failed to create EventBridge schedule for closed job for session {}", session.getId(), e);
+            throw e; // Propagate the exception to trigger transaction rollback
         }
     }
 
+    /**
+     * Creates an EventBridge schedule for the given session at the specified time
+     *
+     */
     private void createEventBridgeSchedule(EventSession session, Instant scheduleTime) {
         String scheduleName = "session-onsale-" + session.getId().toString();
         log.debug("Creating EventBridge schedule '{}' for session ID: {} at time: {}",
@@ -173,7 +199,7 @@ public class EventSchedulingService {
             log.info("Successfully created EventBridge schedule for session {}", session.getId());
         } catch (Exception e) {
             log.error("Failed to create EventBridge schedule for session {}", session.getId(), e);
-            // In a real system, this failure would need a robust retry or dead-lettering mechanism.
+            throw e; // Propagate the exception to trigger transaction rollback
         }
     }
 }
