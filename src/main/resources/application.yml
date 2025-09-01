@@ -10,8 +10,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${JWT_ISSUER_URI:http://auth.ticketly.com:8080/realms/event-ticketing}
-          jwk-set-uri: ${JWT_JWK_SET_URI:http://auth.ticketly.com:8080/realms/event-ticketing/protocol/openid-connect/certs}
+          issuer-uri: ${JWT_ISSUER_URI:https://auth.dpiyumal.me/realms/event-ticketing}
+          jwk-set-uri: ${JWT_JWK_SET_URI:https://auth.dpiyumal.me/realms/event-ticketing/protocol/openid-connect/certs}
   servlet:
     multipart:
       enabled: true
@@ -64,7 +64,7 @@ spring:
 
 # Keycloak Admin Client Configuration
 keycloak:
-  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://auth.ticketly.com:8080}
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:https://auth.dpiyumal.me}
   realm: ${KEYCLOAK_REALM:event-ticketing}
   resource: ${KEYCLOAK_CLIENT_ID:events-service}
   credentials:
