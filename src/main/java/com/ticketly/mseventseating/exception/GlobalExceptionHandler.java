@@ -89,6 +89,12 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
+    @ExceptionHandler(SchedulingException.class)
+    public ResponseEntity<ErrorResponse> handleSchedulingException(SchedulingException ex) {
+        log.error("Scheduling exception: {}", ex.getMessage());
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    }
+
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String message) {
         ErrorResponse err = ErrorResponse.builder()
                 .status(status.value())

@@ -1,5 +1,6 @@
 package com.ticketly.mseventseating.service.event;
 
+import com.ticketly.mseventseating.exception.SchedulingException;
 import com.ticketly.mseventseating.model.Event;
 import com.ticketly.mseventseating.model.EventSession;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import model.SessionStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.services.scheduler.SchedulerClient;
 import software.amazon.awssdk.services.scheduler.model.*;
@@ -14,6 +16,8 @@ import software.amazon.awssdk.services.scheduler.model.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,13 +38,10 @@ public class EventSchedulingService {
     @Value("${aws.scheduler.group-name}")
     private String schedulerGroupName;
 
-    /**
-     * Schedules on-sale jobs for all valid sessions of an event.
-     * This operation should be part of a transaction when the event status changes.
-     */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void scheduleOnSaleJobsForEvent(Event event) {
         log.debug("Starting to schedule on-sale jobs for event ID: {}, title: {}", event.getId(), event.getTitle());
+        List<Exception> schedulingErrors = new ArrayList<>();
 
         if (event.getSessions() == null || event.getSessions().isEmpty()) {
             log.debug("No sessions found for event ID: {}, skipping scheduling", event.getId());
@@ -68,77 +69,57 @@ public class EventSchedulingService {
 
                 // Use the sales start time directly provided by the frontend
                 Instant scheduleTime = session.getSalesStartTime() != null ?
-                    session.getSalesStartTime().toInstant() : Instant.now();
+                        session.getSalesStartTime().toInstant() : Instant.now();
 
                 log.debug("Using sales start time for session ID: {} is: {}", session.getId(), scheduleTime);
 
-                // If the sales start time is in the past, make tickets available immediately
-                createEventBridgeSchedule(session, scheduleTime.isAfter(Instant.now()) ? scheduleTime : Instant.now());
+                try {
+                    // If the sales start time is in the past, make tickets available immediately
+                    createEventBridgeSchedule(session, scheduleTime.isAfter(Instant.now()) ? scheduleTime : Instant.now());
 
-                // Also schedule a job to mark the session as CLOSED once it ends
-                if (session.getEndTime() != null) {
-                    scheduleSessionClosedJob(session);
+                    // Also schedule a job to mark the session as CLOSED once it ends
+                    if (session.getEndTime() != null) {
+                        scheduleSessionClosedJob(session);
+                    }
+                } catch (Exception e) {
+                    schedulingErrors.add(e);
                 }
             } else {
                 log.debug("Session ID: {} has already started or is in the past, skipping", session.getId());
             }
         }
 
+        // If there were any errors during scheduling, throw an exception to roll back the transaction
+        if (!schedulingErrors.isEmpty()) {
+            String errorMessage = String.format("Failed to schedule one or more sessions for event %s. %d error(s) occurred.",
+                    event.getId(), schedulingErrors.size());
+            log.error(errorMessage);
+            throw new SchedulingException(errorMessage, schedulingErrors.getFirst());
+        }
+
         log.debug("Completed scheduling on-sale jobs for event ID: {}", event.getId());
     }
 
-    /**
-     * Schedules a job to mark a session as CLOSED once it ends
-     */
+    // REFACTORED METHOD
     private void scheduleSessionClosedJob(EventSession session) {
         if (session.getEndTime() == null) {
             log.debug("Session ID: {} has null end time, skipping closed scheduling", session.getId());
             return;
         }
-
-        Instant endTime = session.getEndTime().toInstant();
-        log.debug("Scheduling closed job for session ID: {} at end time: {}", session.getId(), endTime);
-
-        try {
-            String scheduleName = "session-closed-" + session.getId().toString();
-
-            String scheduleExpression = "at(" +
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-                            .withZone(ZoneId.of("UTC"))
-                            .format(endTime) + ")";
-
-            log.debug("Schedule expression for closed job for session ID: {}: {}", session.getId(), scheduleExpression);
-
-            String inputJson = "{\"sessionId\":\"" + session.getId() + "\", \"action\":\"CLOSED\"}";
-            log.debug("Schedule payload for closed job for session ID: {}: {}", session.getId(), inputJson);
-
-            Target target = Target.builder()
-                    .arn(sqsClosedQueueArn)
-                    .roleArn(schedulerRoleArn)
-                    .input(inputJson)
-                    .build();
-
-            CreateScheduleRequest request = CreateScheduleRequest.builder()
-                    .name(scheduleName)
-                    .groupName(schedulerGroupName)
-                    .scheduleExpression(scheduleExpression)
-                    .target(target)
-                    .flexibleTimeWindow(FlexibleTimeWindow.builder().mode(FlexibleTimeWindowMode.OFF).build())
-                    .actionAfterCompletion(ActionAfterCompletion.DELETE)
-                    .build();
-
-            log.debug("Sending CreateSchedule request for closed job for session ID: {}", session.getId());
-            schedulerClient.createSchedule(request);
-            log.info("Successfully created EventBridge schedule for closed job for session {}", session.getId());
-        } catch (Exception e) {
-            log.error("Failed to create EventBridge schedule for closed job for session {}", session.getId(), e);
-        }
+        createOrUpdateSchedule(session, session.getEndTime().toInstant(), "session-closed-", sqsClosedQueueArn, "CLOSED", "closed job");
     }
 
+    // REFACTORED METHOD
     private void createEventBridgeSchedule(EventSession session, Instant scheduleTime) {
-        String scheduleName = "session-onsale-" + session.getId().toString();
-        log.debug("Creating EventBridge schedule '{}' for session ID: {} at time: {}",
-                scheduleName, session.getId(), scheduleTime);
+        createOrUpdateSchedule(session, scheduleTime, "session-onsale-", sqsOnSaleQueueArn, "ON_SALE", "on-sale job");
+    }
+
+    /**
+     * NEW private helper method that contains the shared logic for creating or updating a schedule.
+     */
+    private void createOrUpdateSchedule(EventSession session, Instant scheduleTime, String namePrefix, String queueArn, String action, String logContext) {
+        String scheduleName = namePrefix + session.getId().toString();
+        log.debug("Creating or updating schedule '{}' for session ID: {} at time: {}", scheduleName, session.getId(), scheduleTime);
 
         try {
             String scheduleExpression = "at(" +
@@ -146,34 +127,49 @@ public class EventSchedulingService {
                             .withZone(ZoneId.of("UTC"))
                             .format(scheduleTime) + ")";
 
-            log.debug("Schedule expression for session ID: {}: {}", session.getId(), scheduleExpression);
-            log.debug("Using SQS queue ARN: {}", sqsOnSaleQueueArn);
-            log.debug("Using scheduler role ARN: {}", schedulerRoleArn);
-
-            String inputJson = "{\"sessionId\":\"" + session.getId() + "\", \"action\":\"ON_SALE\"}";
-            log.debug("Schedule payload for session ID: {}: {}", session.getId(), inputJson);
+            String inputJson = "{\"sessionId\":\"" + session.getId() + "\", \"action\":\"" + action + "\"}";
 
             Target target = Target.builder()
-                    .arn(sqsOnSaleQueueArn)
+                    .arn(queueArn)
                     .roleArn(schedulerRoleArn)
                     .input(inputJson)
                     .build();
 
-            CreateScheduleRequest request = CreateScheduleRequest.builder()
-                    .name(scheduleName)
-                    .groupName(schedulerGroupName)
-                    .scheduleExpression(scheduleExpression)
-                    .target(target)
-                    .flexibleTimeWindow(FlexibleTimeWindow.builder().mode(FlexibleTimeWindowMode.OFF).build())
-                    .actionAfterCompletion(ActionAfterCompletion.DELETE)
-                    .build();
+            FlexibleTimeWindow flexibleTimeWindow = FlexibleTimeWindow.builder().mode(FlexibleTimeWindowMode.OFF).build();
 
-            log.debug("Sending CreateSchedule request for session ID: {}", session.getId());
-            schedulerClient.createSchedule(request);
-            log.info("Successfully created EventBridge schedule for session {}", session.getId());
+            try {
+                // First, try to create the schedule
+                CreateScheduleRequest request = CreateScheduleRequest.builder()
+                        .name(scheduleName)
+                        .groupName(schedulerGroupName)
+                        .scheduleExpression(scheduleExpression)
+                        .target(target)
+                        .flexibleTimeWindow(flexibleTimeWindow)
+                        .actionAfterCompletion(ActionAfterCompletion.DELETE)
+                        .build();
+
+                schedulerClient.createSchedule(request);
+                log.info("Successfully created EventBridge schedule for {} for session {}", logContext, session.getId());
+
+            } catch (ConflictException e) {
+                // If it already exists, update it instead
+                log.warn("Schedule '{}' already exists. Attempting to update.", scheduleName);
+                UpdateScheduleRequest updateRequest = UpdateScheduleRequest.builder()
+                        .name(scheduleName)
+                        .groupName(schedulerGroupName)
+                        .scheduleExpression(scheduleExpression)
+                        .target(target)
+                        .flexibleTimeWindow(flexibleTimeWindow)
+                        .actionAfterCompletion(ActionAfterCompletion.DELETE)
+                        .build();
+
+                schedulerClient.updateSchedule(updateRequest);
+                log.info("Successfully updated EventBridge schedule for {} for session {}", logContext, session.getId());
+            }
+
         } catch (Exception e) {
-            log.error("Failed to create EventBridge schedule for session {}", session.getId(), e);
-            // In a real system, this failure would need a robust retry or dead-lettering mechanism.
+            log.error("Failed to create or update EventBridge schedule for {} for session {}", logContext, session.getId(), e);
+            throw e;
         }
     }
 }

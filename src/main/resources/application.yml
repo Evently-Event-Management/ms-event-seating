@@ -108,7 +108,7 @@ app:
 
 # AWS Configuration
 aws:
-  region: ${AWS_REGION:us-east-1}
+  region: ${AWS_REGION:ap-south-1}
   s3:
     bucket-name: ${AWS_S3_BUCKET_NAME:ticketly-storage}
   # Local development settings (used only when needed)

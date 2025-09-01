@@ -2,6 +2,7 @@ package com.ticketly.mseventseating.service.event;
 
 import com.ticketly.mseventseating.exception.InvalidStateException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
+import com.ticketly.mseventseating.exception.SchedulingException;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.repository.EventSessionRepository;
@@ -34,7 +35,10 @@ public class EventLifecycleService {
      * * This method can only be called by an admin or a user who is not the owner of the event's organization.
      * * It changes the event status to APPROVED and handles session scheduling.
      * * Past sessions are automatically cancelled, and future sessions are scheduled for on-sale.
+     *
+     * @throws SchedulingException if there's any failure in scheduling sessions, which will rollback the transaction
      */
+    @Transactional(rollbackFor = Exception.class)
     public void approveEvent(UUID eventId, String userId) {
         log.info("Approving event ID: {} by user: {}", eventId, userId);
         Event event = findEventById(eventId);
@@ -78,13 +82,20 @@ public class EventLifecycleService {
         log.debug("Event {} has {} cancelled past sessions and {} future sessions to schedule",
                 eventId, cancelledSessions, scheduledSessions);
 
-        // Schedule the on-sale jobs for the approved, future sessions
-        log.debug("Scheduling on-sale jobs for event {}", eventId);
-        schedulingService.scheduleOnSaleJobsForEvent(event);
+        try {
+            // Schedule the on-sale jobs for the approved, future sessions
+            log.debug("Scheduling on-sale jobs for event {}", eventId);
+            schedulingService.scheduleOnSaleJobsForEvent(event);
 
-        eventRepository.save(event);
-        log.info("Event with ID {} has been successfully approved with {} active sessions",
-                eventId, scheduledSessions);
+            // Only save the event if scheduling succeeds
+            eventRepository.save(event);
+            log.info("Event with ID {} has been successfully approved with {} active sessions",
+                    eventId, scheduledSessions);
+        } catch (SchedulingException e) {
+            // Log the error and rethrow to ensure transaction rollback
+            log.error("Failed to approve event {} due to scheduling error: {}", eventId, e.getMessage(), e);
+            throw e; // This will trigger transaction rollback
+        }
     }
 
     /**
