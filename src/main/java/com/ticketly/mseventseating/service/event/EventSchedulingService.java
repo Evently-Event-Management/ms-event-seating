@@ -127,7 +127,7 @@ public class EventSchedulingService {
                             .withZone(ZoneId.of("UTC"))
                             .format(scheduleTime) + ")";
 
-            String inputJson = "{\"sessionId\":\"" + session.getId() + "\", \"action\":\"" + action + "\"}";
+            String inputJson = "{\"session_id\":\"" + session.getId() + "\", \"action\":\"" + action + "\"}";
 
             Target target = Target.builder()
                     .arn(queueArn)

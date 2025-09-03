@@ -28,21 +28,21 @@ public class SeatBookingService {
      */
     @Transactional
     public void processSeatsBooked(SeatStatusChangeEventDto event) {
-        if (event == null || event.sessionId() == null || event.seatIds() == null || event.seatIds().isEmpty()) {
+        if (event == null || event.session_id() == null || event.seat_ids() == null || event.seat_ids().isEmpty()) {
             log.warn("Received an invalid or empty SeatsBooked event. Ignoring.");
             return;
         }
 
-        log.info("Processing booking for {} seats in session {}", event.seatIds().size(), event.sessionId());
+        log.info("Processing booking for {} seats in session {}", event.seat_ids().size(), event.session_id());
 
-        UUID[] seatIdsArray = event.seatIds().toArray(new UUID[0]);
+        UUID[] seatIdsArray = event.seat_ids().toArray(new UUID[0]);
 
         seatingMapRepository.updateSeatStatusesInLayout(
-                event.sessionId(),
+                event.session_id(),
                 seatIdsArray, // Pass the new array
                 SeatStatus.BOOKED.name()
         );
 
-        log.info("Successfully updated seat statuses to BOOKED for session {}", event.sessionId());
+        log.info("Successfully updated seat statuses to BOOKED for session {}", event.session_id());
     }
 }

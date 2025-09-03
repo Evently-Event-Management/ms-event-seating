@@ -16,21 +16,26 @@ public class SeatsBookedConsumer {
 
     private final SeatBookingService seatBookingService;
 
-    @KafkaListener(topics = "ticketly.seats.booked")
+    @KafkaListener(topics = "ticketly.seats.booked", errorHandler = "kafkaErrorHandler")
     public void onSeatsBooked(@Payload SeatStatusChangeEventDto payload, Acknowledgment acknowledgment) {
-        log.info("Received SeatsBooked event for session: {}", payload.sessionId());
+        log.info("Received SeatsBooked event for session: {}", payload.session_id());
         try {
             // Delegate the business logic to the service layer
             seatBookingService.processSeatsBooked(payload);
 
             // Acknowledge the message upon successful processing
             acknowledgment.acknowledge();
-            log.info("Successfully acknowledged SeatsBooked event for session {}", payload.sessionId());
+            log.info("Successfully acknowledged SeatsBooked event for session {}", payload.session_id());
         } catch (Exception e) {
-            // Log the error and DO NOT acknowledge the message.
-            // Kafka will redeliver the message based on your retry configuration.
-            log.error("Error processing SeatsBooked event for session {}. Message will be retried. Error: {}",
-                    payload.sessionId(), e.getMessage(), e);
+            // Log the error
+            log.error("Error processing SeatsBooked event for session {}. Error: {}",
+                    payload.session_id(), e.getMessage(), e);
+
+            // Acknowledge the message even on error to prevent getting stuck
+            // This will prevent the infinite loop on business logic errors
+            acknowledgment.acknowledge();
+            log.info("Acknowledged message despite error for session {} to prevent infinite retries",
+                    payload.session_id());
         }
     }
 }
