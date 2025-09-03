@@ -32,7 +32,7 @@ public class EventController {
     private final EventCreationService eventCreationService;
     private final EventLifecycleService eventLifecycleService;
     private final EventQueryService eventQueryService;
-    private final ObjectMapper objectMapper; // To convert JSON string to DTO
+    private final ObjectMapper objectMapper;
 
     // ✅ Updated endpoint to consume multipart/form-data
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
@@ -167,4 +167,7 @@ public class EventController {
         eventLifecycleService.rejectEvent(eventId, request.getReason());
         return ResponseEntity.ok().build();
     }
+
+
+
 }
