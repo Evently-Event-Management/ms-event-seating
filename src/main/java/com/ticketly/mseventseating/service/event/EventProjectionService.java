@@ -27,9 +27,10 @@ public class EventProjectionService {
     public EventProjectionDTO projectEvent(UUID eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found for projection: " + eventId));
-        if (event.getStatus() != EventStatus.APPROVED) {
+        if (event.getStatus() != EventStatus.APPROVED && event.getStatus() != EventStatus.COMPLETED) {
             throw new ResourceNotFoundException("Event is not approved for projection: " + event.getId());
         }
+
         EventProjectionDTO.OrganizationInfo orgInfo = EventProjectionDTO.OrganizationInfo.builder()
                 .id(event.getOrganization().getId())
                 .name(event.getOrganization().getName())
