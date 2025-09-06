@@ -1,0 +1,106 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: sa
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+  cache:
+    type: none
+    redis:
+      time-to-live: 3600s
+      key-prefix: "test-event-seating::"
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000
+      repositories:
+        enabled: false
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      auto-offset-reset: earliest
+      group-id: test-event-command-service
+      properties:
+        spring.json.trusted.packages: "com.ticketly.mseventseating.dto.event"
+        spring.json.value.default.type: "com.ticketly.mseventseating.dto.event.SeatStatusChangeEventDto"
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://test-auth.example.com/realms/test-realm
+          jwk-set-uri: https://test-auth.example.com/realms/test-realm/protocol/openid-connect/certs
+  ai:
+    vertex:
+      ai:
+        gemini:
+          project-id: test-project-id
+          location: us-central1
+          chat:
+            options:
+              model: gemini-2.5-flash-lite
+              temperature: 0.6
+              max-output-tokens: 1024
+              top-p: 0.9
+
+server:
+  port: 8081
+  servlet:
+    context-path: /api/event-seating
+
+# Keycloak Admin Client Configuration
+keycloak:
+  auth-server-url: https://test-auth.example.com
+  realm: test-realm
+  resource: test-client
+  credentials:
+    secret: test-secret
+
+# Mock AWS configuration for tests
+aws:
+  region: us-east-1
+  s3:
+    bucket-name: test-bucket
+  scheduler:
+    sqs-session-on-sale-queue-arn: arn:aws:sqs:us-east-1:000000000000:test-on-sale-queue
+    sqs-session-closed-queue-arn: arn:aws:sqs:us-east-1:000000000000:test-closed-queue
+    role-arn: arn:aws:iam:us-east-1:000000000000:role/test-scheduler-role
+    group-name: test-scheduler-group
+
+# Application specific configurations
+app:
+  tier:
+    limits:
+      FREE:
+        max-organizations-per-user: 3
+        max-seating-layouts-per-org: 5
+        max-active-events: 1
+        max-sessions-per-event: 5
+      PRO:
+        max-organizations-per-user: 10
+        max-seating-layouts-per-org: 25
+        max-active-events: 10
+        max-sessions-per-event: 52
+      ENTERPRISE:
+        max-organizations-per-user: 100
+        max-seating-layouts-per-org: 200
+        max-active-events: 1000
+        max-sessions-per-event: 200
+  seating_layout:
+    default-page-size: 6
+    default-gap: 25
+  organization:
+    max-logo-size: 1048576
+  event:
+    max-cover-photos: 5
+    max-cover-photo-size: 3145728
