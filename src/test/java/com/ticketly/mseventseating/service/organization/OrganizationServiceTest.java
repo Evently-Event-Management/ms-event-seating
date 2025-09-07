@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.service;
+package com.ticketly.mseventseating.service.organization;
 
 import com.ticketly.mseventseating.config.AppLimitsConfig;
 import com.ticketly.mseventseating.dto.organization.OrganizationRequest;
@@ -6,6 +6,8 @@ import com.ticketly.mseventseating.dto.organization.OrganizationResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.SubscriptionLimitType;
+import com.ticketly.mseventseating.service.limts.LimitService;
+import com.ticketly.mseventseating.service.storage.S3StorageService;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.repository.OrganizationRepository;

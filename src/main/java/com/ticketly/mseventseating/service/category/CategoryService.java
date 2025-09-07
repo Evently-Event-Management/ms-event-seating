@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.service;
+package com.ticketly.mseventseating.service.category;
 
 import com.ticketly.mseventseating.dto.category.CategoryRequest;
 import com.ticketly.mseventseating.dto.category.CategoryResponse;

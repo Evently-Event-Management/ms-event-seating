@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.service;
+package com.ticketly.mseventseating.service.organization;
 
 
 import com.ticketly.mseventseating.dto.organization.InviteStaffRequest;
@@ -8,7 +8,7 @@ import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.model.OrganizationMember;
 import com.ticketly.mseventseating.repository.OrganizationMemberRepository;
 import com.ticketly.mseventseating.repository.OrganizationRepository;
-import com.ticketly.mseventseating.service.event.SessionOwnershipService;
+import com.ticketly.mseventseating.service.session.SessionOwnershipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;

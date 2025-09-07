@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.service.event;
+package com.ticketly.mseventseating.service.projection;
 
 import com.ticketly.mseventseating.dto.event.VenueDetailsDTO;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;

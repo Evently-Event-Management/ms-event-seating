@@ -13,11 +13,22 @@ import java.util.Map;
 @RequestMapping("/v1")
 public class TestController {
 
+    /**
+     * Public endpoint that returns a simple hello message.
+     *
+     * @return A map containing a hello message.
+     */
     @GetMapping("/public/hello")
     public Map<String, String> publicEndpoint() {
         return Collections.singletonMap("message", "Public endpoint - Hello!");
     }
 
+    /**
+     * Protected endpoint that returns a hello message and user info from JWT.
+     *
+     * @param jwt The authenticated user's JWT.
+     * @return A map containing a hello message and user info.
+     */
     @GetMapping("/protected/hello")
     public Map<String, Object> protectedEndpoint(@AuthenticationPrincipal Jwt jwt) {
         return Map.of(

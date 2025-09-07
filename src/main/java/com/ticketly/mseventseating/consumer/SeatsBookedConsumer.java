@@ -1,7 +1,7 @@
 package com.ticketly.mseventseating.consumer;
 
 import com.ticketly.mseventseating.dto.event.SeatStatusChangeEventDto;
-import com.ticketly.mseventseating.service.event.SeatBookingService;
+import com.ticketly.mseventseating.service.seat.SeatBookingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;

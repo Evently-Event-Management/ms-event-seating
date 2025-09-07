@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.service.event;
+package com.ticketly.mseventseating.service.projection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.VenueDetailsDTO;
@@ -23,7 +23,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.ticketly.mseventseating.service.event.VenueDetailsMapper.getVenueDetailsInfo;
+import static com.ticketly.mseventseating.service.projection.VenueDetailsMapper.getVenueDetailsInfo;
 
 @Service
 @RequiredArgsConstructor

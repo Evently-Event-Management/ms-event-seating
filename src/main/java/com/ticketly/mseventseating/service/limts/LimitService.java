@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.service;
+package com.ticketly.mseventseating.service.limts;
 
 import com.ticketly.mseventseating.config.AppLimitsConfig;
 import com.ticketly.mseventseating.dto.config.AppConfigDTO;

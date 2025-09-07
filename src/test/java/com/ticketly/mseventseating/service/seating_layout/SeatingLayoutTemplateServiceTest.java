@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.service;
+package com.ticketly.mseventseating.service.seating_layout;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.config.AppLimitsConfig;
@@ -11,6 +11,9 @@ import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.model.SeatingLayoutTemplate;
 import com.ticketly.mseventseating.model.SubscriptionLimitType;
 import com.ticketly.mseventseating.repository.SeatingLayoutTemplateRepository;
+import com.ticketly.mseventseating.service.limts.LimitService;
+import com.ticketly.mseventseating.service.organization.OrganizationOwnershipService;
+import com.ticketly.mseventseating.service.organization.OrganizationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

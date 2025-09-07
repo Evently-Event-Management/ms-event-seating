@@ -1,8 +1,9 @@
-package com.ticketly.mseventseating.service;
+package com.ticketly.mseventseating.service.seating_layout;
 
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.SeatingLayoutTemplate;
 import com.ticketly.mseventseating.repository.SeatingLayoutTemplateRepository;
+import com.ticketly.mseventseating.service.organization.OrganizationOwnershipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;

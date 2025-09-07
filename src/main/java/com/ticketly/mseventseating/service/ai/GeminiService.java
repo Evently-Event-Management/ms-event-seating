@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.service.event;
+package com.ticketly.mseventseating.service.ai;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;

@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.service.event;
+package com.ticketly.mseventseating.service.seat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

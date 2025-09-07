@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.service.event;
+package com.ticketly.mseventseating.service.projection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;

@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.service.event;
+package com.ticketly.mseventseating.service.seat;
 
 import com.ticketly.mseventseating.dto.event.SeatStatusChangeEventDto;
 import com.ticketly.mseventseating.repository.SessionSeatingMapRepository;

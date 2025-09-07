@@ -1,4 +1,4 @@
-package com.ticketly.mseventseating.service.event;
+package com.ticketly.mseventseating.service.projection;
 
 import com.ticketly.mseventseating.model.Event;
 import com.ticketly.mseventseating.model.EventCoverPhoto;
