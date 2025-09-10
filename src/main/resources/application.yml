@@ -20,9 +20,9 @@ spring:
       file-size-threshold: 2KB
   # Database Configuration
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/event_seating}
-    username: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD:postgres}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/event_service}
+    username: ${DATABASE_USERNAME:ticketly}
+    password: ${DATABASE_PASSWORD:ticketly}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
