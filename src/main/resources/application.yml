@@ -87,8 +87,8 @@ keycloak:
 logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
-    com.ticketly: ${LOG_LEVEL_APP:INFO}
-    org.springframework.security: ${LOG_LEVEL_SECURITY:DEBUG}
+    com.ticketly: ${COM_TICKETLY_LOG_LEVEL:DEBUG}
+    org.springframework.security: ${SPRING_SECURITY_LOG_LEVEL:DEBUG}
 
 # Application specific configurations
 app:
