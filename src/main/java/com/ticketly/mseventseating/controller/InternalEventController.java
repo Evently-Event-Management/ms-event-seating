@@ -3,12 +3,12 @@ package com.ticketly.mseventseating.controller;
 
 import com.ticketly.mseventseating.dto.event.SeatDetailsRequest;
 import com.ticketly.mseventseating.dto.event.SeatDetailsResponse;
-import com.ticketly.mseventseating.service.CategoryProjectionDataService;
+import com.ticketly.mseventseating.service.category.CategoryProjectionDataService;
 import com.ticketly.mseventseating.service.event.EventLifecycleService;
-import com.ticketly.mseventseating.service.event.EventProjectionService;
-import com.ticketly.mseventseating.service.event.SeatingMapProjectionService;
-import com.ticketly.mseventseating.service.event.SeatValidationService;
-import com.ticketly.mseventseating.service.event.SessionProjectionService;
+import com.ticketly.mseventseating.service.projection.EventProjectionService;
+import com.ticketly.mseventseating.service.projection.SeatingMapProjectionService;
+import com.ticketly.mseventseating.service.seat.SeatValidationService;
+import com.ticketly.mseventseating.service.projection.SessionProjectionService;
 import dto.projection.CategoryProjectionDTO;
 import dto.projection.EventProjectionDTO;
 import dto.projection.SeatingMapProjectionDTO;

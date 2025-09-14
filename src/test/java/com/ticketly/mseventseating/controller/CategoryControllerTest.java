@@ -2,7 +2,7 @@ package com.ticketly.mseventseating.controller;
 
 import com.ticketly.mseventseating.dto.category.CategoryRequest;
 import com.ticketly.mseventseating.dto.category.CategoryResponse;
-import com.ticketly.mseventseating.service.CategoryService;
+import com.ticketly.mseventseating.service.category.CategoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

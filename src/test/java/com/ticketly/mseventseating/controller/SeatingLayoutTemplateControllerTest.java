@@ -3,7 +3,7 @@ package com.ticketly.mseventseating.controller;
 import com.ticketly.mseventseating.dto.layout_template.LayoutDataDTO;
 import com.ticketly.mseventseating.dto.layout_template.SeatingLayoutTemplateDTO;
 import com.ticketly.mseventseating.dto.layout_template.SeatingLayoutTemplateRequest;
-import com.ticketly.mseventseating.service.SeatingLayoutTemplateService;
+import com.ticketly.mseventseating.service.seating_layout.SeatingLayoutTemplateService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

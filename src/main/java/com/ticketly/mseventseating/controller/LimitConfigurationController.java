@@ -2,7 +2,7 @@ package com.ticketly.mseventseating.controller;
 
 import com.ticketly.mseventseating.dto.config.AppConfigDTO;
 import com.ticketly.mseventseating.dto.config.MyLimitsResponseDTO;
-import com.ticketly.mseventseating.service.LimitService;
+import com.ticketly.mseventseating.service.limts.LimitService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

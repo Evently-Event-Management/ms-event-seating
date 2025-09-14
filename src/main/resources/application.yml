@@ -2,6 +2,8 @@ server:
   port: ${SERVER_PORT:8081}
   servlet:
     context-path: /api/event-seating
+  tomcat:
+    max-http-form-post-size: ${MAX_HTTP_FORM_POST_SIZE:50MB}
 
 spring:
   application:
@@ -15,14 +17,14 @@ spring:
   servlet:
     multipart:
       enabled: true
-      max-file-size: ${MAX_FILE_SIZE:5MB}
-      max-request-size: ${MAX_REQUEST_SIZE:15MB}
+      max-file-size: ${MAX_FILE_SIZE:10MB}
+      max-request-size: ${MAX_REQUEST_SIZE:50MB}
       file-size-threshold: 2KB
   # Database Configuration
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/event_seating}
-    username: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD:postgres}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/event_service}
+    username: ${DATABASE_USERNAME:ticketly}
+    password: ${DATABASE_PASSWORD:ticketly}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -87,8 +89,8 @@ keycloak:
 logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
-    com.ticketly: ${LOG_LEVEL_APP:INFO}
-    org.springframework.security: ${LOG_LEVEL_SECURITY:DEBUG}
+    com.ticketly: ${COM_TICKETLY_LOG_LEVEL:DEBUG}
+    org.springframework.security: ${SPRING_SECURITY_LOG_LEVEL:DEBUG}
 
 # Application specific configurations
 app:

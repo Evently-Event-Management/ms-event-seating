@@ -3,7 +3,7 @@ package com.ticketly.mseventseating.controller;
 import com.ticketly.mseventseating.config.AppLimitsConfig;
 import com.ticketly.mseventseating.dto.config.AppConfigDTO;
 import com.ticketly.mseventseating.dto.config.MyLimitsResponseDTO;
-import com.ticketly.mseventseating.service.LimitService;
+import com.ticketly.mseventseating.service.limts.LimitService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

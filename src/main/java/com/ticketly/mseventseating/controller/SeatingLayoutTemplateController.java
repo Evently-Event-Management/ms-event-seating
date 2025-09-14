@@ -2,7 +2,7 @@ package com.ticketly.mseventseating.controller;
 
 import com.ticketly.mseventseating.dto.layout_template.SeatingLayoutTemplateDTO;
 import com.ticketly.mseventseating.dto.layout_template.SeatingLayoutTemplateRequest;
-import com.ticketly.mseventseating.service.SeatingLayoutTemplateService;
+import com.ticketly.mseventseating.service.seating_layout.SeatingLayoutTemplateService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +22,15 @@ public class SeatingLayoutTemplateController {
 
     private final SeatingLayoutTemplateService seatingLayoutTemplateService;
 
+    /**
+     * Get all seating layout templates for a specific organization, paginated.
+     *
+     * @param organizationId The ID of the organization.
+     * @param page The page number to retrieve.
+     * @param size The number of templates per page.
+     * @param jwt The authenticated user's JWT.
+     * @return A paginated list of seating layout templates.
+     */
     @GetMapping("/organization/{organizationId}")
     public ResponseEntity<Page<SeatingLayoutTemplateDTO>> getAllTemplatesByOrganization(
             @PathVariable UUID organizationId,
@@ -34,6 +43,13 @@ public class SeatingLayoutTemplateController {
         return ResponseEntity.ok(seatingLayoutTemplateService.getAllTemplatesByOrganizationId(organizationId, userId, page, size));
     }
 
+    /**
+     * Get a specific seating layout template by its ID.
+     *
+     * @param id The template ID.
+     * @param jwt The authenticated user's JWT.
+     * @return The seating layout template.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<SeatingLayoutTemplateDTO> getTemplateById(
             @PathVariable UUID id,
@@ -43,6 +59,13 @@ public class SeatingLayoutTemplateController {
         return ResponseEntity.ok(seatingLayoutTemplateService.getTemplateById(id, userId));
     }
 
+    /**
+     * Create a new seating layout template for an organization.
+     *
+     * @param request The template creation request.
+     * @param jwt The authenticated user's JWT.
+     * @return The created seating layout template.
+     */
     @PostMapping
     public ResponseEntity<SeatingLayoutTemplateDTO> createTemplate(
             @Valid @RequestBody SeatingLayoutTemplateRequest request,
@@ -54,6 +77,14 @@ public class SeatingLayoutTemplateController {
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
+    /**
+     * Update an existing seating layout template.
+     *
+     * @param id The template ID.
+     * @param request The update request.
+     * @param jwt The authenticated user's JWT.
+     * @return The updated seating layout template.
+     */
     @PutMapping("/{id}")
     public ResponseEntity<SeatingLayoutTemplateDTO> updateTemplate(
             @PathVariable UUID id,
@@ -64,6 +95,13 @@ public class SeatingLayoutTemplateController {
         return ResponseEntity.ok(seatingLayoutTemplateService.updateTemplate(id, request, userId));
     }
 
+    /**
+     * Delete a seating layout template by its ID.
+     *
+     * @param id The template ID.
+     * @param jwt The authenticated user's JWT.
+     * @return No content response.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTemplate(
             @PathVariable UUID id,
