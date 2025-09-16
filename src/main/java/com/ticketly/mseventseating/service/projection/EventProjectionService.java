@@ -34,6 +34,7 @@ public class EventProjectionService {
         EventProjectionDTO.OrganizationInfo orgInfo = EventProjectionDTO.OrganizationInfo.builder()
                 .id(event.getOrganization().getId())
                 .name(event.getOrganization().getName())
+                .userId(event.getOrganization().getUserId())
                 .logoUrl(event.getOrganization().getLogoUrl())
                 .build();
 

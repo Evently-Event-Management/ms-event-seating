@@ -46,6 +46,4 @@ public class Organization {
 
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
-
-    // Remove the PreUpdate method since @UpdateTimestamp will handle it
 }

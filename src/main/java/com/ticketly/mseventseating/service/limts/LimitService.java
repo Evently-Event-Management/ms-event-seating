@@ -54,10 +54,6 @@ public class LimitService {
                 .build();
     }
 
-    // ================================================================================
-    // Methods for Internal Services (Specific, Granular Configs & Limits)
-    // ================================================================================
-
     /**
      * Generic method for internal services to get any TIER-BASED limit for a user.
      * This replaces the need for other services to use @Value for tier-specific limits.
@@ -93,10 +89,10 @@ public class LimitService {
     }
 
 
-    // ================================================================================
-    // Private Helper Methods
-    // ================================================================================
-
+    /**
+     * Determines the highest subscription tier for a user based on their JWT claims.
+     * If no valid tier is found, defaults to FREE.
+     */
     private SubscriptionTier getHighestTierForUser(Jwt jwt) {
         List<String> userGroups = jwt.getClaimAsStringList("user_groups");
 
