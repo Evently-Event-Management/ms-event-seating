@@ -89,10 +89,10 @@ public class LimitService {
     }
 
 
-    // ================================================================================
-    // Private Helper Methods
-    // ================================================================================
-
+    /**
+     * Determines the highest subscription tier for a user based on their JWT claims.
+     * If no valid tier is found, defaults to FREE.
+     */
     private SubscriptionTier getHighestTierForUser(Jwt jwt) {
         List<String> userGroups = jwt.getClaimAsStringList("user_groups");
 
