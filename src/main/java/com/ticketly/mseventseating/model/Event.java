@@ -67,5 +67,6 @@ public class Event {
     private Category category;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("event-sessions") // Add this
     private List<EventSession> sessions;
 }

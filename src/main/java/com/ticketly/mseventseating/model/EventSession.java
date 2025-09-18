@@ -1,5 +1,7 @@
 package com.ticketly.mseventseating.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import model.SessionStatus;
@@ -8,6 +10,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -25,6 +28,7 @@ public class EventSession {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)
+    @JsonBackReference("event-sessions") // Add this
     private Event event;
 
     @Column(name = "start_time", nullable = false)
@@ -55,4 +59,8 @@ public class EventSession {
 
     @OneToOne(mappedBy = "eventSession", cascade = CascadeType.ALL, orphanRemoval = true)
     private SessionSeatingMap sessionSeatingMap;
+
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("session-discounts") // Add this
+    private List<Discount> discounts;
 }
