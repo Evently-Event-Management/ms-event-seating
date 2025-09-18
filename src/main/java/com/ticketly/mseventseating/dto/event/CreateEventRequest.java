@@ -37,6 +37,4 @@ public class CreateEventRequest {
     @Valid
     @NotEmpty
     private List<SessionRequest> sessions;
-
-    // ✅ REMOVED: seatingLayoutTemplateId is no longer needed here.
 }

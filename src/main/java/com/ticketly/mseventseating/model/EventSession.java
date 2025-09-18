@@ -59,8 +59,4 @@ public class EventSession {
 
     @OneToOne(mappedBy = "eventSession", cascade = CascadeType.ALL, orphanRemoval = true)
     private SessionSeatingMap sessionSeatingMap;
-
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("session-discounts") // Add this
-    private List<Discount> discounts;
 }
