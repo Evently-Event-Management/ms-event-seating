@@ -37,4 +37,6 @@ public class CreateEventRequest {
     @Valid
     @NotEmpty
     private List<SessionRequest> sessions;
+
+    private List<DiscountRequestDTO> discounts;
 }
