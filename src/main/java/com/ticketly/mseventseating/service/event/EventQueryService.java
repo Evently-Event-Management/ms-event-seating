@@ -4,6 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.*;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
+import com.ticketly.mseventseating.model.discount.BogoDiscountParams;
+import com.ticketly.mseventseating.model.discount.DiscountParameters;
+import com.ticketly.mseventseating.model.discount.FlatOffDiscountParams;
+import com.ticketly.mseventseating.model.discount.PercentageDiscountParams;
 import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.service.organization.OrganizationOwnershipService;
 import com.ticketly.mseventseating.service.storage.S3StorageService;
@@ -295,5 +299,48 @@ public class EventQueryService {
                 .status(session.getStatus())
                 .layoutData(layoutData)
                 .build();
+    }
+
+    private DiscountDetailsDTO mapToDiscountDetailsDTO(Discount discount) {
+        return DiscountDetailsDTO.builder()
+                .id(discount.getId())
+                .code(discount.getCode())
+                .type(discount.getType())
+                .parameters(mapDiscountParameters(discount.getParameters()))
+                .maxUsage(discount.getMaxUsage())
+                .currentUsage(discount.getCurrentUsage())
+                .isActive(discount.isActive())
+                .isPublic(discount.isPublic())
+                .activeFrom(discount.getActiveFrom())
+                .expiresAt(discount.getExpiresAt())
+                .applicableTierIds(discount.getApplicableTiers() != null
+                        ? discount.getApplicableTiers().stream()
+                        .map(Tier::getId)
+                        .collect(Collectors.toList())
+                        : null)
+                .applicableSessionIds(discount.getApplicableSessions() != null
+                        ? discount.getApplicableSessions().stream()
+                        .map(EventSession::getId)
+                        .collect(Collectors.toList())
+                        : null)
+                .build();
+    }
+
+    /**
+     * Maps domain DiscountParameters to DTO DiscountParametersDTO based on their type
+     */
+    private DiscountParametersDTO mapDiscountParameters(DiscountParameters parameters) {
+        if (parameters == null) {
+            return null;
+        }
+
+        return switch (parameters) {
+            case PercentageDiscountParams p ->
+                new PercentageDiscountParamsDTO(p.percentage());
+            case FlatOffDiscountParams f ->
+                new FlatOffDiscountParamsDTO(f.amount(), f.currency());
+            case BogoDiscountParams b ->
+                new BogoDiscountParamsDTO(b.buyQuantity(), b.getQuantity());
+        };
     }
 }
