@@ -2,7 +2,6 @@ package com.ticketly.mseventseating.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.ticketly.mseventseating.model.discount.DiscountParameters;
-import com.ticketly.mseventseating.model.discount.DiscountType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,12 +32,6 @@ public class Discount {
     @Column(name = "code", nullable = false, unique = true)
     private String code;
 
-    /**
-     * The discriminator column. This tells our code how to interpret the 'parameters' field.
-     */
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
-    private DiscountType type;
 
     /**
      * The JSONB column.

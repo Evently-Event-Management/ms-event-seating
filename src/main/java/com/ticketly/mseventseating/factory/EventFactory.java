@@ -192,6 +192,7 @@ public class EventFactory {
             }
 
             DiscountParameters parameters = objectMapper.convertValue(req.getParameters(), DiscountParameters.class);
+
             List<Tier> applicableTiers = req.getApplicableTierIds().stream()
                     .map(tierMap::get)
                     .toList();
@@ -201,7 +202,6 @@ public class EventFactory {
             return Discount.builder()
                     .id(UUID.randomUUID())
                     .code(req.getCode())
-                    .type(req.getType())
                     .parameters(parameters)
                     .maxUsage(req.getMaxUsage())
                     .isActive(req.isActive())

@@ -1,5 +1,6 @@
 package com.ticketly.mseventseating.dto.event;
 
+import com.ticketly.mseventseating.model.discount.DiscountType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BogoDiscountParamsDTO implements DiscountParametersDTO {
+    private DiscountType type;
     private int buyQuantity;
     private int getQuantity;
 }

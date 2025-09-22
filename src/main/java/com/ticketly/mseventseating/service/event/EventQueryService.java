@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.*;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
-import com.ticketly.mseventseating.model.discount.BogoDiscountParams;
-import com.ticketly.mseventseating.model.discount.DiscountParameters;
-import com.ticketly.mseventseating.model.discount.FlatOffDiscountParams;
-import com.ticketly.mseventseating.model.discount.PercentageDiscountParams;
+import com.ticketly.mseventseating.model.discount.*;
 import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.service.organization.OrganizationOwnershipService;
 import com.ticketly.mseventseating.service.storage.S3StorageService;
@@ -243,6 +240,12 @@ public class EventQueryService {
                 .collect(Collectors.toList())
                 : null;
 
+        List<DiscountDetailsDTO> discountDTOs = event.getDiscounts() != null
+                ? event.getDiscounts().stream()
+                .map(this::mapToDiscountDetailsDTO)
+                .toList()
+                : null;
+
         return EventDetailDTO.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -259,6 +262,7 @@ public class EventQueryService {
                 .updatedAt(event.getUpdatedAt())
                 .tiers(tierDTOs)
                 .sessions(sessionDTOs)
+                .discounts(discountDTOs)
                 .build();
     }
 
@@ -305,7 +309,6 @@ public class EventQueryService {
         return DiscountDetailsDTO.builder()
                 .id(discount.getId())
                 .code(discount.getCode())
-                .type(discount.getType())
                 .parameters(mapDiscountParameters(discount.getParameters()))
                 .maxUsage(discount.getMaxUsage())
                 .currentUsage(discount.getCurrentUsage())
@@ -336,11 +339,11 @@ public class EventQueryService {
 
         return switch (parameters) {
             case PercentageDiscountParams p ->
-                new PercentageDiscountParamsDTO(p.percentage());
+                    new PercentageDiscountParamsDTO(DiscountType.PERCENTAGE, p.percentage());
             case FlatOffDiscountParams f ->
-                new FlatOffDiscountParamsDTO(f.amount(), f.currency());
+                new FlatOffDiscountParamsDTO(DiscountType.FLAT_OFF, f.amount(), f.currency());
             case BogoDiscountParams b ->
-                new BogoDiscountParamsDTO(b.buyQuantity(), b.getQuantity());
+                new BogoDiscountParamsDTO(DiscountType.BUY_N_GET_N_FREE, b.buyQuantity(), b.getQuantity());
         };
     }
 }

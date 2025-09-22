@@ -6,5 +6,15 @@ import java.math.BigDecimal;
  * @param percentage The discount percentage (e.g., 15.5 for 15.5%).
  */
 public record PercentageDiscountParams(
+        DiscountType type,
         BigDecimal percentage
-) implements DiscountParameters {}
+) implements DiscountParameters {
+    public PercentageDiscountParams {
+        if (type != DiscountType.PERCENTAGE) {
+            throw new IllegalArgumentException("Type must be PERCENTAGE for PercentageDiscountParams");
+        }
+        if (percentage.compareTo(BigDecimal.ZERO) < 0 || percentage.compareTo(new BigDecimal("100")) > 0) {
+            throw new IllegalArgumentException("Percentage must be between 0 and 100");
+        }
+    }
+}
