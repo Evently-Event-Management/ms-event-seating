@@ -13,8 +13,12 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 @Entity
-@Table(name = "discounts")
-@Getter
+@Table(
+        name = "discounts",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"event_id", "code"})
+        }
+)@Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,10 +30,10 @@ public class Discount {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)
-    @JsonBackReference("event-discounts") // Add this
+    @JsonBackReference("event-discounts")
     private Event event;
 
-    @Column(name = "code", nullable = false, unique = true)
+    @Column(name = "code", nullable = false)
     private String code;
 
 
@@ -49,9 +53,11 @@ public class Discount {
     private int currentUsage = 0;
 
     @Column(name = "is_active", nullable = false)
+    @Builder.Default
     private boolean isActive = true;
 
     @Column(name = "is_public", nullable = false)
+    @Builder.Default
     private boolean isPublic = false;
 
     @Column(name = "active_from")

@@ -2,7 +2,7 @@ package com.ticketly.mseventseating.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.ticketly.mseventseating.model.discount.DiscountType;
+import model.DiscountType;
 
 /**
  * A marker interface to represent all possible discount parameter DTO structures.

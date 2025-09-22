@@ -1,6 +1,5 @@
 package com.ticketly.mseventseating.dto.event;
 
-import com.ticketly.mseventseating.model.discount.DiscountType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +16,6 @@ import java.util.UUID;
 public class DiscountDetailsDTO {
     private UUID id;
     private String code;
-    private DiscountType type;
     private DiscountParametersDTO parameters;
     private Integer maxUsage;
     private Integer currentUsage;

@@ -5,6 +5,7 @@ import com.ticketly.mseventseating.model.EventCoverPhoto;
 import com.ticketly.mseventseating.model.Tier;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.repository.EventRepository;
+import dto.projection.DiscountProjectionDTO;
 import dto.projection.EventProjectionDTO;
 import dto.projection.SessionProjectionDTO;
 import dto.projection.TierInfo;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventProjectionService {
     private final SessionProjectionService sessionProjectionService;
+    private final DiscountProjectionService discountProjectionService;
     private final EventRepository eventRepository;
 
     public EventProjectionDTO projectEvent(UUID eventId) {
@@ -54,6 +56,10 @@ public class EventProjectionService {
                 .map(session -> sessionProjectionService.projectSession(session, tierInfoMap))
                 .collect(Collectors.toList());
 
+        List<DiscountProjectionDTO> discountInfo = event.getDiscounts().stream()
+                .map(discountProjectionService::mapToDiscountDetailsDTO)
+                .toList();
+
         return EventProjectionDTO.builder()
                 .id(event.getId()).title(event.getTitle()).description(event.getDescription())
                 .overview(event.getOverview()).status(event.getStatus()).coverPhotos(event.getCoverPhotos().stream()
@@ -61,6 +67,7 @@ public class EventProjectionService {
                 .organization(orgInfo).category(catInfo)
                 .tiers(tierInfoList)
                 .sessions(sessionInfo)
+                .discounts(discountInfo)
                 .build();
     }
 

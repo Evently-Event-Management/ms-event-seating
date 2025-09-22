@@ -1,4 +1,5 @@
 package com.ticketly.mseventseating.model.discount;
+import model.DiscountType;
 
 /**
  * Parameters for "Buy N, Get N Free" discounts.

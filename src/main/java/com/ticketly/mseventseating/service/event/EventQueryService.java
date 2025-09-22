@@ -11,6 +11,7 @@ import com.ticketly.mseventseating.service.storage.S3StorageService;
 import dto.SessionSeatingMapDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.DiscountType;
 import model.EventStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

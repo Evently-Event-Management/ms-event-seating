@@ -1,4 +1,6 @@
 package com.ticketly.mseventseating.model.discount;
+import model.DiscountType;
+
 import java.math.BigDecimal;
 
 /**
