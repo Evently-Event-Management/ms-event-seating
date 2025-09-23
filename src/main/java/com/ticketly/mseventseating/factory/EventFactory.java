@@ -183,12 +183,8 @@ public class EventFactory {
 
     private List<Discount> buildDiscounts(List<DiscountRequestDTO> discountRequests, Event event, Map<String, Tier> tierMap, Map<String, EventSession> sessionMap) {
         return discountRequests.stream().map(req -> {
-            if (req.getType() == null || req.getParameters() == null) {
-                throw new BadRequestException("Discount type and parameters are required.");
-            }
-
-            if (req.getType() != req.getParameters().getType()) {
-                throw new BadRequestException("Mismatch between discount type and parameters type.");
+            if (req.getParameters() == null) {
+                throw new BadRequestException("Discount parameters are required.");
             }
 
             DiscountParameters parameters = objectMapper.convertValue(req.getParameters(), DiscountParameters.class);

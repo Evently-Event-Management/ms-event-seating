@@ -1,6 +1,7 @@
 package com.ticketly.mseventseating.service.projection;
 
 import com.ticketly.mseventseating.dto.event.*;
+import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Discount;
 import com.ticketly.mseventseating.model.EventSession;
 import com.ticketly.mseventseating.model.Tier;
@@ -8,6 +9,7 @@ import com.ticketly.mseventseating.model.discount.BogoDiscountParams;
 import com.ticketly.mseventseating.model.discount.DiscountParameters;
 import com.ticketly.mseventseating.model.discount.FlatOffDiscountParams;
 import com.ticketly.mseventseating.model.discount.PercentageDiscountParams;
+import com.ticketly.mseventseating.repository.DiscountRepository;
 import dto.projection.DiscountProjectionDTO;
 import dto.projection.discount.BogoDiscountParamsProjectionDTO;
 import dto.projection.discount.DiscountParametersProjectionDTO;
@@ -18,12 +20,24 @@ import lombok.extern.slf4j.Slf4j;
 import model.DiscountType;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class DiscountProjectionService {
+    private final DiscountRepository discountRepository;
+
+    public DiscountProjectionDTO projectDiscount(UUID discountId) {
+        Discount discount = discountRepository.findById(discountId).orElse(null);
+        if (discount == null) {
+            throw new ResourceNotFoundException("discount not found");
+        }
+        return mapToDiscountDetailsDTO(discount);
+    }
+
+
     protected DiscountProjectionDTO mapToDiscountDetailsDTO(Discount discount) {
         return DiscountProjectionDTO.builder()
                 .id(discount.getId())

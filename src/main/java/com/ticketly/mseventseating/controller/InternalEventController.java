@@ -5,11 +5,13 @@ import com.ticketly.mseventseating.dto.event.SeatDetailsRequest;
 import com.ticketly.mseventseating.dto.event.SeatDetailsResponse;
 import com.ticketly.mseventseating.service.category.CategoryProjectionDataService;
 import com.ticketly.mseventseating.service.event.EventLifecycleService;
+import com.ticketly.mseventseating.service.projection.DiscountProjectionService;
 import com.ticketly.mseventseating.service.projection.EventProjectionService;
 import com.ticketly.mseventseating.service.projection.SeatingMapProjectionService;
 import com.ticketly.mseventseating.service.seat.SeatValidationService;
 import com.ticketly.mseventseating.service.projection.SessionProjectionService;
 import dto.projection.CategoryProjectionDTO;
+import dto.projection.DiscountProjectionDTO;
 import dto.projection.EventProjectionDTO;
 import dto.projection.SeatingMapProjectionDTO;
 import dto.projection.SessionProjectionDTO;
@@ -33,6 +35,7 @@ public class InternalEventController {
     private final SeatingMapProjectionService seatingMapProjectionService;
     private final CategoryProjectionDataService categoryProjectionService;
     private final SeatValidationService seatValidationService;
+    private final DiscountProjectionService discountProjectionService;
 
     /**
      * Secure M2M endpoint for the Scheduler Service to put a session on sale.
@@ -86,6 +89,17 @@ public class InternalEventController {
     @GetMapping("/categories/{categoryId}/projection-data")
     public ResponseEntity<CategoryProjectionDTO> getCategoryProjectionData(@PathVariable UUID categoryId) {
         return ResponseEntity.ok(categoryProjectionService.getCategoryProjectionData(categoryId));
+    }
+
+    /**
+     * Endpoint for retrieving projection data for a specific discount.
+     *
+     * @param discountId The ID of the discount to retrieve projection data for
+     * @return The projection data for the specified discount
+     */
+    @GetMapping("/discounts/{discountId}/projection-data")
+    public ResponseEntity<DiscountProjectionDTO> getDiscountProjectionData(@PathVariable UUID discountId) {
+        return ResponseEntity.ok(discountProjectionService.projectDiscount(discountId));
     }
 
     /**

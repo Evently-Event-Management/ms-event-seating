@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import model.DiscountType;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -14,9 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DiscountRequestDTO {
-
     private String code;
-    private DiscountType type;
     private DiscountParametersDTO parameters;
     private Integer maxUsage;
     private boolean isActive;

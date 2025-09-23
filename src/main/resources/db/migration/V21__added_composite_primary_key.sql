@@ -1,6 +1,2 @@
 ALTER TABLE discounts
     ADD CONSTRAINT uc_6702df37600a0a29d54344257 UNIQUE (event_id, code);
-
-ALTER TABLE discounts
-DROP
-COLUMN type;
