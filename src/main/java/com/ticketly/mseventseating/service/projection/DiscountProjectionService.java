@@ -11,10 +11,10 @@ import com.ticketly.mseventseating.model.discount.FlatOffDiscountParams;
 import com.ticketly.mseventseating.model.discount.PercentageDiscountParams;
 import com.ticketly.mseventseating.repository.DiscountRepository;
 import dto.projection.DiscountProjectionDTO;
-import dto.projection.discount.BogoDiscountParamsProjectionDTO;
-import dto.projection.discount.DiscountParametersProjectionDTO;
-import dto.projection.discount.FlatOffDiscountParamsProjectionDTO;
-import dto.projection.discount.PercentageDiscountParamsProjectionDTO;
+import dto.projection.discount.BogoDiscountParamsDTO;
+import dto.projection.discount.DiscountParametersDTO;
+import dto.projection.discount.FlatOffDiscountParamsDTO;
+import dto.projection.discount.PercentageDiscountParamsDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.DiscountType;
@@ -65,18 +65,18 @@ public class DiscountProjectionService {
     /**
      * Maps domain DiscountParameters to DTO DiscountParametersDTO based on their type
      */
-    protected DiscountParametersProjectionDTO mapDiscountParameters(DiscountParameters parameters) {
+    protected DiscountParametersDTO mapDiscountParameters(DiscountParameters parameters) {
         if (parameters == null) {
             return null;
         }
 
         return switch (parameters) {
             case PercentageDiscountParams p ->
-                    new PercentageDiscountParamsProjectionDTO(DiscountType.PERCENTAGE, p.percentage());
+                    new PercentageDiscountParamsDTO(DiscountType.PERCENTAGE, p.percentage());
             case FlatOffDiscountParams f ->
-                    new FlatOffDiscountParamsProjectionDTO(DiscountType.FLAT_OFF, f.amount(), f.currency());
+                    new FlatOffDiscountParamsDTO(DiscountType.FLAT_OFF, f.amount(), f.currency());
             case BogoDiscountParams b ->
-                    new BogoDiscountParamsProjectionDTO(DiscountType.BUY_N_GET_N_FREE, b.buyQuantity(), b.getQuantity());
+                    new BogoDiscountParamsDTO(DiscountType.BUY_N_GET_N_FREE, b.buyQuantity(), b.getQuantity());
         };
     }
 }

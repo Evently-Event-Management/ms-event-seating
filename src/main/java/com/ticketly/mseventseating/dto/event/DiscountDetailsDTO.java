@@ -1,5 +1,6 @@
 package com.ticketly.mseventseating.dto.event;
 
+import dto.projection.discount.DiscountParametersDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
