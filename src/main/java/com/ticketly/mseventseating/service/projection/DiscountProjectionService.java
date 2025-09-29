@@ -72,9 +72,9 @@ public class DiscountProjectionService {
 
         return switch (parameters) {
             case PercentageDiscountParams p ->
-                    new PercentageDiscountParamsDTO(DiscountType.PERCENTAGE, p.percentage());
+                    new PercentageDiscountParamsDTO(DiscountType.PERCENTAGE, p.percentage(),p.minSpend(), p.maxDiscount());
             case FlatOffDiscountParams f ->
-                    new FlatOffDiscountParamsDTO(DiscountType.FLAT_OFF, f.amount(), f.currency());
+                    new FlatOffDiscountParamsDTO(DiscountType.FLAT_OFF, f.amount(), f.currency(), f.minSpend());
             case BogoDiscountParams b ->
                     new BogoDiscountParamsDTO(DiscountType.BUY_N_GET_N_FREE, b.buyQuantity(), b.getQuantity());
         };
