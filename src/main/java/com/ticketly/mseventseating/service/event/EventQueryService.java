@@ -7,15 +7,12 @@ import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.model.discount.*;
 import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.service.organization.OrganizationOwnershipService;
+import com.ticketly.mseventseating.service.projection.EventProjectionMapper;
 import com.ticketly.mseventseating.service.storage.S3StorageService;
 import dto.SessionSeatingMapDTO;
-import dto.projection.discount.BogoDiscountParamsDTO;
 import dto.projection.discount.DiscountParametersDTO;
-import dto.projection.discount.FlatOffDiscountParamsDTO;
-import dto.projection.discount.PercentageDiscountParamsDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.DiscountType;
 import model.EventStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -334,21 +331,11 @@ public class EventQueryService {
                 .build();
     }
 
-    /**
-     * Maps domain DiscountParameters to DTO DiscountParametersDTO based on their type
-     */
     private DiscountParametersDTO mapDiscountParameters(DiscountParameters parameters) {
-        if (parameters == null) {
-            return null;
-        }
+        return getDiscountParametersDTO(parameters);
+    }
 
-        return switch (parameters) {
-            case PercentageDiscountParams p ->
-                    new PercentageDiscountParamsDTO(DiscountType.PERCENTAGE, p.percentage());
-            case FlatOffDiscountParams f ->
-                new FlatOffDiscountParamsDTO(DiscountType.FLAT_OFF, f.amount(), f.currency());
-            case BogoDiscountParams b ->
-                new BogoDiscountParamsDTO(DiscountType.BUY_N_GET_N_FREE, b.buyQuantity(), b.getQuantity());
-        };
+    private static DiscountParametersDTO getDiscountParametersDTO(DiscountParameters parameters) {
+        return EventProjectionMapper.getDiscountParametersDTO(parameters);
     }
 }

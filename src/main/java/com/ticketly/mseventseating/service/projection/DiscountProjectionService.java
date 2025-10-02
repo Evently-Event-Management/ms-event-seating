@@ -1,82 +1,38 @@
 package com.ticketly.mseventseating.service.projection;
 
-import com.ticketly.mseventseating.dto.event.*;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Discount;
-import com.ticketly.mseventseating.model.EventSession;
 import com.ticketly.mseventseating.model.Tier;
-import com.ticketly.mseventseating.model.discount.BogoDiscountParams;
-import com.ticketly.mseventseating.model.discount.DiscountParameters;
-import com.ticketly.mseventseating.model.discount.FlatOffDiscountParams;
-import com.ticketly.mseventseating.model.discount.PercentageDiscountParams;
 import com.ticketly.mseventseating.repository.DiscountRepository;
+import com.ticketly.mseventseating.repository.TierRepository;
 import dto.projection.DiscountProjectionDTO;
-import dto.projection.discount.BogoDiscountParamsDTO;
-import dto.projection.discount.DiscountParametersDTO;
-import dto.projection.discount.FlatOffDiscountParamsDTO;
-import dto.projection.discount.PercentageDiscountParamsDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.DiscountType;
+import model.EventStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class DiscountProjectionService {
     private final DiscountRepository discountRepository;
+    private final TierRepository tierRepository;
+    private final EventProjectionMapper eventProjectionMapper;
 
     public DiscountProjectionDTO projectDiscount(UUID discountId) {
         Discount discount = discountRepository.findById(discountId).orElse(null);
         if (discount == null) {
             throw new ResourceNotFoundException("discount not found");
         }
-        return mapToDiscountDetailsDTO(discount);
-    }
-
-
-    protected DiscountProjectionDTO mapToDiscountDetailsDTO(Discount discount) {
-        return DiscountProjectionDTO.builder()
-                .id(discount.getId())
-                .code(discount.getCode())
-                .parameters(mapDiscountParameters(discount.getParameters()))
-                .maxUsage(discount.getMaxUsage())
-                .currentUsage(discount.getCurrentUsage())
-                .isActive(discount.isActive())
-                .isPublic(discount.isPublic())
-                .activeFrom(discount.getActiveFrom())
-                .expiresAt(discount.getExpiresAt())
-                .applicableTierIds(discount.getApplicableTiers() != null
-                        ? discount.getApplicableTiers().stream()
-                        .map(Tier::getId)
-                        .collect(Collectors.toList())
-                        : null)
-                .applicableSessionIds(discount.getApplicableSessions() != null
-                        ? discount.getApplicableSessions().stream()
-                        .map(EventSession::getId)
-                        .collect(Collectors.toList())
-                        : null)
-                .build();
-    }
-
-    /**
-     * Maps domain DiscountParameters to DTO DiscountParametersDTO based on their type
-     */
-    protected DiscountParametersDTO mapDiscountParameters(DiscountParameters parameters) {
-        if (parameters == null) {
-            return null;
+        if (discount.getEvent().getStatus() != EventStatus.APPROVED &&
+                discount.getEvent().getStatus() != EventStatus.COMPLETED) {
+            throw new ResourceNotFoundException("Event is not approved for projection: " + discount.getEvent().getId());
         }
 
-        return switch (parameters) {
-            case PercentageDiscountParams p ->
-                    new PercentageDiscountParamsDTO(DiscountType.PERCENTAGE, p.percentage(),p.minSpend(), p.maxDiscount());
-            case FlatOffDiscountParams f ->
-                    new FlatOffDiscountParamsDTO(DiscountType.FLAT_OFF, f.amount(), f.currency(), f.minSpend());
-            case BogoDiscountParams b ->
-                    new BogoDiscountParamsDTO(DiscountType.BUY_N_GET_N_FREE, b.buyQuantity(), b.getQuantity());
-        };
+        List<Tier> tiers = tierRepository.findByEventId(discount.getEvent().getId());
+        return eventProjectionMapper.mapToDiscountDetailsDTO(discount, tiers);
     }
 }
