@@ -74,22 +74,4 @@ public class AwsConfig {
 
         return builder.build();
     }
-
-    /**
-     * Configures the SchedulerClient bean for EventBridge Scheduler.
-     * Points to LocalStack for local development.
-     */
-    @Bean
-    public SchedulerClient schedulerClient() {
-        SchedulerClientBuilder builder = SchedulerClient.builder()
-                .region(Region.of(region));
-
-        if (localEndpoint != null && !localEndpoint.isBlank()) {
-            builder.endpointOverride(URI.create(localEndpoint))
-                    .credentialsProvider(StaticCredentialsProvider.create(
-                            AwsBasicCredentials.create(accessKey, secretKey)));
-        }
-
-        return builder.build();
-    }
 }
