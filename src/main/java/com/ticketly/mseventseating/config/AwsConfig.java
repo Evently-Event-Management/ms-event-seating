@@ -10,8 +10,6 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.scheduler.SchedulerClient;
-import software.amazon.awssdk.services.scheduler.SchedulerClientBuilder;
 
 import java.net.URI;
 
