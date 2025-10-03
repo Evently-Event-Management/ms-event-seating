@@ -3,11 +3,13 @@ package com.ticketly.mseventseating.factory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.CreateEventRequest;
+import com.ticketly.mseventseating.dto.event.DiscountRequestDTO;
 import com.ticketly.mseventseating.dto.event.SessionRequest;
 import com.ticketly.mseventseating.dto.event.TierRequest;
 import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
+import com.ticketly.mseventseating.model.discount.DiscountParameters;
 import com.ticketly.mseventseating.repository.CategoryRepository;
 import dto.SessionSeatingMapDTO;
 import lombok.RequiredArgsConstructor;
@@ -44,8 +46,13 @@ public class EventFactory {
         List<Tier> tiers = buildTiers(request.getTiers(), event, tierIdMap);
         event.setTiers(tiers);
 
-        List<EventSession> sessions = buildSessions(request.getSessions(), event, tierIdMap);
+        Map<String, EventSession> sessionIdMap = new HashMap<>();
+
+        List<EventSession> sessions = buildSessions(request.getSessions(), event, tierIdMap, sessionIdMap);
         event.setSessions(sessions);
+
+        List<Discount> discounts = buildDiscounts(request.getDiscounts(), event, tierIdMap, sessionIdMap);
+        event.setDiscounts(discounts);
 
         return event;
     }
@@ -76,14 +83,13 @@ public class EventFactory {
                             .color(req.getColor())
                             .event(event)
                             .build();
-                    // Map the client's temp ID to the fully formed Tier object (which now has a permanent ID)
                     tierIdMap.put(req.getId(), tier);
                     return tier;
                 })
                 .collect(Collectors.toList());
     }
 
-    private List<EventSession> buildSessions(List<SessionRequest> sessionRequests, Event event, Map<String, Tier> tierIdMap) {
+    private List<EventSession> buildSessions(List<SessionRequest> sessionRequests, Event event, Map<String, Tier> tierIdMap, Map<String, EventSession> sessionIdMap) {
         List<EventSession> sessions = new ArrayList<>();
         for (SessionRequest req : sessionRequests) {
             // This object now contains either the online link or physical address.
@@ -105,6 +111,9 @@ public class EventFactory {
                     .venueDetails(venueDetailsJson) // Set the JSON string
                     .salesStartTime(req.getSalesStartTime()) // Set the direct sales start time from frontend
                     .build();
+
+            // Map the client's temp session ID to the fully formed EventSession object
+            sessionIdMap.put(req.getId(), session);
 
             String validatedLayoutData = prepareSessionLayout(req.getLayoutData(), tierIdMap);
 
@@ -170,6 +179,36 @@ public class EventFactory {
                 throw new BadRequestException("Seat must be assigned to a valid Tier ID.");
             }
         }
+    }
+
+    private List<Discount> buildDiscounts(List<DiscountRequestDTO> discountRequests, Event event, Map<String, Tier> tierMap, Map<String, EventSession> sessionMap) {
+        return discountRequests.stream().map(req -> {
+            if (req.getParameters() == null) {
+                throw new BadRequestException("Discount parameters are required.");
+            }
+
+            DiscountParameters parameters = objectMapper.convertValue(req.getParameters(), DiscountParameters.class);
+
+            List<Tier> applicableTiers = req.getApplicableTierIds().stream()
+                    .map(tierMap::get)
+                    .toList();
+
+            List<EventSession> applicableSessions = req.getApplicableSessionIds().stream().map(sessionMap::get).toList();
+
+            return Discount.builder()
+                    .id(UUID.randomUUID())
+                    .code(req.getCode())
+                    .parameters(parameters)
+                    .maxUsage(req.getMaxUsage())
+                    .isActive(req.isActive())
+                    .isPublic(req.isPublic())
+                    .activeFrom(req.getActiveFrom())
+                    .expiresAt(req.getExpiresAt())
+                    .applicableTiers(applicableTiers)
+                    .applicableSessions(applicableSessions)
+                    .event(event)
+                    .build();
+        }).toList();
     }
 
     // --- Helper methods for finding entities ---

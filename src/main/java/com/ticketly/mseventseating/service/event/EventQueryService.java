@@ -4,10 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.*;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
+import com.ticketly.mseventseating.model.discount.*;
 import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.service.organization.OrganizationOwnershipService;
+import com.ticketly.mseventseating.service.projection.EventProjectionMapper;
 import com.ticketly.mseventseating.service.storage.S3StorageService;
 import dto.SessionSeatingMapDTO;
+import dto.projection.discount.DiscountParametersDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.EventStatus;
@@ -239,6 +242,12 @@ public class EventQueryService {
                 .collect(Collectors.toList())
                 : null;
 
+        List<DiscountDetailsDTO> discountDTOs = event.getDiscounts() != null
+                ? event.getDiscounts().stream()
+                .map(this::mapToDiscountDetailsDTO)
+                .toList()
+                : null;
+
         return EventDetailDTO.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -255,6 +264,7 @@ public class EventQueryService {
                 .updatedAt(event.getUpdatedAt())
                 .tiers(tierDTOs)
                 .sessions(sessionDTOs)
+                .discounts(discountDTOs)
                 .build();
     }
 
@@ -295,5 +305,37 @@ public class EventQueryService {
                 .status(session.getStatus())
                 .layoutData(layoutData)
                 .build();
+    }
+
+    private DiscountDetailsDTO mapToDiscountDetailsDTO(Discount discount) {
+        return DiscountDetailsDTO.builder()
+                .id(discount.getId())
+                .code(discount.getCode())
+                .parameters(mapDiscountParameters(discount.getParameters()))
+                .maxUsage(discount.getMaxUsage())
+                .currentUsage(discount.getCurrentUsage())
+                .isActive(discount.isActive())
+                .isPublic(discount.isPublic())
+                .activeFrom(discount.getActiveFrom())
+                .expiresAt(discount.getExpiresAt())
+                .applicableTierIds(discount.getApplicableTiers() != null
+                        ? discount.getApplicableTiers().stream()
+                        .map(Tier::getId)
+                        .collect(Collectors.toList())
+                        : null)
+                .applicableSessionIds(discount.getApplicableSessions() != null
+                        ? discount.getApplicableSessions().stream()
+                        .map(EventSession::getId)
+                        .collect(Collectors.toList())
+                        : null)
+                .build();
+    }
+
+    private DiscountParametersDTO mapDiscountParameters(DiscountParameters parameters) {
+        return getDiscountParametersDTO(parameters);
+    }
+
+    private static DiscountParametersDTO getDiscountParametersDTO(DiscountParameters parameters) {
+        return EventProjectionMapper.getDiscountParametersDTO(parameters);
     }
 }

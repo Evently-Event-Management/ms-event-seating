@@ -2,9 +2,9 @@ package com.ticketly.mseventseating.service.projection;
 
 import com.ticketly.mseventseating.model.Event;
 import com.ticketly.mseventseating.model.EventCoverPhoto;
-import com.ticketly.mseventseating.model.Tier;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.repository.EventRepository;
+import dto.projection.DiscountProjectionDTO;
 import dto.projection.EventProjectionDTO;
 import dto.projection.SessionProjectionDTO;
 import dto.projection.TierInfo;
@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventProjectionService {
     private final SessionProjectionService sessionProjectionService;
+    private final EventProjectionMapper eventProjectionMapper;
     private final EventRepository eventRepository;
 
     public EventProjectionDTO projectEvent(UUID eventId) {
@@ -45,7 +46,7 @@ public class EventProjectionService {
                 .build();
 
         List<TierInfo> tierInfoList = event.getTiers().stream()
-                .map(this::mapToTierInfo)
+                .map(eventProjectionMapper::mapToTierInfo)
                 .collect(Collectors.toList());
         Map<UUID, TierInfo> tierInfoMap = tierInfoList.stream()
                 .collect(Collectors.toMap(TierInfo::getId, Function.identity()));
@@ -54,6 +55,10 @@ public class EventProjectionService {
                 .map(session -> sessionProjectionService.projectSession(session, tierInfoMap))
                 .collect(Collectors.toList());
 
+        List<DiscountProjectionDTO> discountInfo = event.getDiscounts().stream()
+                .map(discount -> eventProjectionMapper.mapToDiscountDetailsDTO(discount, event.getTiers()))
+                .toList();
+
         return EventProjectionDTO.builder()
                 .id(event.getId()).title(event.getTitle()).description(event.getDescription())
                 .overview(event.getOverview()).status(event.getStatus()).coverPhotos(event.getCoverPhotos().stream()
@@ -61,12 +66,7 @@ public class EventProjectionService {
                 .organization(orgInfo).category(catInfo)
                 .tiers(tierInfoList)
                 .sessions(sessionInfo)
-                .build();
-    }
-
-    private TierInfo mapToTierInfo(Tier tier) {
-        return TierInfo.builder()
-                .id(tier.getId()).name(tier.getName()).price(tier.getPrice()).color(tier.getColor())
+                .discounts(discountInfo)
                 .build();
     }
 }

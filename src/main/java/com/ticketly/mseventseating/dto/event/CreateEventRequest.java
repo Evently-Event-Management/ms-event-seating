@@ -38,5 +38,5 @@ public class CreateEventRequest {
     @NotEmpty
     private List<SessionRequest> sessions;
 
-    // ✅ REMOVED: seatingLayoutTemplateId is no longer needed here.
+    private List<DiscountRequestDTO> discounts;
 }

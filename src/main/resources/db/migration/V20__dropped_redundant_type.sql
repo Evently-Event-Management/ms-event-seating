@@ -1,0 +1,3 @@
+ALTER TABLE discounts
+DROP
+COLUMN type;

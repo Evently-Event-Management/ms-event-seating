@@ -5,6 +5,7 @@ import com.ticketly.mseventseating.validators.ValidSessionDuration;
 import com.ticketly.mseventseating.validators.ValidSessionLocation;
 import dto.SessionSeatingMapDTO;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Builder;
@@ -23,6 +24,9 @@ import java.time.OffsetDateTime;
 @ValidSessionDuration(minMinutes = 30, maxHours = 12)
 @ValidSalesStartTime
 public class SessionRequest {
+    @NotBlank
+    private String id;
+
     @NotNull
     @Future
     private OffsetDateTime startTime;
