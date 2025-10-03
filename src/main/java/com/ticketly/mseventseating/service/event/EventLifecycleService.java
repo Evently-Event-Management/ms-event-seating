@@ -26,7 +26,6 @@ public class EventLifecycleService {
 
     private final EventRepository eventRepository;
     private final EventSessionRepository eventSessionRepository;
-    private final EventSchedulingService schedulingService;
     private final EventOwnershipService eventOwnershipService;
 
 
@@ -64,38 +63,30 @@ public class EventLifecycleService {
         OffsetDateTime now = OffsetDateTime.now();
 
         for (EventSession session : event.getSessions()) {
-            // If session start time is in the past, mark it as cancelled
             if (session.getStartTime().isBefore(now)) {
                 session.setStatus(SessionStatus.CANCELLED);
                 cancelledSessions++;
                 log.warn("Session {} for event {} start time is in the past and has been automatically cancelled upon approval.",
                         session.getId(), event.getId());
+            } else if (session.getSalesStartTime().isBefore(now)) {
+                session.setStatus(SessionStatus.ON_SALE);
+                scheduledSessions++;
+                log.debug("Session {} for event {} sales start time is in the past, setting status to ON_SALE.",
+                        session.getId(), event.getId());
             } else {
-                // Session is in the future, mark as scheduled regardless of the on-sale time
                 session.setStatus(SessionStatus.SCHEDULED);
                 scheduledSessions++;
-                log.debug("Session {} for event {} is in the future and will be scheduled for on-sale.",
-                        session.getId(), event.getId());
+                log.debug("Session {} for event {} is scheduled for future sale at {}, setting status to SCHEDULED.",
+                        session.getId(), event.getId(), session.getSalesStartTime());
             }
         }
 
         log.debug("Event {} has {} cancelled past sessions and {} future sessions to schedule",
                 eventId, cancelledSessions, scheduledSessions);
 
-        try {
-            // Schedule the on-sale jobs for the approved, future sessions
-            log.debug("Scheduling on-sale jobs for event {}", eventId);
-            schedulingService.scheduleOnSaleJobsForEvent(event);
-
-            // Only save the event if scheduling succeeds
-            eventRepository.save(event);
-            log.info("Event with ID {} has been successfully approved with {} active sessions",
-                    eventId, scheduledSessions);
-        } catch (SchedulingException e) {
-            // Log the error and rethrow to ensure transaction rollback
-            log.error("Failed to approve event {} due to scheduling error: {}", eventId, e.getMessage(), e);
-            throw e; // This will trigger transaction rollback
-        }
+        eventRepository.save(event);
+        log.info("Event with ID {} has been successfully approved with {} active sessions",
+                eventId, scheduledSessions);
     }
 
     /**

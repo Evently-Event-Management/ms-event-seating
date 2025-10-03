@@ -62,10 +62,6 @@ public class EventCreationService {
         Event savedEvent = eventRepository.save(event);
         log.info("Created new PENDING event with ID: {} and title: '{}'", savedEvent.getId(), savedEvent.getTitle());
 
-        // 5. Orchestrate Side Effects (e.g., scheduling)
-        // This is done after the event is successfully saved.
-        // log.debug("Scheduling on-sale jobs for event: {}", savedEvent.getId());
-        // eventSchedulingService.scheduleOnSaleJobsForEvent(savedEvent);
 
         return mapToEventResponseDTO(savedEvent);
     }

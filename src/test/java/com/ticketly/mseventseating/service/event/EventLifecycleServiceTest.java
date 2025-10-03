@@ -33,9 +33,6 @@ class EventLifecycleServiceTest {
     private EventRepository eventRepository;
 
     @Mock
-    private EventSchedulingService schedulingService;
-
-    @Mock
     private EventOwnershipService eventOwnershipService;
 
     @InjectMocks
@@ -113,7 +110,6 @@ class EventLifecycleServiceTest {
         assertEquals(SessionStatus.CANCELLED, pastSession.getStatus());
         assertEquals(SessionStatus.SCHEDULED, futureSession.getStatus()); // Future session should be scheduled
         verify(eventRepository).findById(eventId);
-        verify(schedulingService).scheduleOnSaleJobsForEvent(event);
         verify(eventRepository).save(event);
     }
 
@@ -130,7 +126,6 @@ class EventLifecycleServiceTest {
 
         assertEquals("You cannot approve your own event.", exception.getMessage());
         verify(eventRepository).findById(eventId);
-        verify(schedulingService, never()).scheduleOnSaleJobsForEvent(any());
         verify(eventRepository, never()).save(any());
     }
 
@@ -147,7 +142,6 @@ class EventLifecycleServiceTest {
 
         assertEquals("Only events with PENDING status can be approved.", exception.getMessage());
         verify(eventRepository).findById(eventId);
-        verify(schedulingService, never()).scheduleOnSaleJobsForEvent(any());
         verify(eventRepository, never()).save(any());
     }
 
@@ -262,6 +256,5 @@ class EventLifecycleServiceTest {
         assertEquals(EventStatus.APPROVED, event.getStatus());
         assertEquals(SessionStatus.CANCELLED, pastSession.getStatus());
         assertEquals(SessionStatus.SCHEDULED, futureSession.getStatus());
-        verify(schedulingService).scheduleOnSaleJobsForEvent(event);
     }
 }
