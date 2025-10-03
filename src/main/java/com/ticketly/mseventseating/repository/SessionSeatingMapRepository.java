@@ -26,4 +26,15 @@ public interface SessionSeatingMapRepository extends JpaRepository<SessionSeatin
             UUID[] seatIds,
             String status
     );
+
+    /**
+     * Calls the native PostgreSQL function 'validate_seat_statuses' to efficiently
+     * count how many of the requested seats are not in 'AVAILABLE' status.
+     *
+     * @param sessionId The UUID of the event session.
+     * @param seatIds   An array of seat UUIDs to validate.
+     * @return The number of seats from the input array that are NOT available.
+     */
+    @Query(value = "SELECT validate_seat_statuses(?1, ?2)", nativeQuery = true)
+    int countUnavailableSeatsInLayout(UUID sessionId, UUID[] seatIds);
 }

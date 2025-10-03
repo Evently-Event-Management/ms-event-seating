@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -32,4 +33,7 @@ public interface EventSessionRepository extends JpaRepository<EventSession, UUID
      */
     @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM EventSession s WHERE s.event.id = :eventId")
     boolean existsByEventId(@Param("eventId") UUID eventId);
+
+    @Query("SELECT es FROM EventSession es JOIN FETCH es.event WHERE es.id = :sessionId AND es.event.id = :eventId")
+    Optional<EventSession> findByIdAndEventIdWithEvent(UUID sessionId, UUID eventId);
 }

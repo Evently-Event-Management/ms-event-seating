@@ -10,11 +10,14 @@ import com.ticketly.mseventseating.service.projection.EventProjectionService;
 import com.ticketly.mseventseating.service.projection.SeatingMapProjectionService;
 import com.ticketly.mseventseating.service.seat.SeatValidationService;
 import com.ticketly.mseventseating.service.projection.SessionProjectionService;
+import com.ticketly.mseventseating.service.validation.ValidationService;
+import dto.CreateOrderRequest;
 import dto.projection.CategoryProjectionDTO;
 import dto.projection.DiscountProjectionDTO;
 import dto.projection.EventProjectionDTO;
 import dto.projection.SeatingMapProjectionDTO;
 import dto.projection.SessionProjectionDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,6 +39,7 @@ public class InternalEventController {
     private final CategoryProjectionDataService categoryProjectionService;
     private final SeatValidationService seatValidationService;
     private final DiscountProjectionService discountProjectionService;
+    private final ValidationService validationService;
 
     /**
      * Secure M2M endpoint for the Scheduler Service to put a session on sale.
@@ -117,4 +121,12 @@ public class InternalEventController {
         List<SeatDetailsResponse> seatDetails = seatValidationService.validateAndGetSeatsDetails(sessionId, request);
         return ResponseEntity.ok(seatDetails);
     }
+
+    @PostMapping("/validate-pre-order")
+    public ResponseEntity<Void> validatePreOrder(@RequestBody @Valid CreateOrderRequest request) {
+        validationService.validatePreOrder(request);
+        // If no exception is thrown, all validations passed.
+        return ResponseEntity.ok().build();
+    }
+
 }
