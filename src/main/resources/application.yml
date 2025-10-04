@@ -132,9 +132,3 @@ aws:
     endpoint: ${AWS_LOCAL_ENDPOINT:}
     access-key: ${AWS_LOCAL_ACCESS_KEY:}
     secret-key: ${AWS_LOCAL_SECRET_KEY:}
-  # EventBridge Scheduler configuration
-  scheduler:
-    sqs-session-on-sale-queue-arn: ${AWS_SQS_SESSION_ON_SALE_QUEUE_ARN}
-    sqs-session-closed-queue-arn: ${AWS_SQS_SESSION_CLOSED_QUEUE_ARN}
-    role-arn: ${AWS_SCHEDULER_ROLE_ARN}
-    group-name: ${AWS_SCHEDULER_GROUP_NAME:event-ticketing-schedules}
