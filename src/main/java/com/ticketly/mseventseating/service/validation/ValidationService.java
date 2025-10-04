@@ -1,6 +1,5 @@
 package com.ticketly.mseventseating.service.validation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.exception.ValidationException;
 import com.ticketly.mseventseating.model.Discount;
 import com.ticketly.mseventseating.model.EventSession;
@@ -26,7 +25,6 @@ public class ValidationService {
     private final EventSessionRepository eventSessionRepository;
     private final DiscountRepository discountRepository;
     private final SessionSeatingMapRepository seatingMapRepository;
-    private final ObjectMapper objectMapper;
 
     @Transactional(readOnly = true)
     public void validatePreOrder(CreateOrderRequest request) {
@@ -68,6 +66,11 @@ public class ValidationService {
 
         if (!isDiscountActive) {
             throw new ValidationException("Discount is not currently active or has expired.");
+        }
+
+        // Validate usage limit
+        if (discount.getMaxUsage() != null && discount.getCurrentUsage() >= discount.getMaxUsage()) {
+            throw new ValidationException("Discount usage limit has been reached.");
         }
     }
 
