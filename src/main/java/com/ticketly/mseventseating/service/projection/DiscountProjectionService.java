@@ -20,7 +20,7 @@ import java.util.UUID;
 public class DiscountProjectionService {
     private final DiscountRepository discountRepository;
     private final TierRepository tierRepository;
-    private final EventProjectionMapper eventProjectionMapper;
+    private final EventMapper eventMapper;
 
     public DiscountProjectionDTO projectDiscount(UUID discountId) {
         Discount discount = discountRepository.findById(discountId).orElse(null);
@@ -33,6 +33,6 @@ public class DiscountProjectionService {
         }
 
         List<Tier> tiers = tierRepository.findByEventId(discount.getEvent().getId());
-        return eventProjectionMapper.mapToDiscountDetailsDTO(discount, tiers);
+        return eventMapper.mapToDiscountDetailsDTO(discount, tiers);
     }
 }
