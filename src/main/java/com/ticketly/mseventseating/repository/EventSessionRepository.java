@@ -36,4 +36,6 @@ public interface EventSessionRepository extends JpaRepository<EventSession, UUID
 
     @Query("SELECT es FROM EventSession es JOIN FETCH es.event WHERE es.id = :sessionId AND es.event.id = :eventId")
     Optional<EventSession> findByIdAndEventIdWithEvent(UUID sessionId, UUID eventId);
+
+    List<EventSession> findAllByIdIn(List<UUID> ids);
 }

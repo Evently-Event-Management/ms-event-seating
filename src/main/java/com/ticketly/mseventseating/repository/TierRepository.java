@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface TierRepository extends JpaRepository<Tier, UUID> {
     List<Tier> findByEventId(UUID eventId);
+    List<Tier> findAllByIdIn(List<UUID> ids);
 }

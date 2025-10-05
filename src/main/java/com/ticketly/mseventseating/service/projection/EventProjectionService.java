@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventProjectionService {
     private final SessionProjectionService sessionProjectionService;
-    private final EventProjectionMapper eventProjectionMapper;
+    private final EventMapper eventMapper;
     private final EventRepository eventRepository;
 
     public EventProjectionDTO projectEvent(UUID eventId) {
@@ -46,7 +46,7 @@ public class EventProjectionService {
                 .build();
 
         List<TierInfo> tierInfoList = event.getTiers().stream()
-                .map(eventProjectionMapper::mapToTierInfo)
+                .map(eventMapper::mapToTierInfo)
                 .collect(Collectors.toList());
         Map<UUID, TierInfo> tierInfoMap = tierInfoList.stream()
                 .collect(Collectors.toMap(TierInfo::getId, Function.identity()));
@@ -56,7 +56,7 @@ public class EventProjectionService {
                 .collect(Collectors.toList());
 
         List<DiscountProjectionDTO> discountInfo = event.getDiscounts().stream()
-                .map(discount -> eventProjectionMapper.mapToDiscountDetailsDTO(discount, event.getTiers()))
+                .map(discount -> eventMapper.mapToDiscountDetailsDTO(discount, event.getTiers()))
                 .toList();
 
         return EventProjectionDTO.builder()
