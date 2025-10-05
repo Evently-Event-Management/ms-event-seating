@@ -12,23 +12,22 @@ import com.ticketly.mseventseating.dto.session.SessionVenueUpdateDTO;
 import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.exception.UnauthorizedException;
-import com.ticketly.mseventseating.model.Event;
-import com.ticketly.mseventseating.model.EventSession;
-import com.ticketly.mseventseating.model.OrganizationRole;
-import com.ticketly.mseventseating.model.SessionSeatingMap;
-import com.ticketly.mseventseating.model.SubscriptionLimitType;
+import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.repository.EventSessionRepository;
 import com.ticketly.mseventseating.service.event.EventOwnershipService;
 import com.ticketly.mseventseating.service.limts.LimitService;
 import com.ticketly.mseventseating.dto.event.VenueDetailsDTO;
+import dto.SessionSeatingMapDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.SeatStatus;
 import model.SessionStatus;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,9 +71,15 @@ public class SessionManagementService {
         for (SessionCreationDTO sessionDTO : request.getSessions()) {
             EventSession session = buildEventSession(sessionDTO, event);
 
+            // Get tiers from the event
+            List<Tier> tiers = event.getTiers();
+            
+            // Validate and prepare layout data
+            String validatedLayoutData = prepareSessionLayout(sessionDTO.getLayoutData(), tiers);
+            
             // Create the seating map
             SessionSeatingMap map = SessionSeatingMap.builder()
-                    .layoutData(convertToJsonString(sessionDTO.getLayoutData()))
+                    .layoutData(validatedLayoutData)
                     .eventSession(session)
                     .build();
 
@@ -218,14 +223,20 @@ public class SessionManagementService {
             throw new BadRequestException("Invalid venue details format.");
         }
 
-        // 5. Update seating map
+        // 5. Get tiers from the event
+        List<Tier> tiers = session.getEvent().getTiers();
+        
+        // 6. Validate and prepare layout data
+        String validatedLayoutData = prepareSessionLayout(updateDTO.getLayoutData(), tiers);
+        
+        // 7. Update seating map
         SessionSeatingMap seatingMap = session.getSessionSeatingMap();
-        seatingMap.setLayoutData(convertToJsonString(updateDTO.getLayoutData()));
+        seatingMap.setLayoutData(validatedLayoutData);
 
-        // 6. Save changes
+        // 8. Save changes
         EventSession updatedSession = sessionRepository.save(session);
 
-        // 7. Invalidate cache for this session
+        // 9. Invalidate cache for this session
         ownershipService.evictSessionCacheById(sessionId);
 
         log.info("Successfully updated session venue and seating map: {}", updatedSession.getId());
@@ -335,8 +346,10 @@ public class SessionManagementService {
     }
 
     /**
-     * Convert layout data to JSON string
+     * Utility method to convert any object to a JSON string
+     * Not currently used as we have more specific methods for layout data.
      */
+    @SuppressWarnings("unused") 
     private String convertToJsonString(Object obj) {
         try {
             return objectMapper.writeValueAsString(obj);
@@ -402,4 +415,71 @@ public class SessionManagementService {
             throw new BadRequestException("Can only update venue details for sessions in SCHEDULED state");
         }
     }
+
+
+    /**
+     * Prepares and validates session layout data.
+     * This includes:
+     * 1. Ensuring all blocks, rows, and seats have valid UUIDs
+     * 2. Validating that seats have valid tier assignments
+     * 3. Setting the correct seat status
+     * 
+     * @param layoutData The layout data to validate
+     * @param tiers The list of tiers to validate against
+     * @return Validated layout data as a JSON string
+     */
+    private String prepareSessionLayout(SessionSeatingMapDTO layoutData, List<Tier> tiers) {
+        try {
+            if (layoutData == null || layoutData.getLayout() == null || layoutData.getLayout().getBlocks() == null) {
+                throw new BadRequestException("Layout data or blocks cannot be null.");
+            }
+
+            for (SessionSeatingMapDTO.Block block : layoutData.getLayout().getBlocks()) {
+                block.setId(UUID.randomUUID());
+
+                if ("seated_grid".equals(block.getType())) {
+                    if (block.getRows() == null) continue;
+                    for (SessionSeatingMapDTO.Row row : block.getRows()) {
+                        row.setId(UUID.randomUUID());
+                        if (row.getSeats() != null) {
+                            validateSeats(row.getSeats(), tiers);
+                        }
+                    }
+                } else if ("standing_capacity".equals(block.getType())) {
+                    if (block.getSeats() != null) {
+                        validateSeats(block.getSeats(), tiers);
+                    }
+                }
+            }
+            return objectMapper.writeValueAsString(layoutData);
+        } catch (IOException e) {
+            log.error("Invalid session layout data", e);
+            throw new BadRequestException("Invalid session layout data: " + e.getMessage());
+        }
+    }
+
+
+    private void validateSeats(List<SessionSeatingMapDTO.Seat> seats, List<Tier> tiers) {
+        for (SessionSeatingMapDTO.Seat seat : seats) {
+            seat.setId(UUID.randomUUID());
+            if (seat.getStatus() == SeatStatus.RESERVED) {
+                continue;
+            }
+
+            seat.setStatus(SeatStatus.AVAILABLE);
+
+            if (seat.getTierId() != null) {
+                // Check if the tierId exists in the provided tiers list
+                boolean tierExists = tiers.stream()
+                        .anyMatch(tier -> tier.getId().equals(seat.getTierId()));
+                if (!tierExists) {
+                    throw new BadRequestException("Seat/slot is assigned to an invalid Tier ID: " + seat.getTierId());
+                }
+            } else {
+                throw new BadRequestException("Seat must be assigned to a valid Tier ID.");
+            }
+        }
+    }
+
+
 }

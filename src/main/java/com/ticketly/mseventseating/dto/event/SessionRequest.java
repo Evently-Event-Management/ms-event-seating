@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 import model.SessionType;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -25,7 +26,7 @@ import java.time.OffsetDateTime;
 @ValidSalesStartTime
 public class SessionRequest {
     @NotBlank
-    private String id;
+    private UUID id;
 
     @NotNull
     @Future
