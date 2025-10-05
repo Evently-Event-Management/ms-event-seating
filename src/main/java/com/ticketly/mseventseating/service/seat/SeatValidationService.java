@@ -110,8 +110,7 @@ public class SeatValidationService {
                                   Map<String, Tier> tiersById, List<SeatDetailsResponse> results) {
         for (SessionSeatingMapDTO.Seat seat : seats) {
             try {
-                UUID seatUUID = UUID.fromString(seat.getId());
-                if (seatIds.contains(seatUUID)) {
+                if (seatIds.contains(seat.getId())) {
                     // Verify seat is available
                     if (seat.getStatus() != SeatStatus.AVAILABLE) {
                         throw new BadRequestException("Seat " + seat.getId() + " is not available. Current status: " + seat.getStatus());
@@ -125,7 +124,7 @@ public class SeatValidationService {
 
                     // Create response
                     SeatDetailsResponse response = SeatDetailsResponse.builder()
-                            .seatId(seatUUID)
+                            .seatId(seat.getId())
                             .label(seat.getLabel())
                             .tier(SeatDetailsResponse.TierInfo.builder()
                                     .id(tier.getId())
@@ -136,7 +135,7 @@ public class SeatValidationService {
                             .build();
 
                     results.add(response);
-                    seatIds.remove(seatUUID);
+                    seatIds.remove(seat.getId());
                 }
             } catch (IllegalArgumentException e) {
                 log.warn("Invalid seat ID format: {}", seat.getId());

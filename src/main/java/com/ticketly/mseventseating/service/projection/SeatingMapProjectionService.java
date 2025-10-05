@@ -94,7 +94,7 @@ public class SeatingMapProjectionService {
     private List<SeatingMapProjectionDTO.SeatInfo> mapSeatsWithTiers(List<SessionSeatingMapDTO.Seat> seatDtos, Map<UUID, TierInfo> tierInfoMap) {
         return seatDtos.stream().map(seatDto -> {
             TierInfo embeddedTier = seatDto.getTierId() != null
-                    ? tierInfoMap.get(UUID.fromString(seatDto.getTierId()))
+                    ? tierInfoMap.get(seatDto.getTierId())
                     : null;
             return SeatingMapProjectionDTO.SeatInfo.builder()
                     .id(seatDto.getId())
