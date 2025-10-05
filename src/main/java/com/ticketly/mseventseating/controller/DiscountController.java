@@ -1,20 +1,18 @@
 package com.ticketly.mseventseating.controller;
 
 import com.ticketly.mseventseating.dto.event.DiscountRequestDTO;
-import com.ticketly.mseventseating.dto.event.DiscountDetailsDTO;
+import com.ticketly.mseventseating.dto.event.DiscountResponseDTO;
 import com.ticketly.mseventseating.service.discount.DiscountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -26,44 +24,43 @@ public class DiscountController {
     private final DiscountService discountService;
 
     @PostMapping
-    public ResponseEntity<DiscountDetailsDTO> createDiscount(
+    public ResponseEntity<DiscountResponseDTO> createDiscount(
             @PathVariable UUID eventId,
             @RequestBody @Valid DiscountRequestDTO requestDTO,
             @AuthenticationPrincipal Jwt jwt) {
         
         log.info("Creating discount for event: {}", eventId);
         String userId = jwt.getSubject();
-        DiscountDetailsDTO createdDiscount = discountService.createDiscount(eventId, requestDTO, userId);
+        DiscountResponseDTO createdDiscount = discountService.createDiscount(eventId, requestDTO, userId);
         return new ResponseEntity<>(createdDiscount, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<Page<DiscountDetailsDTO>> getDiscounts(
+    public ResponseEntity<List<DiscountResponseDTO>> getDiscounts(
             @PathVariable UUID eventId,
             @RequestParam(defaultValue = "false") boolean includePrivate,
-            @PageableDefault Pageable pageable,
             @AuthenticationPrincipal Jwt jwt) {
         
         log.info("Getting discounts for event: {}, includePrivate: {}", eventId, includePrivate);
         String userId = jwt.getSubject();
-        Page<DiscountDetailsDTO> discounts = discountService.getDiscounts(eventId, includePrivate, userId, pageable);
+        List<DiscountResponseDTO> discounts = discountService.getDiscounts(eventId, includePrivate, userId);
         return ResponseEntity.ok(discounts);
     }
 
     @GetMapping("/{discountId}")
-    public ResponseEntity<DiscountDetailsDTO> getDiscount(
+    public ResponseEntity<DiscountResponseDTO> getDiscount(
             @PathVariable UUID eventId,
             @PathVariable UUID discountId,
             @AuthenticationPrincipal Jwt jwt) {
         
         log.info("Getting discount: {} for event: {}", discountId, eventId);
         String userId = jwt.getSubject();
-        DiscountDetailsDTO discount = discountService.getDiscount(eventId, discountId, userId);
+        DiscountResponseDTO discount = discountService.getDiscount(eventId, discountId, userId);
         return ResponseEntity.ok(discount);
     }
 
     @PutMapping("/{discountId}")
-    public ResponseEntity<DiscountDetailsDTO> updateDiscount(
+    public ResponseEntity<DiscountResponseDTO> updateDiscount(
             @PathVariable UUID eventId,
             @PathVariable UUID discountId,
             @RequestBody @Valid DiscountRequestDTO requestDTO,
@@ -71,7 +68,7 @@ public class DiscountController {
         
         log.info("Updating discount: {} for event: {}", discountId, eventId);
         String userId = jwt.getSubject();
-        DiscountDetailsDTO updatedDiscount = discountService.updateDiscount(eventId, discountId, requestDTO, userId);
+        DiscountResponseDTO updatedDiscount = discountService.updateDiscount(eventId, discountId, requestDTO, userId);
         return ResponseEntity.ok(updatedDiscount);
     }
 

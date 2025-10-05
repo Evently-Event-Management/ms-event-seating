@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.*;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
-import com.ticketly.mseventseating.model.discount.*;
 import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.service.organization.OrganizationOwnershipService;
 import com.ticketly.mseventseating.service.projection.EventMapper;
@@ -242,7 +241,7 @@ public class EventQueryService {
                 .collect(Collectors.toList())
                 : null;
 
-        List<DiscountDetailsDTO> discountDTOs = event.getDiscounts() != null
+        List<DiscountResponseDTO> discountDTOs = event.getDiscounts() != null
                 ? event.getDiscounts().stream()
                 .map(eventMapper::mapToDiscountDetailsDTO)
                 .toList()

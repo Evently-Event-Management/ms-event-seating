@@ -30,5 +30,5 @@ public class EventDetailDTO {
     private OffsetDateTime updatedAt;
     private List<TierDTO> tiers;
     private List<SessionDetailDTO> sessions;
-    private List<DiscountDetailsDTO> discounts;
+    private List<DiscountResponseDTO> discounts;
 }

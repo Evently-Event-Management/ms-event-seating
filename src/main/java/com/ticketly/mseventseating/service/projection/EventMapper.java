@@ -1,6 +1,6 @@
 package com.ticketly.mseventseating.service.projection;
 
-import com.ticketly.mseventseating.dto.event.DiscountDetailsDTO;
+import com.ticketly.mseventseating.dto.event.DiscountResponseDTO;
 import com.ticketly.mseventseating.model.Discount;
 import com.ticketly.mseventseating.model.EventSession;
 import com.ticketly.mseventseating.model.Tier;
@@ -37,8 +37,8 @@ public class EventMapper {
      * @param discount The discount entity to map
      * @return A DiscountDetailsDTO with all the discount details
      */
-    public DiscountDetailsDTO mapToDiscountDetailsDTO(Discount discount) {
-        return DiscountDetailsDTO.builder()
+    public DiscountResponseDTO mapToDiscountDetailsDTO(Discount discount) {
+        return DiscountResponseDTO.builder()
                 .id(discount.getId())
                 .code(discount.getCode())
                 .parameters(mapDiscountParameters(discount.getParameters()))

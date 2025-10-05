@@ -2,15 +2,16 @@ package com.ticketly.mseventseating.dto.event;
 
 import dto.projection.discount.DiscountParametersDTO;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class DiscountRequestDTO {
@@ -21,6 +22,6 @@ public class DiscountRequestDTO {
     private boolean isPublic;
     private OffsetDateTime activeFrom;
     private OffsetDateTime expiresAt;
-    private List<String> applicableTierIds;
-    private List<String> applicableSessionIds;
+    private List<UUID> applicableTierIds;
+    private List<UUID> applicableSessionIds;
 }
