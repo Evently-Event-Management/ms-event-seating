@@ -3,7 +3,9 @@ package com.ticketly.mseventseating.controller;
 import com.ticketly.mseventseating.dto.session.CreateSessionsRequest;
 import com.ticketly.mseventseating.dto.session.SessionBatchResponse;
 import com.ticketly.mseventseating.dto.session.SessionResponse;
+import com.ticketly.mseventseating.dto.session.SessionStatusUpdateDTO;
 import com.ticketly.mseventseating.dto.session.SessionTimeUpdateDTO;
+import com.ticketly.mseventseating.dto.session.SessionVenueUpdateDTO;
 import com.ticketly.mseventseating.service.session.SessionManagementService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -69,24 +71,68 @@ public class SessionManagementController {
     }
 
     /**
-     * Update a session
+     * Update a session's time details
      */
-    @PutMapping("/{sessionId}")
-    @Operation(summary = "Update a session", 
-              description = "Updates an existing session. Only allowed before sales start. Only organization owners can update.")
+    @PutMapping("/{sessionId}/time")
+    @Operation(summary = "Update a session's time details", 
+              description = "Updates a session's start time, end time, and sales start time. Allowed for SCHEDULED and ON_SALE sessions. Only organization owners can update.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Session updated successfully"),
+        @ApiResponse(responseCode = "200", description = "Session times updated successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid request, validation error, or session not editable"),
         @ApiResponse(responseCode = "403", description = "User not authorized to update this session"),
         @ApiResponse(responseCode = "404", description = "Session not found")
     })
-    public ResponseEntity<SessionResponse> updateSession(
+    public ResponseEntity<SessionResponse> updateSessionTime(
             @PathVariable UUID sessionId,
             @Valid @RequestBody SessionTimeUpdateDTO updateDTO,
             @AuthenticationPrincipal Jwt jwt) {
         
         String userId = jwt.getClaimAsString("sub");
-        SessionResponse response = sessionManagementService.updateSession(sessionId, updateDTO, userId);
+        SessionResponse response = sessionManagementService.updateSessionTime(sessionId, updateDTO, userId);
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * Update a session's status
+     */
+    @PutMapping("/{sessionId}/status")
+    @Operation(summary = "Update a session's status", 
+              description = "Updates a session's status. Valid transitions: SCHEDULED -> ON_SALE -> CLOSED. Only organization owners can update.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Session status updated successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid request, validation error, or invalid status transition"),
+        @ApiResponse(responseCode = "403", description = "User not authorized to update this session"),
+        @ApiResponse(responseCode = "404", description = "Session not found")
+    })
+    public ResponseEntity<SessionResponse> updateSessionStatus(
+            @PathVariable UUID sessionId,
+            @Valid @RequestBody SessionStatusUpdateDTO updateDTO,
+            @AuthenticationPrincipal Jwt jwt) {
+        
+        String userId = jwt.getClaimAsString("sub");
+        SessionResponse response = sessionManagementService.updateSessionStatus(sessionId, updateDTO, userId);
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * Update a session's venue and seating map
+     */
+    @PutMapping("/{sessionId}/venue")
+    @Operation(summary = "Update a session's venue and seating map", 
+              description = "Updates a session's venue details and seating layout. Only allowed for SCHEDULED sessions. Only organization owners can update.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Session venue updated successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid request, validation error, or session not in SCHEDULED state"),
+        @ApiResponse(responseCode = "403", description = "User not authorized to update this session"),
+        @ApiResponse(responseCode = "404", description = "Session not found")
+    })
+    public ResponseEntity<SessionResponse> updateSessionVenue(
+            @PathVariable UUID sessionId,
+            @Valid @RequestBody SessionVenueUpdateDTO updateDTO,
+            @AuthenticationPrincipal Jwt jwt) {
+        
+        String userId = jwt.getClaimAsString("sub");
+        SessionResponse response = sessionManagementService.updateSessionVenue(sessionId, updateDTO, userId);
         return ResponseEntity.ok(response);
     }
 
