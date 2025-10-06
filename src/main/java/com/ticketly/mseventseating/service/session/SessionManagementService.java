@@ -73,10 +73,10 @@ public class SessionManagementService {
 
             // Get tiers from the event
             List<Tier> tiers = event.getTiers();
-            
+
             // Validate and prepare layout data
             String validatedLayoutData = prepareSessionLayout(sessionDTO.getLayoutData(), tiers);
-            
+
             // Create the seating map
             SessionSeatingMap map = SessionSeatingMap.builder()
                     .layoutData(validatedLayoutData)
@@ -118,6 +118,31 @@ public class SessionManagementService {
         }
 
         return mapToSessionResponse(session);
+    }
+
+
+    /**
+     * Get all sessions for an event
+     */
+    public List<SessionResponse> getSessionsByEvent(UUID eventId, String userId) {
+        log.info("Fetching sessions for event ID: {}", eventId);
+
+        // 1. Find the event
+        eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found with ID: " + eventId));
+
+        // 2. Validate ownership - only event owners can view sessions
+        if (!eventOwnershipService.isOwner(eventId, userId)) {
+            throw new UnauthorizedException("User is not authorized to view sessions for this event");
+        }
+
+        // 3. Fetch sessions
+        List<EventSession> sessions = sessionRepository.findAllByEventId(eventId);
+
+        // 4. Map to response
+        return sessions.stream()
+                .map(this::mapToSessionResponse)
+                .toList();
     }
 
     /**
@@ -225,10 +250,10 @@ public class SessionManagementService {
 
         // 5. Get tiers from the event
         List<Tier> tiers = session.getEvent().getTiers();
-        
+
         // 6. Validate and prepare layout data
         String validatedLayoutData = prepareSessionLayout(updateDTO.getLayoutData(), tiers);
-        
+
         // 7. Update seating map
         SessionSeatingMap seatingMap = session.getSessionSeatingMap();
         seatingMap.setLayoutData(validatedLayoutData);
@@ -280,6 +305,18 @@ public class SessionManagementService {
     private SessionResponse mapToSessionResponse(EventSession session) {
         VenueDetailsDTO venueDetails = parseVenueDetails(session.getVenueDetails());
 
+        // Parse layout data from session seating map
+        SessionSeatingMapDTO layoutData = null;
+        try {
+            if (session.getSessionSeatingMap() != null && session.getSessionSeatingMap().getLayoutData() != null) {
+                layoutData = objectMapper.readValue(
+                    session.getSessionSeatingMap().getLayoutData(),
+                    SessionSeatingMapDTO.class);
+            }
+        } catch (IOException e) {
+            log.error("Error parsing layout data for session {}", session.getId(), e);
+        }
+
         return SessionResponse.builder()
                 .id(session.getId())
                 .eventId(session.getEvent().getId())
@@ -289,6 +326,7 @@ public class SessionManagementService {
                 .sessionType(session.getSessionType())
                 .status(session.getStatus())
                 .venueDetails(venueDetails)
+                .layoutData(layoutData)
                 .build();
     }
 
@@ -349,7 +387,7 @@ public class SessionManagementService {
      * Utility method to convert any object to a JSON string
      * Not currently used as we have more specific methods for layout data.
      */
-    @SuppressWarnings("unused") 
+    @SuppressWarnings("unused")
     private String convertToJsonString(Object obj) {
         try {
             return objectMapper.writeValueAsString(obj);
@@ -423,9 +461,9 @@ public class SessionManagementService {
      * 1. Ensuring all blocks, rows, and seats have valid UUIDs
      * 2. Validating that seats have valid tier assignments
      * 3. Setting the correct seat status
-     * 
+     *
      * @param layoutData The layout data to validate
-     * @param tiers The list of tiers to validate against
+     * @param tiers      The list of tiers to validate against
      * @return Validated layout data as a JSON string
      */
     private String prepareSessionLayout(SessionSeatingMapDTO layoutData, List<Tier> tiers) {

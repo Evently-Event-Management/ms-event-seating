@@ -1,5 +1,6 @@
 package com.ticketly.mseventseating.dto.event;
 
+import com.ticketly.mseventseating.dto.session.SessionResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,6 +30,6 @@ public class EventDetailDTO {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private List<TierDTO> tiers;
-    private List<SessionDetailDTO> sessions;
+    private List<SessionResponse> sessions;
     private List<DiscountResponseDTO> discounts;
 }

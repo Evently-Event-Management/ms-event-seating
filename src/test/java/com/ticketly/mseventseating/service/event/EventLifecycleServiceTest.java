@@ -73,7 +73,7 @@ class EventLifecycleServiceTest {
         pastSession.setId(UUID.randomUUID());
         pastSession.setStartTime(OffsetDateTime.now().minusDays(1));
         pastSession.setEndTime(OffsetDateTime.now().minusDays(1).plusHours(2));
-        pastSession.setStatus(SessionStatus.PENDING);
+        pastSession.setStatus(SessionStatus.SCHEDULED);
         pastSession.setEvent(event);
 
         // Setup Future Session
@@ -81,7 +81,7 @@ class EventLifecycleServiceTest {
         futureSession.setId(UUID.randomUUID());
         futureSession.setStartTime(OffsetDateTime.now().plusDays(1));
         futureSession.setEndTime(OffsetDateTime.now().plusDays(1).plusHours(2));
-        futureSession.setStatus(SessionStatus.PENDING);
+        futureSession.setStatus(SessionStatus.SCHEDULED);
         futureSession.setEvent(event);
 
         // Add sessions to event

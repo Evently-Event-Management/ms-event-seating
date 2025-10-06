@@ -1,6 +1,7 @@
 package com.ticketly.mseventseating.dto.session;
 
 import com.ticketly.mseventseating.dto.event.VenueDetailsDTO;
+import dto.SessionSeatingMapDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,4 +25,5 @@ public class SessionResponse {
     private SessionType sessionType;
     private SessionStatus status;
     private VenueDetailsDTO venueDetails;
+    private SessionSeatingMapDTO layoutData;
 }
