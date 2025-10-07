@@ -5,7 +5,6 @@ import com.ticketly.mseventseating.validators.ValidSessionDuration;
 import com.ticketly.mseventseating.validators.ValidSessionLocation;
 import dto.SessionSeatingMapDTO;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Builder;
@@ -25,7 +24,7 @@ import java.util.UUID;
 @ValidSessionDuration(minMinutes = 30, maxHours = 12)
 @ValidSalesStartTime
 public class SessionRequest {
-    @NotBlank
+    @NotNull
     private UUID id;
 
     @NotNull
@@ -36,7 +35,6 @@ public class SessionRequest {
     @Future
     private OffsetDateTime endTime;
 
-    // ✅ UPDATED: Single sales start time field calculated by frontend
     @NotNull
     @Future
     private OffsetDateTime salesStartTime;
@@ -44,7 +42,7 @@ public class SessionRequest {
     @NotNull
     private SessionType sessionType;
 
-    @NotNull // The object itself must not be null
+    @NotNull
     @Valid
     private VenueDetailsDTO venueDetails;
 

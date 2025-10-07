@@ -2,9 +2,11 @@ package com.ticketly.mseventseating.controller;
 
 import com.ticketly.mseventseating.dto.session.CreateSessionsRequest;
 import com.ticketly.mseventseating.dto.session.SessionBatchResponse;
+import com.ticketly.mseventseating.dto.session.SessionLayoutUpdateDTO;
 import com.ticketly.mseventseating.dto.session.SessionResponse;
 import com.ticketly.mseventseating.dto.session.SessionStatusUpdateDTO;
 import com.ticketly.mseventseating.dto.session.SessionTimeUpdateDTO;
+import com.ticketly.mseventseating.dto.session.SessionVenueDetailsUpdateDTO;
 import com.ticketly.mseventseating.dto.session.SessionVenueUpdateDTO;
 import com.ticketly.mseventseating.service.session.SessionManagementService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,7 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/sessions")
+@RequestMapping("/v1/sessions")
 @RequiredArgsConstructor
 @Tag(name = "Session Management", description = "API endpoints for managing event sessions")
 public class SessionManagementController {
@@ -116,7 +118,7 @@ public class SessionManagementController {
     }
 
     /**
-     * Update a session's venue and seating map
+     * Update a session's venue and seating map (legacy combined endpoint)
      */
     @PutMapping("/{sessionId}/venue")
     @Operation(summary = "Update a session's venue and seating map",
@@ -134,6 +136,50 @@ public class SessionManagementController {
 
         String userId = jwt.getClaimAsString("sub");
         SessionResponse response = sessionManagementService.updateSessionVenue(sessionId, updateDTO, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Update only a session's venue details
+     */
+    @PutMapping("/{sessionId}/venue-details")
+    @Operation(summary = "Update only a session's venue details",
+            description = "Updates just the venue details of a session. Only allowed for SCHEDULED sessions. Only organization owners can update.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Session venue details updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request, validation error, or session not in SCHEDULED state"),
+            @ApiResponse(responseCode = "403", description = "User not authorized to update this session"),
+            @ApiResponse(responseCode = "404", description = "Session not found")
+    })
+    public ResponseEntity<SessionResponse> updateSessionVenueDetails(
+            @PathVariable UUID sessionId,
+            @Valid @RequestBody SessionVenueDetailsUpdateDTO updateDTO,
+            @AuthenticationPrincipal Jwt jwt) {
+
+        String userId = jwt.getClaimAsString("sub");
+        SessionResponse response = sessionManagementService.updateSessionVenueDetails(sessionId, updateDTO, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Update only a session's seating layout
+     */
+    @PutMapping("/{sessionId}/layout")
+    @Operation(summary = "Update only a session's seating layout",
+            description = "Updates just the seating layout of a session. Only allowed for SCHEDULED sessions. Only organization owners can update.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Session seating layout updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request, validation error, or session not in SCHEDULED state"),
+            @ApiResponse(responseCode = "403", description = "User not authorized to update this session"),
+            @ApiResponse(responseCode = "404", description = "Session not found")
+    })
+    public ResponseEntity<SessionResponse> updateSessionLayout(
+            @PathVariable UUID sessionId,
+            @Valid @RequestBody SessionLayoutUpdateDTO updateDTO,
+            @AuthenticationPrincipal Jwt jwt) {
+
+        String userId = jwt.getClaimAsString("sub");
+        SessionResponse response = sessionManagementService.updateSessionLayout(sessionId, updateDTO, userId);
         return ResponseEntity.ok(response);
     }
 

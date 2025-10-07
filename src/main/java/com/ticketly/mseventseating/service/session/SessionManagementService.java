@@ -2,12 +2,14 @@ package com.ticketly.mseventseating.service.session;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ticketly.mseventseating.dto.event.SessionRequest;
 import com.ticketly.mseventseating.dto.session.CreateSessionsRequest;
 import com.ticketly.mseventseating.dto.session.SessionBatchResponse;
-import com.ticketly.mseventseating.dto.session.SessionCreationDTO;
+import com.ticketly.mseventseating.dto.session.SessionLayoutUpdateDTO;
 import com.ticketly.mseventseating.dto.session.SessionResponse;
 import com.ticketly.mseventseating.dto.session.SessionStatusUpdateDTO;
 import com.ticketly.mseventseating.dto.session.SessionTimeUpdateDTO;
+import com.ticketly.mseventseating.dto.session.SessionVenueDetailsUpdateDTO;
 import com.ticketly.mseventseating.dto.session.SessionVenueUpdateDTO;
 import com.ticketly.mseventseating.exception.BadRequestException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
@@ -68,7 +70,7 @@ public class SessionManagementService {
         // 4. Create and save sessions
         List<EventSession> createdSessions = new ArrayList<>();
 
-        for (SessionCreationDTO sessionDTO : request.getSessions()) {
+        for (SessionRequest sessionDTO : request.getSessions()) {
             EventSession session = buildEventSession(sessionDTO, event);
 
             // Get tiers from the event
@@ -270,6 +272,84 @@ public class SessionManagementService {
     }
 
     /**
+     * Update only a session's venue details
+     */
+    @Transactional
+    public SessionResponse updateSessionVenueDetails(UUID sessionId, SessionVenueDetailsUpdateDTO updateDTO, String userId) {
+        log.info("Updating venue details for session ID: {}", sessionId);
+
+        // 1. Find the session
+        EventSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Session not found with ID: " + sessionId));
+
+        // 2. Validate ownership - Only owners can update venue, not scanners
+        if (!ownershipService.isOwner(sessionId, userId)) {
+            throw new UnauthorizedException("User is not authorized to update this session's venue details");
+        }
+
+        // 3. Validate session is in SCHEDULED state for venue update
+        validateSessionForVenueUpdate(session);
+
+        // 4. Update venue details only
+        try {
+            session.setVenueDetails(objectMapper.writeValueAsString(updateDTO.getVenueDetails()));
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize venue details for session", e);
+            throw new BadRequestException("Invalid venue details format.");
+        }
+
+        // 5. Save changes
+        EventSession updatedSession = sessionRepository.save(session);
+
+        // 6. Invalidate cache for this session
+        ownershipService.evictSessionCacheById(sessionId);
+
+        log.info("Successfully updated session venue details: {}", updatedSession.getId());
+
+        return mapToSessionResponse(updatedSession);
+    }
+
+    /**
+     * Update only a session's seating layout
+     */
+    @Transactional
+    public SessionResponse updateSessionLayout(UUID sessionId, SessionLayoutUpdateDTO updateDTO, String userId) {
+        log.info("Updating seating layout for session ID: {}", sessionId);
+
+        // 1. Find the session
+        EventSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Session not found with ID: " + sessionId));
+
+        // 2. Validate ownership - Only owners can update layout, not scanners
+        if (!ownershipService.isOwner(sessionId, userId)) {
+            throw new UnauthorizedException("User is not authorized to update this session's layout");
+        }
+
+        // 3. Validate session is in SCHEDULED state for layout update
+        validateSessionForVenueUpdate(session);
+
+        // 4. Get tiers from the event
+        List<Tier> tiers = session.getEvent().getTiers();
+
+        // 5. Validate and prepare layout data
+        String validatedLayoutData = prepareSessionLayout(updateDTO.getLayoutData(), tiers);
+
+        // 6. Update seating map
+        SessionSeatingMap seatingMap = session.getSessionSeatingMap();
+        seatingMap.setLayoutData(validatedLayoutData);
+
+        // 7. Save changes
+        EventSession updatedSession = sessionRepository.save(session);
+
+        // 8. Invalidate cache for this session
+        ownershipService.evictSessionCacheById(sessionId);
+
+        log.info("Successfully updated session seating layout: {}", updatedSession.getId());
+
+        return mapToSessionResponse(updatedSession);
+    }
+
+    /**
      * Delete a session
      */
     @Transactional
@@ -345,9 +425,9 @@ public class SessionManagementService {
     }
 
     /**
-     * Build EventSession from SessionCreationDTO
+     * Build EventSession from SessionRequest
      */
-    private EventSession buildEventSession(SessionCreationDTO dto, Event event) {
+    private EventSession buildEventSession(SessionRequest dto, Event event) {
         String venueDetailsJson;
         try {
             venueDetailsJson = objectMapper.writeValueAsString(dto.getVenueDetails());

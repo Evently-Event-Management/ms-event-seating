@@ -1,5 +1,6 @@
 package com.ticketly.mseventseating.dto.session;
 
+import com.ticketly.mseventseating.dto.event.SessionRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -21,5 +22,5 @@ public class CreateSessionsRequest {
     
     @Valid
     @NotEmpty
-    private List<SessionCreationDTO> sessions;
+    private List<SessionRequest> sessions;
 }
