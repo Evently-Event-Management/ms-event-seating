@@ -166,13 +166,13 @@ public class SessionManagementService {
         // 3. Check if session status allows time update
         validateSessionForTimeUpdate(session);
 
-        //If session is ON_SALE and sales start time changes ensure session put back into SCHEDULED
+        // 4. Additional validation for salesStartTime changes in ON_SALE status
         if (session.getStatus() == SessionStatus.ON_SALE &&
                 !session.getSalesStartTime().isEqual(updateDTO.getSalesStartTime())) {
-            session.setStatus(SessionStatus.SCHEDULED);
+            throw new BadRequestException("Cannot change sales start time once a session is ON_SALE.");
         }
 
-        // 4. Update time fields
+        // 5. Update time fields
         session.setStartTime(updateDTO.getStartTime());
         session.setEndTime(updateDTO.getEndTime());
         session.setSalesStartTime(updateDTO.getSalesStartTime());
@@ -193,7 +193,7 @@ public class SessionManagementService {
      * 
      * Business Logic:
      * - SCHEDULED -> ON_SALE or CANCELLED
-     * - ON_SALE -> CLOSED or SCHEDULED
+     * - ON_SALE -> CLOSED only (one-way transition)
      * - SOLD_OUT: Cannot be manually set (system-determined)
      * - CLOSED: Final state
      * - CANCELLED: Final state
@@ -513,7 +513,7 @@ public class SessionManagementService {
      * Validate if the session status transition is allowed
      * Valid transitions:
      * - SCHEDULED -> ON_SALE or CANCELLED
-     * - ON_SALE -> CLOSED or SCHEDULED
+     * - ON_SALE -> CLOSED only (one-way transition, cannot go back to SCHEDULED)
      * - SOLD_OUT (can't be manually set)
      * - CLOSED (final state)
      * - CANCELLED (final state)
@@ -539,9 +539,9 @@ public class SessionManagementService {
                 }
                 break;
             case ON_SALE:
-                // From ON_SALE, can only go to CLOSED or SCHEDULED
-                if (newStatus != SessionStatus.CLOSED && newStatus != SessionStatus.SCHEDULED) {
-                    throw new BadRequestException("From ON_SALE, you can only change to CLOSED or back to SCHEDULED.");
+                // From ON_SALE, can only go to CLOSED (one-way transition)
+                if (newStatus != SessionStatus.CLOSED) {
+                    throw new BadRequestException("From ON_SALE, you can only change to CLOSED. Cannot revert back to SCHEDULED once sales have started.");
                 }
                 break;
             case SOLD_OUT:
