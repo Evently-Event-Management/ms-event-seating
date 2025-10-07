@@ -190,10 +190,17 @@ public class SessionManagementService {
 
     /**
      * Update a session's status
+     * 
+     * Business Logic:
+     * - SCHEDULED -> ON_SALE or CANCELLED
+     * - ON_SALE -> CLOSED or SCHEDULED
+     * - SOLD_OUT: Cannot be manually set (system-determined)
+     * - CLOSED: Final state
+     * - CANCELLED: Final state
      */
     @Transactional
     public SessionResponse updateSessionStatus(UUID sessionId, SessionStatusUpdateDTO updateDTO, String userId) {
-        log.info("Updating session status for ID: {}", sessionId);
+        log.info("Updating session status for ID: {} to {}", sessionId, updateDTO.getStatus());
 
         // 1. Find the session
         EventSession session = sessionRepository.findById(sessionId)
@@ -207,13 +214,21 @@ public class SessionManagementService {
         // 3. Validate status transition
         validateStatusTransition(session, updateDTO.getStatus());
 
-        // 4. Update status
-        session.setStatus(updateDTO.getStatus());
+        // 4. Update status with any additional business logic
+        SessionStatus newStatus = updateDTO.getStatus();
+        session.setStatus(newStatus);
+        
+        // 5. Additional actions based on transition
+        if (newStatus == SessionStatus.CANCELLED) {
+            // For cancelled sessions, we might want to perform additional actions
+            // like releasing held seats, notifying users, etc.
+            log.info("Session cancelled: {}. Additional cancellation logic would be applied here.", sessionId);
+        }
 
-        // 5. Save changes
+        // 6. Save changes
         EventSession updatedSession = sessionRepository.save(session);
 
-        // 6. Invalidate cache for this session
+        // 7. Invalidate cache for this session
         ownershipService.evictSessionCacheById(sessionId);
 
         log.info("Successfully updated session status to {}: {}", updateDTO.getStatus(), updatedSession.getId());
@@ -367,7 +382,7 @@ public class SessionManagementService {
 
         //Can delete only SCHEDULED sessions before sales start
         if (session.getStatus() != SessionStatus.SCHEDULED) {
-            throw new BadRequestException("Only SCHEDULED sessions can be deleted");
+            throw new BadRequestException("Only SCHEDULED sessions can be deleted. Current status: " + session.getStatus());
         }
 
         // 4. Delete the session
@@ -479,11 +494,12 @@ public class SessionManagementService {
 
     /**
      * Validate if the session is in a state that allows time updates
-     * SCHEDULED and ON_SALE sessions can have their times updated
+     * Only SCHEDULED and ON_SALE sessions can have their times updated
      */
     private void validateSessionForTimeUpdate(EventSession session) {
-        if (session.getStatus() == SessionStatus.CLOSED) {
-            throw new BadRequestException("Cannot update times for a CLOSED session");
+        SessionStatus status = session.getStatus();
+        if (status == SessionStatus.CLOSED || status == SessionStatus.CANCELLED || status == SessionStatus.SOLD_OUT) {
+            throw new BadRequestException("Cannot update times for a session with status: " + status);
         }
 
         // Additional validation logic for time updates
@@ -495,7 +511,12 @@ public class SessionManagementService {
 
     /**
      * Validate if the session status transition is allowed
-     * Valid transitions: SCHEDULED -> ON_SALE -> CLOSED
+     * Valid transitions:
+     * - SCHEDULED -> ON_SALE or CANCELLED
+     * - ON_SALE -> CLOSED or SCHEDULED
+     * - SOLD_OUT (can't be manually set)
+     * - CLOSED (final state)
+     * - CANCELLED (final state)
      */
     private void validateStatusTransition(EventSession session, SessionStatus newStatus) {
         SessionStatus currentStatus = session.getStatus();
@@ -504,21 +525,34 @@ public class SessionManagementService {
         if (currentStatus == newStatus) {
             return;
         }
+        
+        // SOLD_OUT is a system-determined state and cannot be manually set
+        if (newStatus == SessionStatus.SOLD_OUT) {
+            throw new BadRequestException("Status SOLD_OUT is determined by the system and cannot be manually set.");
+        }
 
         switch (currentStatus) {
             case SCHEDULED:
-                // From SCHEDULED, can only go to ON_SALE
-                if (newStatus != SessionStatus.ON_SALE) {
-                    throw new BadRequestException("Cannot transition from SCHEDULED to " + newStatus + ". Must go to ON_SALE first.");
+                // From SCHEDULED, can only go to ON_SALE or CANCELLED
+                if (newStatus != SessionStatus.ON_SALE && newStatus != SessionStatus.CANCELLED) {
+                    throw new BadRequestException("From SCHEDULED, you can only change to ON_SALE or CANCELLED.");
                 }
                 break;
             case ON_SALE:
-                if (newStatus != SessionStatus.CLOSED) {
-                    throw new BadRequestException("Cannot transition from ON_SALE to " + newStatus + ". Can only transition to CLOSED.");
+                // From ON_SALE, can only go to CLOSED or SCHEDULED
+                if (newStatus != SessionStatus.CLOSED && newStatus != SessionStatus.SCHEDULED) {
+                    throw new BadRequestException("From ON_SALE, you can only change to CLOSED or back to SCHEDULED.");
                 }
                 break;
+            case SOLD_OUT:
+                // SOLD_OUT is determined by the system, no manual transitions allowed
+                throw new BadRequestException("Cannot manually change status of a SOLD_OUT session.");
             case CLOSED:
-                throw new BadRequestException("Cannot change status of a CLOSED session");
+                // CLOSED is a final state
+                throw new BadRequestException("Cannot change status of a CLOSED session; it is a final state.");
+            case CANCELLED:
+                // CANCELLED is a final state
+                throw new BadRequestException("Cannot change status of a CANCELLED session; it is a final state.");
             default:
                 throw new BadRequestException("Unknown session status: " + currentStatus);
         }
@@ -530,7 +564,7 @@ public class SessionManagementService {
      */
     private void validateSessionForVenueUpdate(EventSession session) {
         if (session.getStatus() != SessionStatus.SCHEDULED) {
-            throw new BadRequestException("Can only update venue details for sessions in SCHEDULED state");
+            throw new BadRequestException("Can only update venue details for sessions in SCHEDULED state. Current state: " + session.getStatus());
         }
     }
 
