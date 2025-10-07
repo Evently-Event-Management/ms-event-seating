@@ -1,7 +1,6 @@
 package com.ticketly.mseventseating.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import model.SessionStatus;
@@ -10,7 +9,6 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -40,7 +38,7 @@ public class EventSession {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private SessionStatus status = SessionStatus.PENDING;
+    private SessionStatus status = SessionStatus.SCHEDULED;
 
     // --- Session-Specific Location & Sales Information ---
 

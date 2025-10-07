@@ -27,7 +27,7 @@ public class ValidationService {
     private final SessionSeatingMapRepository seatingMapRepository;
 
     @Transactional(readOnly = true)
-    public void validatePreOrder(CreateOrderRequest request) {
+    public void     validatePreOrder(CreateOrderRequest request) {
         // 1. Fetch Session and Event in one go
         EventSession session = eventSessionRepository
                 .findByIdAndEventIdWithEvent(request.getSession_id(), request.getEvent_id())

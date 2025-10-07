@@ -42,11 +42,11 @@ public class EventFactory {
         event.setCoverPhotos(coverPhotos);
 
         // This map will translate the client's temporary tier IDs to the newly created Tier objects.
-        Map<String, Tier> tierIdMap = new HashMap<>();
+        Map<UUID, Tier> tierIdMap = new HashMap<>();
         List<Tier> tiers = buildTiers(request.getTiers(), event, tierIdMap);
         event.setTiers(tiers);
 
-        Map<String, EventSession> sessionIdMap = new HashMap<>();
+        Map<UUID, EventSession> sessionIdMap = new HashMap<>();
 
         List<EventSession> sessions = buildSessions(request.getSessions(), event, tierIdMap, sessionIdMap);
         event.setSessions(sessions);
@@ -73,7 +73,7 @@ public class EventFactory {
                 .collect(Collectors.toList());
     }
 
-    private List<Tier> buildTiers(List<TierRequest> tierRequests, Event event, Map<String, Tier> tierIdMap) {
+    private List<Tier> buildTiers(List<TierRequest> tierRequests, Event event, Map<UUID, Tier> tierIdMap) {
         return tierRequests.stream()
                 .map(req -> {
                     Tier tier = Tier.builder()
@@ -89,7 +89,7 @@ public class EventFactory {
                 .collect(Collectors.toList());
     }
 
-    private List<EventSession> buildSessions(List<SessionRequest> sessionRequests, Event event, Map<String, Tier> tierIdMap, Map<String, EventSession> sessionIdMap) {
+    private List<EventSession> buildSessions(List<SessionRequest> sessionRequests, Event event, Map<UUID, Tier> tierIdMap, Map<UUID, EventSession> sessionIdMap) {
         List<EventSession> sessions = new ArrayList<>();
         for (SessionRequest req : sessionRequests) {
             // This object now contains either the online link or physical address.
@@ -128,19 +128,19 @@ public class EventFactory {
         return sessions;
     }
 
-    private String prepareSessionLayout(SessionSeatingMapDTO layoutData, Map<String, Tier> tierIdMap) {
+    private String prepareSessionLayout(SessionSeatingMapDTO layoutData, Map<UUID, Tier> tierIdMap) {
         try {
             if (layoutData == null || layoutData.getLayout() == null || layoutData.getLayout().getBlocks() == null) {
                 throw new BadRequestException("Layout data or blocks cannot be null.");
             }
 
             for (SessionSeatingMapDTO.Block block : layoutData.getLayout().getBlocks()) {
-                block.setId(UUID.randomUUID().toString());
+                block.setId(UUID.randomUUID());
 
                 if ("seated_grid".equals(block.getType())) {
                     if (block.getRows() == null) continue;
                     for (SessionSeatingMapDTO.Row row : block.getRows()) {
-                        row.setId(UUID.randomUUID().toString());
+                        row.setId(UUID.randomUUID());
                         if (row.getSeats() != null) {
                             prepareSeats(row.getSeats(), tierIdMap);
                         }
@@ -158,9 +158,9 @@ public class EventFactory {
         }
     }
 
-    private void prepareSeats(List<SessionSeatingMapDTO.Seat> seats, Map<String, Tier> tierIdMap) {
+    private void prepareSeats(List<SessionSeatingMapDTO.Seat> seats, Map<UUID, Tier> tierIdMap) {
         for (SessionSeatingMapDTO.Seat seat : seats) {
-            seat.setId(UUID.randomUUID().toString());
+            seat.setId(UUID.randomUUID());
             if (seat.getStatus() == SeatStatus.RESERVED) {
                 continue;
             }
@@ -174,14 +174,14 @@ public class EventFactory {
                     throw new BadRequestException("Seat/slot is assigned to an invalid Tier ID: " + seat.getTierId());
                 }
                 // Now we can use the permanent ID from the Tier object
-                seat.setTierId(realTier.getId().toString());
+                seat.setTierId(realTier.getId());
             } else {
                 throw new BadRequestException("Seat must be assigned to a valid Tier ID.");
             }
         }
     }
 
-    private List<Discount> buildDiscounts(List<DiscountRequestDTO> discountRequests, Event event, Map<String, Tier> tierMap, Map<String, EventSession> sessionMap) {
+    private List<Discount> buildDiscounts(List<DiscountRequestDTO> discountRequests, Event event, Map<UUID, Tier> tierMap, Map<UUID, EventSession> sessionMap) {
         return discountRequests.stream().map(req -> {
             if (req.getParameters() == null) {
                 throw new BadRequestException("Discount parameters are required.");

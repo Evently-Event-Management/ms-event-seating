@@ -120,7 +120,7 @@ class EventQueryServiceTest {
         session.setStartTime(OffsetDateTime.now().plusDays(1));
         session.setEndTime(OffsetDateTime.now().plusDays(1).plusHours(2));
         session.setEvent(event);
-        session.setStatus(SessionStatus.PENDING);
+        session.setStatus(SessionStatus.SCHEDULED);
 
         event.setTiers(Collections.singletonList(tier));
         event.setSessions(Collections.singletonList(session));

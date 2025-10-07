@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -15,7 +16,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class TierRequest {
     @NotBlank
-    private String id;
+    private UUID id;
 
     @NotBlank
     private String name;

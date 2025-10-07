@@ -85,18 +85,23 @@ public class SessionOwnershipService {
      * @param sessionId the session ID
      */
     public void evictSessionCacheById(UUID sessionId) {
-        log.info("Evicting cache for session ID: {}", sessionId);
-        Set<String> ownershipKeys = redisTemplate.keys("event-seating-ms::sessionOwnership::" + sessionId + "-*");
-        Set<String> roleKeys = redisTemplate.keys("event-seating-ms::sessionRoleAccess::" + sessionId + "-*");
-
-        if (!ownershipKeys.isEmpty()) {
-            redisTemplate.delete(ownershipKeys);
-            log.debug("Evicted ownership cache keys: {}", ownershipKeys);
-        }
-
-        if (!roleKeys.isEmpty()) {
-            redisTemplate.delete(roleKeys);
-            log.debug("Evicted role access cache keys: {}", roleKeys);
+        try {
+            log.info("Evicting cache for session ID: {}", sessionId);
+            Set<String> ownershipKeys = redisTemplate.keys("event-seating-ms::sessionOwnership::" + sessionId + "-*");
+            Set<String> roleKeys = redisTemplate.keys("event-seating-ms::sessionRoleAccess::" + sessionId + "-*");
+            
+            if (ownershipKeys != null && !ownershipKeys.isEmpty()) {
+                redisTemplate.delete(ownershipKeys);
+                log.debug("Evicted ownership cache keys: {}", ownershipKeys);
+            }
+            
+            if (roleKeys != null && !roleKeys.isEmpty()) {
+                redisTemplate.delete(roleKeys);
+                log.debug("Evicted role access cache keys: {}", roleKeys);
+            }
+        } catch (Exception e) {
+            // We don't want cache eviction failures to disrupt normal application flow
+            log.error("Failed to evict session cache for session ID: {}. Error: {}", sessionId, e.getMessage());
         }
     }
 
@@ -106,18 +111,23 @@ public class SessionOwnershipService {
      * @param userId the user ID
      */
     public void evictSessionCacheByUser(String userId) {
-        log.info("Evicting all session caches for user ID: {}", userId);
-        Set<String> ownershipKeys = redisTemplate.keys("event-seating-ms::sessionOwnership::*-" + userId);
-        Set<String> roleKeys = redisTemplate.keys("event-seating-ms::sessionRoleAccess::*-" + userId + "-*");
-
-        if (!ownershipKeys.isEmpty()) {
-            redisTemplate.delete(ownershipKeys);
-            log.debug("Evicted ownership cache keys: {}", ownershipKeys);
-        }
-
-        if (!roleKeys.isEmpty()) {
-            redisTemplate.delete(roleKeys);
-            log.debug("Evicted role access cache keys: {}", roleKeys);
+        try {
+            log.info("Evicting all session caches for user ID: {}", userId);
+            Set<String> ownershipKeys = redisTemplate.keys("event-seating-ms::sessionOwnership::*-" + userId);
+            Set<String> roleKeys = redisTemplate.keys("event-seating-ms::sessionRoleAccess::*-" + userId + "-*");
+            
+            if (ownershipKeys != null && !ownershipKeys.isEmpty()) {
+                redisTemplate.delete(ownershipKeys);
+                log.debug("Evicted ownership cache keys: {}", ownershipKeys);
+            }
+            
+            if (roleKeys != null && !roleKeys.isEmpty()) {
+                redisTemplate.delete(roleKeys);
+                log.debug("Evicted role access cache keys: {}", roleKeys);
+            }
+        } catch (Exception e) {
+            // We don't want cache eviction failures to disrupt normal application flow
+            log.error("Failed to evict session cache for user ID: {}. Error: {}", userId, e.getMessage());
         }
     }
 }

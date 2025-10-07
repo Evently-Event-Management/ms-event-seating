@@ -2,6 +2,7 @@ package com.ticketly.mseventseating.service.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketly.mseventseating.dto.event.*;
+import com.ticketly.mseventseating.dto.session.SessionResponse;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
@@ -230,8 +231,8 @@ public class EventQueryService {
                 .map(this::mapToTierDTO)
                 .collect(Collectors.toList());
 
-        List<SessionDetailDTO> sessionDTOs = event.getSessions().stream()
-                .map(this::mapToSessionDetailDTO)
+        List<SessionResponse> sessionDTOs = event.getSessions().stream()
+                .map(this::mapToSessionResponse)
                 .collect(Collectors.toList());
 
         // Map cover photo entities to URLs
@@ -276,7 +277,7 @@ public class EventQueryService {
                 .build();
     }
 
-    private SessionDetailDTO mapToSessionDetailDTO(EventSession session) {
+    private SessionResponse mapToSessionResponse(EventSession session) {
         SessionSeatingMapDTO layoutData = null;
         VenueDetailsDTO venueDetails = null;
 
@@ -294,8 +295,9 @@ public class EventQueryService {
             log.error("Error parsing JSON data for session {}", session.getId(), e);
         }
 
-        return SessionDetailDTO.builder()
+        return SessionResponse.builder()
                 .id(session.getId())
+                .eventId(session.getEvent().getId())
                 .sessionType(session.getSessionType())
                 .startTime(session.getStartTime())
                 .endTime(session.getEndTime())

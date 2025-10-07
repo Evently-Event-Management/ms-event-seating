@@ -38,4 +38,7 @@ public interface EventSessionRepository extends JpaRepository<EventSession, UUID
     Optional<EventSession> findByIdAndEventIdWithEvent(UUID sessionId, UUID eventId);
 
     List<EventSession> findAllByIdIn(List<UUID> ids);
+
+
+    List<EventSession> findAllByEventId(UUID eventId);
 }
