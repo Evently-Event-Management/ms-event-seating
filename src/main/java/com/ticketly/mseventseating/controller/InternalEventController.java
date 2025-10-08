@@ -5,6 +5,7 @@ import com.ticketly.mseventseating.dto.event.SeatDetailsRequest;
 import com.ticketly.mseventseating.dto.event.SeatDetailsResponse;
 import com.ticketly.mseventseating.service.category.CategoryProjectionDataService;
 import com.ticketly.mseventseating.service.event.EventLifecycleService;
+import com.ticketly.mseventseating.service.event.EventOwnershipService;
 import com.ticketly.mseventseating.service.projection.DiscountProjectionService;
 import com.ticketly.mseventseating.service.projection.EventProjectionService;
 import com.ticketly.mseventseating.service.projection.SeatingMapProjectionService;
@@ -40,6 +41,7 @@ public class InternalEventController {
     private final SeatValidationService seatValidationService;
     private final DiscountProjectionService discountProjectionService;
     private final ValidationService validationService;
+    private final EventOwnershipService eventOwnershipService;
 
     /**
      * Secure M2M endpoint for the Scheduler Service to put a session on sale.
@@ -129,4 +131,19 @@ public class InternalEventController {
         return ResponseEntity.ok().build();
     }
 
+
+    /**
+     * Verify if a user is the owner of an event
+     *
+     * @param eventId the event ID to check
+     * @param userId  the user ID to verify as owner
+     * @return true if the user is the owner, false otherwise
+     */
+    @GetMapping("/events/verify-ownership")
+    public ResponseEntity<Boolean> verifyEventOwnership(
+            @RequestParam UUID eventId,
+            @RequestParam String userId) {
+        boolean isOwner = eventOwnershipService.isOwner(eventId, userId);
+        return ResponseEntity.ok(isOwner);
+    }
 }
