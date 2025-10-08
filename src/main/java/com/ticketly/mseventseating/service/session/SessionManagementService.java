@@ -55,31 +55,29 @@ public class SessionManagementService {
     public SessionBatchResponse createSessions(CreateSessionsRequest request, String userId, Jwt jwt) {
         log.info("Creating {} sessions for event: {}", request.getSessions().size(), request.getEventId());
 
-        // 1. Find the event
         Event event = eventRepository.findById(request.getEventId())
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found with ID: " + request.getEventId()));
+                .orElseThrow(() -> {
+                    log.error("Event not found with ID: {}", request.getEventId());
+                    return new ResourceNotFoundException("Event not found with ID: " + request.getEventId());
+                });
 
-        // 2. Validate ownership - only event owners can create sessions
         if (!eventOwnershipService.isOwner(event.getId(), userId)) {
+            log.warn("User {} is not authorized to create sessions for event {}", userId, event.getId());
             throw new UnauthorizedException("User is not authorized to create sessions for this event");
         }
 
-        // 3. Validate session limit
         validateSessionLimit(event, request.getSessions().size(), jwt);
 
-        // 4. Create and save sessions
         List<EventSession> createdSessions = new ArrayList<>();
 
         for (SessionRequest sessionDTO : request.getSessions()) {
+            log.debug("Building session for startTime: {}, endTime: {}", sessionDTO.getStartTime(), sessionDTO.getEndTime());
             EventSession session = buildEventSession(sessionDTO, event);
 
-            // Get tiers from the event
             List<Tier> tiers = event.getTiers();
 
-            // Validate and prepare layout data
             String validatedLayoutData = prepareSessionLayout(sessionDTO.getLayoutData(), tiers);
 
-            // Create the seating map
             SessionSeatingMap map = SessionSeatingMap.builder()
                     .layoutData(validatedLayoutData)
                     .eventSession(session)
@@ -92,7 +90,6 @@ public class SessionManagementService {
         List<EventSession> savedSessions = sessionRepository.saveAll(createdSessions);
         log.info("Successfully created {} sessions for event: {}", savedSessions.size(), event.getId());
 
-        // 5. Map to response
         List<SessionResponse> sessionResponses = savedSessions.stream()
                 .map(this::mapToSessionResponse)
                 .toList();
@@ -111,14 +108,18 @@ public class SessionManagementService {
         log.info("Fetching session with ID: {}", sessionId);
 
         EventSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Session not found with ID: " + sessionId));
+                .orElseThrow(() -> {
+                    log.error("Session not found with ID: {}", sessionId);
+                    return new ResourceNotFoundException("Session not found with ID: " + sessionId);
+                });
 
-        // Use ownership service to check if user has access
         if (!ownershipService.isOwner(sessionId, userId) &&
                 !ownershipService.hasRole(sessionId, userId, OrganizationRole.SCANNER)) {
+            log.warn("User {} is not authorized to access session {}", userId, sessionId);
             throw new UnauthorizedException("User is not authorized to access this session");
         }
 
+        log.debug("User {} fetched session {}", userId, sessionId);
         return mapToSessionResponse(session);
     }
 
@@ -129,19 +130,21 @@ public class SessionManagementService {
     public List<SessionResponse> getSessionsByEvent(UUID eventId, String userId) {
         log.info("Fetching sessions for event ID: {}", eventId);
 
-        // 1. Find the event
         eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found with ID: " + eventId));
+                .orElseThrow(() -> {
+                    log.error("Event not found with ID: {}", eventId);
+                    return new ResourceNotFoundException("Event not found with ID: " + eventId);
+                });
 
-        // 2. Validate ownership - only event owners can view sessions
         if (!eventOwnershipService.isOwner(eventId, userId)) {
+            log.warn("User {} is not authorized to view sessions for event {}", userId, eventId);
             throw new UnauthorizedException("User is not authorized to view sessions for this event");
         }
 
-        // 3. Fetch sessions
         List<EventSession> sessions = sessionRepository.findAllByEventId(eventId);
 
-        // 4. Map to response
+        log.debug("Found {} sessions for event {}", sessions.size(), eventId);
+
         return sessions.stream()
                 .map(this::mapToSessionResponse)
                 .toList();
@@ -154,33 +157,36 @@ public class SessionManagementService {
     public SessionResponse updateSessionTime(UUID sessionId, SessionTimeUpdateDTO updateDTO, String userId) {
         log.info("Updating session time details for ID: {}", sessionId);
 
-        // 1. Find the session
         EventSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Session not found with ID: " + sessionId));
+                .orElseThrow(() -> {
+                    log.error("Session not found with ID: {}", sessionId);
+                    return new ResourceNotFoundException("Session not found with ID: " + sessionId);
+                });
 
-        // 2. Validate ownership - Only owners can update sessions, not scanners
         if (!ownershipService.isOwner(sessionId, userId)) {
+            log.warn("User {} is not authorized to update session {}", userId, sessionId);
             throw new UnauthorizedException("User is not authorized to update this session");
         }
 
-        // 3. Check if session status allows time update
-        validateSessionForTimeUpdate(session);
+        try {
+            validateSessionForTimeUpdate(session);
+        } catch (BadRequestException e) {
+            log.warn("Session time update validation failed for session {}: {}", sessionId, e.getMessage());
+            throw e;
+        }
 
-        // 4. Additional validation for salesStartTime changes in ON_SALE status
         if (session.getStatus() == SessionStatus.ON_SALE &&
                 !session.getSalesStartTime().isEqual(updateDTO.getSalesStartTime())) {
+            log.warn("Attempt to change sales start time for ON_SALE session {}", sessionId);
             throw new BadRequestException("Cannot change sales start time once a session is ON_SALE.");
         }
 
-        // 5. Update time fields
         session.setStartTime(updateDTO.getStartTime());
         session.setEndTime(updateDTO.getEndTime());
         session.setSalesStartTime(updateDTO.getSalesStartTime());
 
-        // 5. Save changes
         EventSession updatedSession = sessionRepository.save(session);
 
-        // 6. Invalidate cache for this session
         ownershipService.evictSessionCacheById(sessionId);
 
         log.info("Successfully updated session time details: {}", updatedSession.getId());
@@ -190,7 +196,6 @@ public class SessionManagementService {
 
     /**
      * Update a session's status
-     * 
      * Business Logic:
      * - SCHEDULED -> ON_SALE or CANCELLED
      * - ON_SALE -> CLOSED only (one-way transition)
@@ -202,33 +207,33 @@ public class SessionManagementService {
     public SessionResponse updateSessionStatus(UUID sessionId, SessionStatusUpdateDTO updateDTO, String userId) {
         log.info("Updating session status for ID: {} to {}", sessionId, updateDTO.getStatus());
 
-        // 1. Find the session
         EventSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Session not found with ID: " + sessionId));
+                .orElseThrow(() -> {
+                    log.error("Session not found with ID: {}", sessionId);
+                    return new ResourceNotFoundException("Session not found with ID: " + sessionId);
+                });
 
-        // 2. Validate ownership - Only owners can update status, not scanners
         if (!ownershipService.isOwner(sessionId, userId)) {
+            log.warn("User {} is not authorized to update status for session {}", userId, sessionId);
             throw new UnauthorizedException("User is not authorized to update this session's status");
         }
 
-        // 3. Validate status transition
-        validateStatusTransition(session, updateDTO.getStatus());
+        try {
+            validateStatusTransition(session, updateDTO.getStatus());
+        } catch (BadRequestException e) {
+            log.warn("Status transition validation failed for session {}: {}", sessionId, e.getMessage());
+            throw e;
+        }
 
-        // 4. Update status with any additional business logic
         SessionStatus newStatus = updateDTO.getStatus();
         session.setStatus(newStatus);
-        
-        // 5. Additional actions based on transition
+
         if (newStatus == SessionStatus.CANCELLED) {
-            // For cancelled sessions, we might want to perform additional actions
-            // like releasing held seats, notifying users, etc.
             log.info("Session cancelled: {}. Additional cancellation logic would be applied here.", sessionId);
         }
 
-        // 6. Save changes
         EventSession updatedSession = sessionRepository.save(session);
 
-        // 7. Invalidate cache for this session
         ownershipService.evictSessionCacheById(sessionId);
 
         log.info("Successfully updated session status to {}: {}", updateDTO.getStatus(), updatedSession.getId());
@@ -243,42 +248,42 @@ public class SessionManagementService {
     public SessionResponse updateSessionVenue(UUID sessionId, SessionVenueUpdateDTO updateDTO, String userId) {
         log.info("Updating venue and seating map for session ID: {}", sessionId);
 
-        // 1. Find the session
         EventSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Session not found with ID: " + sessionId));
+                .orElseThrow(() -> {
+                    log.error("Session not found with ID: {}", sessionId);
+                    return new ResourceNotFoundException("Session not found with ID: " + sessionId);
+                });
 
-        // 2. Validate ownership - Only owners can update venue, not scanners
         if (!ownershipService.isOwner(sessionId, userId)) {
+            log.warn("User {} is not authorized to update venue for session {}", userId, sessionId);
             throw new UnauthorizedException("User is not authorized to update this session's venue");
         }
 
-        // 3. Validate session is in SCHEDULED state for venue update
-        validateSessionForVenueUpdate(session);
+        try {
+            validateSessionForVenueUpdate(session);
+        } catch (BadRequestException e) {
+            log.warn("Venue update validation failed for session {}: {}", sessionId, e.getMessage());
+            throw e;
+        }
 
-        // 4. Update session fields
         session.setSessionType(updateDTO.getSessionType());
 
         try {
             session.setVenueDetails(objectMapper.writeValueAsString(updateDTO.getVenueDetails()));
         } catch (JsonProcessingException e) {
-            log.error("Failed to serialize venue details for session", e);
+            log.error("Failed to serialize venue details for session {}", sessionId, e);
             throw new BadRequestException("Invalid venue details format.");
         }
 
-        // 5. Get tiers from the event
         List<Tier> tiers = session.getEvent().getTiers();
 
-        // 6. Validate and prepare layout data
         String validatedLayoutData = prepareSessionLayout(updateDTO.getLayoutData(), tiers);
 
-        // 7. Update seating map
         SessionSeatingMap seatingMap = session.getSessionSeatingMap();
         seatingMap.setLayoutData(validatedLayoutData);
 
-        // 8. Save changes
         EventSession updatedSession = sessionRepository.save(session);
 
-        // 9. Invalidate cache for this session
         ownershipService.evictSessionCacheById(sessionId);
 
         log.info("Successfully updated session venue and seating map: {}", updatedSession.getId());
@@ -293,30 +298,33 @@ public class SessionManagementService {
     public SessionResponse updateSessionVenueDetails(UUID sessionId, SessionVenueDetailsUpdateDTO updateDTO, String userId) {
         log.info("Updating venue details for session ID: {}", sessionId);
 
-        // 1. Find the session
         EventSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Session not found with ID: " + sessionId));
+                .orElseThrow(() -> {
+                    log.error("Session not found with ID: {}", sessionId);
+                    return new ResourceNotFoundException("Session not found with ID: " + sessionId);
+                });
 
-        // 2. Validate ownership - Only owners can update venue, not scanners
         if (!ownershipService.isOwner(sessionId, userId)) {
+            log.warn("User {} is not authorized to update venue details for session {}", userId, sessionId);
             throw new UnauthorizedException("User is not authorized to update this session's venue details");
         }
 
-        // 3. Validate session is in SCHEDULED state for venue update
-        validateSessionForVenueUpdate(session);
+        try {
+            validateSessionForVenueUpdate(session);
+        } catch (BadRequestException e) {
+            log.warn("Venue details update validation failed for session {}: {}", sessionId, e.getMessage());
+            throw e;
+        }
 
-        // 4. Update venue details only
         try {
             session.setVenueDetails(objectMapper.writeValueAsString(updateDTO.getVenueDetails()));
         } catch (JsonProcessingException e) {
-            log.error("Failed to serialize venue details for session", e);
+            log.error("Failed to serialize venue details for session {}", sessionId, e);
             throw new BadRequestException("Invalid venue details format.");
         }
 
-        // 5. Save changes
         EventSession updatedSession = sessionRepository.save(session);
 
-        // 6. Invalidate cache for this session
         ownershipService.evictSessionCacheById(sessionId);
 
         log.info("Successfully updated session venue details: {}", updatedSession.getId());
@@ -331,32 +339,33 @@ public class SessionManagementService {
     public SessionResponse updateSessionLayout(UUID sessionId, SessionLayoutUpdateDTO updateDTO, String userId) {
         log.info("Updating seating layout for session ID: {}", sessionId);
 
-        // 1. Find the session
         EventSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Session not found with ID: " + sessionId));
+                .orElseThrow(() -> {
+                    log.error("Session not found with ID: {}", sessionId);
+                    return new ResourceNotFoundException("Session not found with ID: " + sessionId);
+                });
 
-        // 2. Validate ownership - Only owners can update layout, not scanners
         if (!ownershipService.isOwner(sessionId, userId)) {
+            log.warn("User {} is not authorized to update layout for session {}", userId, sessionId);
             throw new UnauthorizedException("User is not authorized to update this session's layout");
         }
 
-        // 3. Validate session is in SCHEDULED state for layout update
-        validateSessionForVenueUpdate(session);
+        try {
+            validateSessionForVenueUpdate(session);
+        } catch (BadRequestException e) {
+            log.warn("Seating layout update validation failed for session {}: {}", sessionId, e.getMessage());
+            throw e;
+        }
 
-        // 4. Get tiers from the event
         List<Tier> tiers = session.getEvent().getTiers();
 
-        // 5. Validate and prepare layout data
         String validatedLayoutData = prepareSessionLayout(updateDTO.getLayoutData(), tiers);
 
-        // 6. Update seating map
         SessionSeatingMap seatingMap = session.getSessionSeatingMap();
         seatingMap.setLayoutData(validatedLayoutData);
 
-        // 7. Save changes
         EventSession updatedSession = sessionRepository.save(session);
 
-        // 8. Invalidate cache for this session
         ownershipService.evictSessionCacheById(sessionId);
 
         log.info("Successfully updated session seating layout: {}", updatedSession.getId());
@@ -371,24 +380,24 @@ public class SessionManagementService {
     public void deleteSession(UUID sessionId, String userId) {
         log.info("Deleting session with ID: {}", sessionId);
 
-        // 1. Find the session
         EventSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Session not found with ID: " + sessionId));
+                .orElseThrow(() -> {
+                    log.error("Session not found with ID: {}", sessionId);
+                    return new ResourceNotFoundException("Session not found with ID: " + sessionId);
+                });
 
-        // 2. Validate ownership - Only owners can delete sessions
         if (!ownershipService.isOwner(sessionId, userId)) {
+            log.warn("User {} is not authorized to delete session {}", userId, sessionId);
             throw new UnauthorizedException("User is not authorized to delete this session");
         }
 
-        //Can delete only SCHEDULED sessions before sales start
         if (session.getStatus() != SessionStatus.SCHEDULED) {
+            log.warn("Attempt to delete session {} with status {}", sessionId, session.getStatus());
             throw new BadRequestException("Only SCHEDULED sessions can be deleted. Current status: " + session.getStatus());
         }
 
-        // 4. Delete the session
         sessionRepository.delete(session);
 
-        // 5. Invalidate cache for this session
         ownershipService.evictSessionCacheById(sessionId);
 
         log.info("Successfully deleted session: {}", sessionId);
@@ -432,7 +441,10 @@ public class SessionManagementService {
         int maxSessions = limitService.getTierLimit(SubscriptionLimitType.MAX_SESSIONS_PER_EVENT, jwt);
         int currentSessionCount = event.getSessions().size();
 
+        log.debug("Validating session limit: current={}, additional={}, max={}", currentSessionCount, additionalSessions, maxSessions);
+
         if (currentSessionCount + additionalSessions > maxSessions) {
+            log.warn("Session limit exceeded for event {}: attempted={}, max={}", event.getId(), currentSessionCount + additionalSessions, maxSessions);
             throw new BadRequestException("Cannot add " + additionalSessions +
                     " sessions. You can only have a maximum of " + maxSessions +
                     " sessions per event for your subscription tier.");
@@ -499,12 +511,13 @@ public class SessionManagementService {
     private void validateSessionForTimeUpdate(EventSession session) {
         SessionStatus status = session.getStatus();
         if (status == SessionStatus.CLOSED || status == SessionStatus.CANCELLED || status == SessionStatus.SOLD_OUT) {
+            log.warn("Cannot update times for session {} with status {}", session.getId(), status);
             throw new BadRequestException("Cannot update times for a session with status: " + status);
         }
 
-        // Additional validation logic for time updates
         OffsetDateTime now = OffsetDateTime.now();
         if (session.getStartTime().isBefore(now)) {
+            log.warn("Cannot update session {} that has already started", session.getId());
             throw new BadRequestException("Cannot update a session that has already started");
         }
     }
@@ -521,39 +534,42 @@ public class SessionManagementService {
     private void validateStatusTransition(EventSession session, SessionStatus newStatus) {
         SessionStatus currentStatus = session.getStatus();
 
-        // No change in status is always allowed
+        log.debug("Validating status transition for session {}: {} -> {}", session.getId(), currentStatus, newStatus);
+
         if (currentStatus == newStatus) {
+            log.debug("No status change for session {}", session.getId());
             return;
         }
         
-        // SOLD_OUT is a system-determined state and cannot be manually set
         if (newStatus == SessionStatus.SOLD_OUT) {
+            log.warn("Attempt to manually set SOLD_OUT status for session {}", session.getId());
             throw new BadRequestException("Status SOLD_OUT is determined by the system and cannot be manually set.");
         }
 
         switch (currentStatus) {
             case SCHEDULED:
-                // From SCHEDULED, can only go to ON_SALE or CANCELLED
                 if (newStatus != SessionStatus.ON_SALE && newStatus != SessionStatus.CANCELLED) {
+                    log.warn("Invalid status transition from SCHEDULED to {} for session {}", newStatus, session.getId());
                     throw new BadRequestException("From SCHEDULED, you can only change to ON_SALE or CANCELLED.");
                 }
                 break;
             case ON_SALE:
-                // From ON_SALE, can only go to CLOSED (one-way transition)
                 if (newStatus != SessionStatus.CLOSED) {
+                    log.warn("Invalid status transition from ON_SALE to {} for session {}", newStatus, session.getId());
                     throw new BadRequestException("From ON_SALE, you can only change to CLOSED. Cannot revert back to SCHEDULED once sales have started.");
                 }
                 break;
             case SOLD_OUT:
-                // SOLD_OUT is determined by the system, no manual transitions allowed
+                log.warn("Attempt to change status of SOLD_OUT session {}", session.getId());
                 throw new BadRequestException("Cannot manually change status of a SOLD_OUT session.");
             case CLOSED:
-                // CLOSED is a final state
+                log.warn("Attempt to change status of CLOSED session {}", session.getId());
                 throw new BadRequestException("Cannot change status of a CLOSED session; it is a final state.");
             case CANCELLED:
-                // CANCELLED is a final state
+                log.warn("Attempt to change status of CANCELLED session {}", session.getId());
                 throw new BadRequestException("Cannot change status of a CANCELLED session; it is a final state.");
             default:
+                log.error("Unknown session status {} for session {}", currentStatus, session.getId());
                 throw new BadRequestException("Unknown session status: " + currentStatus);
         }
     }
@@ -564,10 +580,10 @@ public class SessionManagementService {
      */
     private void validateSessionForVenueUpdate(EventSession session) {
         if (session.getStatus() != SessionStatus.SCHEDULED) {
+            log.warn("Cannot update venue details for session {} in state {}", session.getId(), session.getStatus());
             throw new BadRequestException("Can only update venue details for sessions in SCHEDULED state. Current state: " + session.getStatus());
         }
     }
-
 
     /**
      * Prepares and validates session layout data.
@@ -583,6 +599,7 @@ public class SessionManagementService {
     private String prepareSessionLayout(SessionSeatingMapDTO layoutData, List<Tier> tiers) {
         try {
             if (layoutData == null || layoutData.getLayout() == null || layoutData.getLayout().getBlocks() == null) {
+                log.warn("Layout data or blocks cannot be null.");
                 throw new BadRequestException("Layout data or blocks cannot be null.");
             }
 
@@ -621,13 +638,14 @@ public class SessionManagementService {
             seat.setStatus(SeatStatus.AVAILABLE);
 
             if (seat.getTierId() != null) {
-                // Check if the tierId exists in the provided tiers list
                 boolean tierExists = tiers.stream()
                         .anyMatch(tier -> tier.getId().equals(seat.getTierId()));
                 if (!tierExists) {
+                    log.warn("Seat/slot assigned to invalid Tier ID: {}", seat.getTierId());
                     throw new BadRequestException("Seat/slot is assigned to an invalid Tier ID: " + seat.getTierId());
                 }
             } else {
+                log.warn("Seat missing Tier ID");
                 throw new BadRequestException("Seat must be assigned to a valid Tier ID.");
             }
         }
@@ -635,3 +653,4 @@ public class SessionManagementService {
 
 
 }
+
