@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.SeatStatus;
 import model.SessionStatus;
+import model.SessionType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -311,6 +312,7 @@ public class SessionManagementService {
 
         try {
             validateSessionForVenueUpdate(session);
+            validateVenueDetailsForSessionType(session.getSessionType(), updateDTO.getVenueDetails());
         } catch (BadRequestException e) {
             log.warn("Venue details update validation failed for session {}: {}", sessionId, e.getMessage());
             throw e;
@@ -582,6 +584,27 @@ public class SessionManagementService {
         if (session.getStatus() != SessionStatus.SCHEDULED) {
             log.warn("Cannot update venue details for session {} in state {}", session.getId(), session.getStatus());
             throw new BadRequestException("Can only update venue details for sessions in SCHEDULED state. Current state: " + session.getStatus());
+        }
+    }
+    
+    /**
+     * Validates that the venue details are appropriate for the session type
+     * For online sessions, online link must be provided
+     * For physical sessions, venue name must be provided
+     */
+    private void validateVenueDetailsForSessionType(SessionType sessionType, VenueDetailsDTO venueDetails) {
+        if (sessionType == SessionType.ONLINE) {
+            // For ONLINE sessions, the onlineLink must be present and not blank
+            if (venueDetails == null || venueDetails.getOnlineLink() == null || venueDetails.getOnlineLink().isBlank()) {
+                log.warn("Online link is required for online sessions");
+                throw new BadRequestException("An online link is required for online sessions.");
+            }
+        } else if (sessionType == SessionType.PHYSICAL) {
+            // For PHYSICAL sessions, the venue name must be present and not blank
+            if (venueDetails == null || venueDetails.getName() == null || venueDetails.getName().isBlank()) {
+                log.warn("Venue name is required for physical sessions");
+                throw new BadRequestException("A venue name is required for physical sessions.");
+            }
         }
     }
 
