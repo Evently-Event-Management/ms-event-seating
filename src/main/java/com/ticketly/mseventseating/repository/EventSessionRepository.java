@@ -41,4 +41,6 @@ public interface EventSessionRepository extends JpaRepository<EventSession, UUID
 
 
     List<EventSession> findAllByEventId(UUID eventId);
+
+    boolean existsByEventIdAndStatus(UUID eventId, SessionStatus status);
 }

@@ -122,19 +122,22 @@ public class EventLifecycleService {
     public void deleteEvent(UUID eventId, String userId) {
         log.info("Attempting to delete event ID: {} by user: {}", eventId, userId);
 
-        // Check if user owns the event
+        // 1. Check if user owns the event
         if (!eventOwnershipService.isOwner(eventId, userId)) {
             log.warn("User {} attempted to delete event {} which they do not own", userId, eventId);
             throw new AuthorizationDeniedException("You are not authorized to delete this event");
         }
 
-        Event event = findEventById(eventId);
-
-        // Only events in PENDING status can be deleted
-        if (event.getStatus() != EventStatus.PENDING) {
-            log.warn("Cannot delete event {} with status {}", eventId, event.getStatus());
-            throw new InvalidStateException("Only events with PENDING status can be deleted");
+        // 2. ++ CHANGE: Check for ON_SALE sessions instead of PENDING status ++
+        // This calls the new, efficient repository method.
+        if (eventSessionRepository.existsByEventIdAndStatus(eventId, SessionStatus.ON_SALE)) {
+            log.warn("Cannot delete event {}: it has one or more sessions that are ON_SALE", eventId);
+            throw new InvalidStateException("Cannot delete an event that has sessions currently on sale.");
         }
+
+        // 3. If the check passes, find the event to delete.
+        // We still need to fetch the event to perform the delete operation.
+        Event event = findEventById(eventId);
 
         log.debug("Deleting event {}: {}", eventId, event.getTitle());
         eventRepository.delete(event);
