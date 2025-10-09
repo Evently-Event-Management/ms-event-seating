@@ -109,34 +109,36 @@ public class EventLifecycleService {
     }
 
     /**
-     * Deletes an event.
-     * Only events with PENDING status can be deleted, and only by the organization owner.
+     * Deletes an event if it's in PENDING status.
+     * Only the owner of the event can delete it.
      *
-     * @param eventId the event to delete
-     * @param userId  the ID of the user performing the deletion
+     * @param eventId UUID of the event to delete
+     * @param userId ID of the user requesting deletion
+     * @throws ResourceNotFoundException if the event doesn't exist
+     * @throws AuthorizationDeniedException if the user is not the event owner
+     * @throws InvalidStateException if the event is not in PENDING status
      */
+    @Transactional
     public void deleteEvent(UUID eventId, String userId) {
-        log.info("Deleting event ID: {} by user: {}", eventId, userId);
+        log.info("Attempting to delete event ID: {} by user: {}", eventId, userId);
 
-        // Only organization owners can delete events, no admin bypass
-        log.debug("Verifying ownership for event {}", eventId);
+        // Check if user owns the event
         if (!eventOwnershipService.isOwner(eventId, userId)) {
-            log.warn("User {} is not the owner of event {}", userId, eventId);
-            throw new AuthorizationDeniedException("You are not authorized to delete this event.");
+            log.warn("User {} attempted to delete event {} which they do not own", userId, eventId);
+            throw new AuthorizationDeniedException("You are not authorized to delete this event");
         }
+
         Event event = findEventById(eventId);
 
+        // Only events in PENDING status can be deleted
         if (event.getStatus() != EventStatus.PENDING) {
             log.warn("Cannot delete event {} with status {}", eventId, event.getStatus());
-            throw new InvalidStateException("Only events with PENDING status can be deleted.");
+            throw new InvalidStateException("Only events with PENDING status can be deleted");
         }
 
-        // Delete the event and all its children (cascade delete)
-        log.debug("Deleting event {} with {} sessions and {} tiers",
-                eventId, event.getSessions().size(), event.getTiers().size());
+        log.debug("Deleting event {}: {}", eventId, event.getTitle());
         eventRepository.delete(event);
-        eventOwnershipService.evictEventCacheById(eventId);
-        log.info("Event with ID {} has been successfully deleted by user {}", eventId, userId);
+        log.info("Event with ID {} has been successfully deleted", eventId);
     }
 
     private Event findEventById(UUID eventId) {

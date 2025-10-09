@@ -51,6 +51,7 @@ public class Discount {
     private Integer maxUsage;
 
     @Column(name = "current_usage", nullable = false)
+    @Builder.Default
     private int currentUsage = 0;
 
     @Column(name = "is_active", nullable = false)
