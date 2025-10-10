@@ -28,9 +28,6 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class EventMapper {
-
-
-
     /**
      * Maps a discount entity to a DiscountDetailsDTO
      *
@@ -44,6 +41,7 @@ public class EventMapper {
                 .parameters(mapDiscountParameters(discount.getParameters()))
                 .maxUsage(discount.getMaxUsage())
                 .currentUsage(discount.getCurrentUsage())
+                .discountedTotal(discount.getDiscountedTotal())
                 .isActive(discount.isActive())
                 .isPublic(discount.isPublic())
                 .activeFrom(discount.getActiveFrom())

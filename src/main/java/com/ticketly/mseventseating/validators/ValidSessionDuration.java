@@ -6,10 +6,11 @@ import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
 /**
- * Validates that a session has a reasonable duration (not too short or too long).
+ * Validates that session duration is within acceptable limits.
+ * This annotation can be applied to both SessionRequest and SessionTimeUpdateDTO classes.
  */
 @Documented
-@Constraint(validatedBy = SessionDurationValidator.class)
+@Constraint(validatedBy = {SessionDurationValidator.class, SessionTimeUpdateDurationValidator.class})
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidSessionDuration {

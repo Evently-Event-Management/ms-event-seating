@@ -5,6 +5,7 @@ import com.ticketly.mseventseating.model.discount.DiscountParameters;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -50,6 +51,7 @@ public class Discount {
     private Integer maxUsage;
 
     @Column(name = "current_usage", nullable = false)
+    @Builder.Default
     private int currentUsage = 0;
 
     @Column(name = "is_active", nullable = false)
@@ -65,6 +67,10 @@ public class Discount {
 
     @Column(name = "expires_at")
     private OffsetDateTime expiresAt;
+
+    //Discounted sum price given to all users
+    @Column(name = "discounted_total", precision = 10, scale = 2)
+    private BigDecimal discountedTotal;
 
     @ManyToMany
     @JoinTable(
