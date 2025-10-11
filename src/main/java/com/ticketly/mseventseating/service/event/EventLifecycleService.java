@@ -68,7 +68,7 @@ public class EventLifecycleService {
                 cancelledSessions++;
                 log.warn("Session {} for event {} start time is in the past and has been automatically cancelled upon approval.",
                         session.getId(), event.getId());
-            } else if (session.getSalesStartTime().isBefore(now)) {
+            } else if (session.getSalesStartTime() != null && session.getSalesStartTime().isBefore(now)) {
                 session.setStatus(SessionStatus.ON_SALE);
                 scheduledSessions++;
                 log.debug("Session {} for event {} sales start time is in the past, setting status to ON_SALE.",
@@ -77,7 +77,7 @@ public class EventLifecycleService {
                 session.setStatus(SessionStatus.SCHEDULED);
                 scheduledSessions++;
                 log.debug("Session {} for event {} is scheduled for future sale at {}, setting status to SCHEDULED.",
-                        session.getId(), event.getId(), session.getSalesStartTime());
+                        session.getId(), event.getId(), session.getSalesStartTime() != null ? session.getSalesStartTime() : "N/A");
             }
         }
 

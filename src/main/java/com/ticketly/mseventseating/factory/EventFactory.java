@@ -15,6 +15,7 @@ import dto.SessionSeatingMapDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.SeatStatus;
+import model.SessionStatus;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -110,6 +111,7 @@ public class EventFactory {
                     .sessionType(req.getSessionType()) // Use the new enum
                     .venueDetails(venueDetailsJson) // Set the JSON string
                     .salesStartTime(req.getSalesStartTime()) // Set the direct sales start time from frontend
+                    .status(SessionStatus.SCHEDULED) // Always set initial status to SCHEDULED
                     .build();
 
             // Map the client's temp session ID to the fully formed EventSession object

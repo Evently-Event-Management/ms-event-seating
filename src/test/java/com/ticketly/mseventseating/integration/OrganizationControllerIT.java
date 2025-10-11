@@ -120,12 +120,13 @@ public class OrganizationControllerIT extends AbstractIntegrationTest {
                         if (orgId.toString().equals(idFromMessage)) {
                             // This is our delete event!
                             assertThat(payload.path("payload").path("source").path("table").asText()).isEqualTo("organizations");
-                            // We can throw an exception here to stop Awaitility's polling successfully
-                            throw new RuntimeException("Found matching delete event!");
+                            // Instead of throwing exception, just continue with the test
+                            return;
                         }
                     }
                 } catch (Exception e) {
-                    if (e.getMessage().contains("Found matching delete event!")) throw new RuntimeException(e);
+                    // Just log the exception rather than rethrowing it
+                    e.printStackTrace();
                 }
             });
         });

@@ -4,6 +4,7 @@ import com.ticketly.mseventseating.exception.InvalidStateException;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
+import com.ticketly.mseventseating.repository.EventSessionRepository;
 import model.EventStatus;
 import model.SessionStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,9 @@ class EventLifecycleServiceTest {
 
     @Mock
     private EventRepository eventRepository;
+    
+    @Mock
+    private EventSessionRepository eventSessionRepository;
 
     @Mock
     private EventOwnershipService eventOwnershipService;
@@ -73,6 +77,7 @@ class EventLifecycleServiceTest {
         pastSession.setId(UUID.randomUUID());
         pastSession.setStartTime(OffsetDateTime.now().minusDays(1));
         pastSession.setEndTime(OffsetDateTime.now().minusDays(1).plusHours(2));
+        pastSession.setSalesStartTime(OffsetDateTime.now().minusDays(2));
         pastSession.setStatus(SessionStatus.SCHEDULED);
         pastSession.setEvent(event);
 
@@ -81,6 +86,7 @@ class EventLifecycleServiceTest {
         futureSession.setId(UUID.randomUUID());
         futureSession.setStartTime(OffsetDateTime.now().plusDays(1));
         futureSession.setEndTime(OffsetDateTime.now().plusDays(1).plusHours(2));
+        futureSession.setSalesStartTime(OffsetDateTime.now().plusHours(12));
         futureSession.setStatus(SessionStatus.SCHEDULED);
         futureSession.setEvent(event);
 
@@ -196,6 +202,7 @@ class EventLifecycleServiceTest {
     void deleteEvent_whenUserIsOwnerAndEventIsPending_shouldDeleteEvent() {
         // Arrange
         when(eventOwnershipService.isOwner(eventId, userId)).thenReturn(true);
+        when(eventSessionRepository.existsByEventIdAndStatus(eventId, SessionStatus.ON_SALE)).thenReturn(false);
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
 
         // Act
@@ -203,25 +210,26 @@ class EventLifecycleServiceTest {
 
         // Assert
         verify(eventOwnershipService).isOwner(eventId, userId);
+        verify(eventSessionRepository).existsByEventIdAndStatus(eventId, SessionStatus.ON_SALE);
         verify(eventRepository).findById(eventId);
         verify(eventRepository).delete(event);
     }
 
     @Test
-    @DisplayName("Should throw exception when deleting non-pending event")
+    @DisplayName("Should throw exception when event has ON_SALE sessions")
     void deleteEvent_whenEventIsNotPending_shouldThrowException() {
         // Arrange
-        event.setStatus(EventStatus.APPROVED);
         when(eventOwnershipService.isOwner(eventId, userId)).thenReturn(true);
-        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(eventSessionRepository.existsByEventIdAndStatus(eventId, SessionStatus.ON_SALE)).thenReturn(true);
 
         // Act & Assert
         InvalidStateException exception = assertThrows(InvalidStateException.class, () ->
                 eventLifecycleService.deleteEvent(eventId, jwt.getSubject()));
 
-        assertEquals("Only events with PENDING status can be deleted.", exception.getMessage());
+        assertEquals("Cannot delete an event that has sessions currently on sale.", exception.getMessage());
         verify(eventOwnershipService).isOwner(eventId, userId);
-        verify(eventRepository).findById(eventId);
+        verify(eventSessionRepository).existsByEventIdAndStatus(eventId, SessionStatus.ON_SALE);
+        verify(eventRepository, never()).findById(any());
         verify(eventRepository, never()).delete(any());
     }
 
@@ -236,7 +244,7 @@ class EventLifecycleServiceTest {
         AuthorizationDeniedException exception = assertThrows(AuthorizationDeniedException.class, () ->
                 eventLifecycleService.deleteEvent(eventId, jwt.getSubject()));
 
-        assertEquals("You are not authorized to delete this event.", exception.getMessage());
+        assertEquals("You are not authorized to delete this event", exception.getMessage());
         verify(eventOwnershipService).isOwner(eventId, userId);
         // Never call findById or delete on the repository
         verify(eventRepository, never()).findById(any());
@@ -256,5 +264,30 @@ class EventLifecycleServiceTest {
         assertEquals(EventStatus.APPROVED, event.getStatus());
         assertEquals(SessionStatus.CANCELLED, pastSession.getStatus());
         assertEquals(SessionStatus.SCHEDULED, futureSession.getStatus());
+    }
+    
+    @Test
+    @DisplayName("Should handle null sales start time during approval")
+    void approveEvent_withNullSalesStartTime_shouldNotThrowException() {
+        // Arrange
+        EventSession sessionWithNullSalesStart = new EventSession();
+        sessionWithNullSalesStart.setId(UUID.randomUUID());
+        sessionWithNullSalesStart.setStartTime(OffsetDateTime.now().plusDays(1));
+        sessionWithNullSalesStart.setEndTime(OffsetDateTime.now().plusDays(1).plusHours(2));
+        sessionWithNullSalesStart.setSalesStartTime(null); // Set null sales start time
+        sessionWithNullSalesStart.setStatus(SessionStatus.SCHEDULED);
+        sessionWithNullSalesStart.setEvent(event);
+
+        event.setSessions(Collections.singletonList(sessionWithNullSalesStart));
+        
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+        // Act
+        eventLifecycleService.approveEvent(eventId, userId);
+
+        // Assert
+        assertEquals(EventStatus.APPROVED, event.getStatus());
+        assertEquals(SessionStatus.SCHEDULED, sessionWithNullSalesStart.getStatus());
+        verify(eventRepository).save(event);
     }
 }

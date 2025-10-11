@@ -20,7 +20,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ValidSessionLocation // ✅ Apply the custom class-level validator
+@ValidSessionLocation
 @ValidSessionDuration(minMinutes = 30, maxHours = 12)
 @ValidSalesStartTime
 public class SessionRequest {
@@ -36,7 +36,6 @@ public class SessionRequest {
     private OffsetDateTime endTime;
 
     @NotNull
-    @Future
     private OffsetDateTime salesStartTime;
 
     @NotNull

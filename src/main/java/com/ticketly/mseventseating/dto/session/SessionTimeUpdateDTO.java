@@ -28,6 +28,5 @@ public class SessionTimeUpdateDTO {
     private OffsetDateTime endTime;
 
     @NotNull
-    @Future
     private OffsetDateTime salesStartTime;
 }
