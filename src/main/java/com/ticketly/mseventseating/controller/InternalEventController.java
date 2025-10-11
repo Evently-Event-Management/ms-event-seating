@@ -3,6 +3,7 @@ package com.ticketly.mseventseating.controller;
 
 import com.ticketly.mseventseating.dto.event.SeatDetailsRequest;
 import com.ticketly.mseventseating.dto.event.SeatDetailsResponse;
+import com.ticketly.mseventseating.model.OrganizationRole;
 import com.ticketly.mseventseating.service.category.CategoryProjectionDataService;
 import com.ticketly.mseventseating.service.event.EventLifecycleService;
 import com.ticketly.mseventseating.service.event.EventOwnershipService;
@@ -11,6 +12,7 @@ import com.ticketly.mseventseating.service.projection.EventProjectionService;
 import com.ticketly.mseventseating.service.projection.SeatingMapProjectionService;
 import com.ticketly.mseventseating.service.seat.SeatValidationService;
 import com.ticketly.mseventseating.service.projection.SessionProjectionService;
+import com.ticketly.mseventseating.service.session.SessionOwnershipService;
 import com.ticketly.mseventseating.service.validation.ValidationService;
 import dto.CreateOrderRequest;
 import dto.projection.CategoryProjectionDTO;
@@ -42,6 +44,7 @@ public class InternalEventController {
     private final DiscountProjectionService discountProjectionService;
     private final ValidationService validationService;
     private final EventOwnershipService eventOwnershipService;
+    private final SessionOwnershipService sessionOwnershipService;
 
     /**
      * Secure M2M endpoint for the Scheduler Service to put a session on sale.
@@ -145,5 +148,22 @@ public class InternalEventController {
             @RequestParam String userId) {
         boolean isOwner = eventOwnershipService.isOwner(eventId, userId);
         return ResponseEntity.ok(isOwner);
+    }
+
+    /**
+     * Verify if a user has a specific role for a session
+     *
+     * @param sessionId the session ID to check
+     * @param userId    the user ID to verify
+     * @param role      the role to check for
+     * @return true if the user has the specified role, false otherwise
+     */
+    @GetMapping("/sessions/verify-role")
+    public ResponseEntity<Boolean> verifySessionRole(
+            @RequestParam UUID sessionId,
+            @RequestParam String userId,
+            @RequestParam OrganizationRole role) {
+        boolean hasRole = sessionOwnershipService.hasRole(sessionId, userId, role);
+        return ResponseEntity.ok(hasRole);
     }
 }
