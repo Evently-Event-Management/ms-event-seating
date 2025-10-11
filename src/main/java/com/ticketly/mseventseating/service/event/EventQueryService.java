@@ -232,6 +232,7 @@ public class EventQueryService {
                 .collect(Collectors.toList());
 
         List<SessionResponse> sessionDTOs = event.getSessions().stream()
+                .sorted(Comparator.comparing(EventSession::getStartTime))
                 .map(this::mapToSessionResponse)
                 .collect(Collectors.toList());
 

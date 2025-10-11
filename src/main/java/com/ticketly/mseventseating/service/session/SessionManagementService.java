@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -92,6 +93,7 @@ public class SessionManagementService {
         log.info("Successfully created {} sessions for event: {}", savedSessions.size(), event.getId());
 
         List<SessionResponse> sessionResponses = savedSessions.stream()
+                .sorted(Comparator.comparing(EventSession::getStartTime))
                 .map(this::mapToSessionResponse)
                 .toList();
 
@@ -147,6 +149,7 @@ public class SessionManagementService {
         log.debug("Found {} sessions for event {}", sessions.size(), eventId);
 
         return sessions.stream()
+                .sorted(Comparator.comparing(EventSession::getStartTime))
                 .map(this::mapToSessionResponse)
                 .toList();
     }
