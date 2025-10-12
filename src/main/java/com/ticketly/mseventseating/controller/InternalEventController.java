@@ -22,12 +22,18 @@ import dto.projection.SeatingMapProjectionDTO;
 import dto.projection.SessionProjectionDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import com.ticketly.mseventseating.dto.event.BatchOwnershipRequest;
+import com.ticketly.mseventseating.dto.event.BatchOwnershipResponse;
 
 @RestController
 @RequestMapping("/internal/v1") // A dedicated path for internal M2M calls
@@ -148,6 +154,50 @@ public class InternalEventController {
             @RequestParam String userId) {
         boolean isOwner = eventOwnershipService.isOwner(eventId, userId);
         return ResponseEntity.ok(isOwner);
+    }
+
+    /**
+     * Verify which events from a batch are owned by a user
+     * Returns a list of event IDs that the user owns
+     *
+     * @param request contains eventIds array and userId to verify as owner
+     * @return BatchOwnershipResponse containing array of event IDs the user owns
+     */
+    @PostMapping("/events/batch-ownership")
+    public ResponseEntity<BatchOwnershipResponse> getBatchEventOwnership(
+            @RequestBody BatchOwnershipRequest request) {
+        String userId = request.getUserId();
+        List<UUID> ownedEvents = request.getEventIds().stream()
+            .filter(eventId -> eventOwnershipService.isOwner(eventId, userId))
+            .collect(Collectors.toList());
+
+        return ResponseEntity.ok(new BatchOwnershipResponse(ownedEvents));
+    }
+
+    /**
+     * Verify if a user owns all the specified events
+     * Returns 200 OK if the user owns all events, otherwise returns a 403 Forbidden error
+     *
+     * @param request contains eventIds array and userId to verify as owner
+     * @return void - 200 OK response if all events are owned by the user
+     * @throws ResponseStatusException with 403 Forbidden if the user doesn't own all events
+     */
+    @PostMapping("/events/verify-batch-ownership")
+    public ResponseEntity<Void> verifyBatchEventOwnership(
+            @RequestBody BatchOwnershipRequest request) {
+        String userId = request.getUserId();
+
+        for (UUID eventId : request.getEventIds()) {
+            if (!eventOwnershipService.isOwner(eventId, userId)) {
+                throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "User " + userId + " does not own all specified events"
+                );
+            }
+        }
+
+        // If we get here, the user owns all events
+        return ResponseEntity.ok().build();
     }
 
     /**

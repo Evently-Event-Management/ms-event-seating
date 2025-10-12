@@ -2,6 +2,8 @@ package com.ticketly.mseventseating.repository;
 
 import com.ticketly.mseventseating.model.EventSession;
 import model.SessionStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -43,4 +45,61 @@ public interface EventSessionRepository extends JpaRepository<EventSession, UUID
     List<EventSession> findAllByEventId(UUID eventId);
 
     boolean existsByEventIdAndStatus(UUID eventId, SessionStatus status);
+    
+    /**
+     * Count sessions grouped by status for a specific event
+     * 
+     * @param eventId The event ID to get session counts for
+     * @return List of counts by status
+     */
+    @Query("SELECT s.status as status, COUNT(s) as count FROM EventSession s WHERE s.event.id = :eventId GROUP BY s.status")
+    List<Object[]> countSessionsByStatusForEvent(@Param("eventId") UUID eventId);
+    
+    /**
+     * Count sessions grouped by status for a specific organization
+     * 
+     * @param organizationId The organization ID to get session counts for
+     * @return List of counts by status
+     */
+    @Query("SELECT s.status as status, COUNT(s) as count FROM EventSession s JOIN s.event e WHERE e.organization.id = :organizationId GROUP BY s.status")
+    List<Object[]> countSessionsByStatusForOrganization(@Param("organizationId") UUID organizationId);
+    
+    /**
+     * Count total sessions for an event
+     * 
+     * @param eventId The event ID
+     * @return Total number of sessions
+     */
+    @Query("SELECT COUNT(s) FROM EventSession s WHERE s.event.id = :eventId")
+    Long countSessionsForEvent(@Param("eventId") UUID eventId);
+    
+    /**
+     * Count total sessions for an organization
+     * 
+     * @param organizationId The organization ID
+     * @return Total number of sessions
+     */
+    @Query("SELECT COUNT(s) FROM EventSession s JOIN s.event e WHERE e.organization.id = :organizationId")
+    Long countSessionsForOrganization(@Param("organizationId") UUID organizationId);
+    
+    /**
+     * Find all sessions for an organization with their event details
+     * 
+     * @param organizationId The organization ID
+     * @param status Optional status filter
+     * @param pageable Pagination and sorting information
+     * @return Page of sessions with event details
+     */
+    @Query("SELECT new com.ticketly.mseventseating.dto.session.OrganizationSessionDTO(" +
+           "s.id, s.startTime, s.endTime, s.salesStartTime, s.sessionType, s.status, " +
+           "e.id, e.title, e.status, c.name) " +
+           "FROM EventSession s " +
+           "JOIN s.event e " +
+           "LEFT JOIN e.category c " +
+           "WHERE e.organization.id = :organizationId " +
+           "AND (:status IS NULL OR s.status = :status)")
+    Page<com.ticketly.mseventseating.dto.session.OrganizationSessionDTO> findSessionsByOrganization(
+            @Param("organizationId") UUID organizationId, 
+            @Param("status") SessionStatus status,
+            Pageable pageable);
 }
