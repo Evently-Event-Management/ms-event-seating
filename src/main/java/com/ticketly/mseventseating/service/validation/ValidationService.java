@@ -27,7 +27,7 @@ public class ValidationService {
     private final SessionSeatingMapRepository seatingMapRepository;
 
     @Transactional(readOnly = true)
-    public void     validatePreOrder(CreateOrderRequest request) {
+    public void validatePreOrder(CreateOrderRequest request) {
         // 1. Fetch Session and Event in one go
         EventSession session = eventSessionRepository
                 .findByIdAndEventIdWithEvent(request.getSession_id(), request.getEvent_id())
@@ -37,7 +37,7 @@ public class ValidationService {
         if (session.getEvent().getStatus() != EventStatus.APPROVED) {
             throw new ValidationException("Event is not approved for sale.");
         }
-        if (session.getEvent().getOrganization().getId() != request.getOrganization_id()) {
+        if (!session.getEvent().getOrganization().getId().equals(request.getOrganization_id())) {
             throw new ValidationException("Event does not belong to the specified organization.");
         }
         if (session.getStatus() != SessionStatus.ON_SALE) {
