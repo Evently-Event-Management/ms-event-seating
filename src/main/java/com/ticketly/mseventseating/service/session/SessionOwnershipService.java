@@ -76,7 +76,7 @@ public class SessionOwnershipService {
 
         // Then check for specific role
         Optional<OrganizationMember> member = organizationMemberRepository.findByOrganizationIdAndUserId(organizationId, userId);
-        return member.isPresent() && member.get().getRoles().contains(role);
+        return member.isPresent() && member.get().getRoles().contains(role) && member.get().isActive();
     }
 
     /**

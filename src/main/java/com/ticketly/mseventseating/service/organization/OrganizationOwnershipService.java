@@ -52,16 +52,16 @@ public class OrganizationOwnershipService {
      * @param organizationId the organization ID
      * @param userId         the user ID
      * @param role           the role to check for
-     * @return true if the user has the specified role
+     * @return true if the user has the specified role and is active
      */
     @Transactional(readOnly = true)
     @Cacheable(value = "organizationMemberRoles", key = "#organizationId + '-' + #userId + '-' + #role")
     public boolean hasRole(UUID organizationId, String userId, OrganizationRole role) {
         log.info("--- DATABASE HIT: Checking if user {} has role {} in organization {} ---", userId, role, organizationId);
 
-        // Then check for specific role in the set of roles
+        // Then check for specific role in the set of roles and that the member is active
         Optional<OrganizationMember> member = memberRepository.findByOrganizationIdAndUserId(organizationId, userId);
-        return member.isPresent() && member.get().getRoles().contains(role);
+        return member.isPresent() && member.get().isActive() && member.get().getRoles().contains(role);
     }
 
     /**
