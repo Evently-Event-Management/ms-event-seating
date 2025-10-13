@@ -60,9 +60,9 @@ public class SeatValidationService {
         }
 
         // Get the tiers associated with this session's event
-        Map<String, Tier> tiersById = tierRepository.findByEventId(session.getEvent().getId())
+        Map<UUID, Tier> tiersById = tierRepository.findByEventId(session.getEvent().getId())
                 .stream()
-                .collect(Collectors.toMap(tier -> tier.getId().toString(), tier -> tier));
+                .collect(Collectors.toMap(Tier::getId, tier -> tier));
 
         // Parse the seating map JSON
         SessionSeatingMapDTO mapDTO;
@@ -90,7 +90,7 @@ public class SeatValidationService {
     }
 
     private void processSeatsByBlock(SessionSeatingMapDTO.Block block, Set<UUID> seatIds,
-                                     Map<String, Tier> tiersById, List<SeatDetailsResponse> results) {
+                                     Map<UUID, Tier> tiersById, List<SeatDetailsResponse> results) {
         // Process individual seats in the block
         if (block.getSeats() != null) {
             processSeatsList(block.getSeats(), seatIds, tiersById, results);
@@ -107,7 +107,7 @@ public class SeatValidationService {
     }
 
     private void processSeatsList(List<SessionSeatingMapDTO.Seat> seats, Set<UUID> seatIds,
-                                  Map<String, Tier> tiersById, List<SeatDetailsResponse> results) {
+                                  Map<UUID, Tier> tiersById, List<SeatDetailsResponse> results) {
         for (SessionSeatingMapDTO.Seat seat : seats) {
             try {
                 if (seatIds.contains(seat.getId())) {

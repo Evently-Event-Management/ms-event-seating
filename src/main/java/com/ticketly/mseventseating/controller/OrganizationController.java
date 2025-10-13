@@ -4,6 +4,7 @@ import com.ticketly.mseventseating.dto.organization.InviteStaffRequest;
 import com.ticketly.mseventseating.dto.organization.OrganizationMemberResponse;
 import com.ticketly.mseventseating.dto.organization.OrganizationRequest;
 import com.ticketly.mseventseating.dto.organization.OrganizationResponse;
+import com.ticketly.mseventseating.dto.organization.UpdateMemberStatusRequest;
 import com.ticketly.mseventseating.service.organization.OrganizationService;
 import com.ticketly.mseventseating.service.organization.OrganizationStaffService;
 import jakarta.validation.Valid;
@@ -179,5 +180,22 @@ public class OrganizationController {
         log.info("User {} removing staff member {} from organization {}", ownerUserId, userId, organizationId);
         organizationStaffService.removeStaff(organizationId, userId, ownerUserId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Update the active status of a staff member in an organization.
+     */
+    @PatchMapping("/{organizationId}/staff/{userId}/status")
+    public ResponseEntity<OrganizationMemberResponse> updateStaffStatus(
+            @PathVariable UUID organizationId,
+            @PathVariable String userId,
+            @Valid @RequestBody UpdateMemberStatusRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        String ownerUserId = jwt.getSubject();
+        log.info("User {} updating status of staff member {} in organization {} to active: {}",
+                ownerUserId, userId, organizationId, request.isActive());
+        OrganizationMemberResponse updatedMember = organizationStaffService.updateMemberStatus(
+                organizationId, userId, request, ownerUserId);
+        return ResponseEntity.ok(updatedMember);
     }
 }

@@ -41,4 +41,8 @@ public class OrganizationMember {
     @Column(name = "role", nullable = false)
     @Builder.Default
     private Set<OrganizationRole> roles = new HashSet<>();
+
+    @Column(name = "is_active", nullable = false)
+    @Builder.Default
+    private boolean isActive = true;
 }

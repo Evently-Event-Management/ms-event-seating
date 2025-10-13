@@ -3,6 +3,7 @@ package com.ticketly.mseventseating.service.organization;
 
 import com.ticketly.mseventseating.dto.organization.InviteStaffRequest;
 import com.ticketly.mseventseating.dto.organization.OrganizationMemberResponse;
+import com.ticketly.mseventseating.dto.organization.UpdateMemberStatusRequest;
 import com.ticketly.mseventseating.exception.ResourceNotFoundException;
 import com.ticketly.mseventseating.model.Organization;
 import com.ticketly.mseventseating.model.OrganizationMember;
@@ -208,8 +209,61 @@ public class OrganizationStaffService {
                             .email(user != null ? user.getEmail() : "Unknown")
                             .name(user != null ? (user.getFirstName() + " " + user.getLastName()) : "Unknown")
                             .roles(member.getRoles())
+                            .isActive(member.isActive())
                             .build();
                 })
                 .toList();
+    }
+
+    /**
+     * Updates the active status of a staff member in an organization.
+     *
+     * @param organizationId the organization ID
+     * @param memberId the member's user ID
+     * @param request the request containing the new active status
+     * @param ownerUserId the user ID of the requester (must be organization owner)
+     * @return the updated organization member response
+     */
+    @Transactional
+    @CacheEvict(value = {"organizationMemberRoles"}, allEntries = true)
+    public OrganizationMemberResponse updateMemberStatus(UUID organizationId, String memberId,
+                                                        UpdateMemberStatusRequest request, String ownerUserId) {
+        // Verify the person updating the member status owns the organization
+        if (!organizationOwnershipService.isOwner(organizationId, ownerUserId)) {
+            throw new AuthorizationDeniedException("Only the organization owner can update staff status.");
+        }
+
+        // Find the member
+        OrganizationMember member = memberRepository.findByOrganizationIdAndUserId(organizationId, memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found in organization: " + memberId));
+
+        // Update the active status
+        member.setActive(request.isActive());
+        memberRepository.save(member);
+
+        // Evict cache for this specific member
+        organizationOwnershipService.evictMemberRoleCacheByUser(UUID.fromString(memberId));
+
+        log.info("Updated active status for user {} in organization {} to {}",
+                memberId, organizationId, request.isActive());
+
+        // Fetch user information from Keycloak to include in the response
+        UserRepresentation user = null;
+        try {
+            user = keycloakAdminClient.realm(realm).users().get(memberId).toRepresentation();
+            log.debug("Found Keycloak user: {} for member ID: {}", user.getUsername(), memberId);
+        } catch (Exception e) {
+            log.warn("Could not fetch Keycloak user with ID: {}. Error: {}", memberId, e.getMessage());
+        }
+
+        // Convert to response
+        return new OrganizationMemberResponse(
+                member.getId(),
+                member.getUserId(),
+                user != null ? user.getEmail() : "Unknown",
+                user != null ? (user.getFirstName() + " " + user.getLastName()) : "Unknown",
+                member.getRoles(),
+                member.isActive()
+        );
     }
 }

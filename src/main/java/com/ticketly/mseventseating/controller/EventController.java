@@ -167,7 +167,4 @@ public class EventController {
         eventLifecycleService.rejectEvent(eventId, request.getReason());
         return ResponseEntity.ok().build();
     }
-
-
-
 }

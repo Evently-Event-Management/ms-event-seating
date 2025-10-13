@@ -10,6 +10,7 @@ public record OrderUpdatedEventDto(
         UUID UserID,
         UUID SessionID,
         UUID EventID,
+        UUID OrganizationID,
         String Status,
         BigDecimal SubTotal,
         UUID DiscountID,

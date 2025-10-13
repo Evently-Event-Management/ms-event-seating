@@ -37,6 +37,9 @@ public class ValidationService {
         if (session.getEvent().getStatus() != EventStatus.APPROVED) {
             throw new ValidationException("Event is not approved for sale.");
         }
+        if (session.getEvent().getOrganization().getId() != request.getOrganization_id()) {
+            throw new ValidationException("Event does not belong to the specified organization.");
+        }
         if (session.getStatus() != SessionStatus.ON_SALE) {
             throw new ValidationException("Session is not currently on sale.");
         }
