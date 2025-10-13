@@ -13,6 +13,7 @@ import dto.SessionSeatingMapDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.EventStatus;
+import model.SessionStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -189,11 +190,25 @@ public class EventQueryService {
      * Maps an Event entity to EventSummaryDTO for list view
      */
     private EventSummaryDTO mapToEventSummary(Event event) {
-        // Find the earliest session
-        OffsetDateTime earliestDate = event.getSessions().stream()
+        // Find the earliest upcoming session (after current time) that is not CANCELLED or CLOSED
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime earliestUpcomingDate = event.getSessions().stream()
+                .filter(session -> session.getStatus() != SessionStatus.CANCELLED &&
+                                   session.getStatus() != SessionStatus.CLOSED)
                 .map(EventSession::getStartTime)
+                .filter(startTime -> startTime.isAfter(now))
                 .min(Comparator.naturalOrder())
                 .orElse(null);
+
+        // If no upcoming active sessions, fall back to the last active session's date
+        if (earliestUpcomingDate == null && !event.getSessions().isEmpty()) {
+            earliestUpcomingDate = event.getSessions().stream()
+                    .filter(session -> session.getStatus() != SessionStatus.CANCELLED &&
+                                       session.getStatus() != SessionStatus.CLOSED)
+                    .map(EventSession::getStartTime)
+                    .max(Comparator.naturalOrder())
+                    .orElse(null);
+        }
 
         String coverPhotoUrl = null;
         if (event.getCoverPhotos() != null && !event.getCoverPhotos().isEmpty()) {
@@ -217,7 +232,7 @@ public class EventQueryService {
                         : null)
                 .coverPhoto(coverPhotoUrl)
                 .sessionCount(event.getSessions().size())
-                .earliestSessionDate(earliestDate)
+                .earliestSessionDate(earliestUpcomingDate)
                 .build();
     }
 
