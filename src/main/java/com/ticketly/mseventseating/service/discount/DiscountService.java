@@ -156,6 +156,17 @@ public class DiscountService {
 
         Discount discount = getAndValidateDiscount(eventId, discountId);
 
+        // Clear the many-to-many relationships to avoid foreign key constraint violations
+        if (discount.getApplicableSessions() != null) {
+            discount.getApplicableSessions().clear();
+        }
+        if (discount.getApplicableTiers() != null) {
+            discount.getApplicableTiers().clear();
+        }
+
+        // Flush changes to ensure join table entries are deleted before the discount is deleted
+        discountRepository.saveAndFlush(discount);
+
         discountRepository.delete(discount);
         log.info("Deleted discount: {} for event: {}", discountId, eventId);
     }

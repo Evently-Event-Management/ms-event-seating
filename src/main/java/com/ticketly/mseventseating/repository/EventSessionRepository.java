@@ -5,6 +5,7 @@ import model.SessionStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -46,6 +47,14 @@ public interface EventSessionRepository extends JpaRepository<EventSession, UUID
 
     boolean existsByEventIdAndStatus(UUID eventId, SessionStatus status);
     
+    /**
+     * Remove all entries from discount_sessions join table for a given session
+     * This prevents foreign key constraint violations when deleting a session
+     */
+    @Modifying
+    @Query(value = "DELETE FROM discount_sessions WHERE session_id = :sessionId", nativeQuery = true)
+    void removeSessionFromDiscounts(@Param("sessionId") UUID sessionId);
+
     /**
      * Count sessions grouped by status for a specific event
      * 

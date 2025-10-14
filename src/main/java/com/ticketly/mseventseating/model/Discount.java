@@ -81,7 +81,7 @@ public class Discount {
     private List<Tier> applicableTiers;
 
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "discount_sessions",
             joinColumns = @JoinColumn(name = "discount_id"),

@@ -401,6 +401,9 @@ public class SessionManagementService {
             throw new BadRequestException("Only SCHEDULED sessions can be deleted. Current status: " + session.getStatus());
         }
 
+        // Remove this session from all discounts that reference it to avoid foreign key constraint violations
+        sessionRepository.removeSessionFromDiscounts(sessionId);
+
         sessionRepository.delete(session);
 
         ownershipService.evictSessionCacheById(sessionId);
