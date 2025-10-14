@@ -127,6 +127,10 @@ aws:
   region: ${AWS_REGION:ap-south-1}
   s3:
     bucket-name: ${AWS_S3_BUCKET_NAME:ticketly-storage}
+  # Credentials from environment variables
+  credentials:
+    access-key: ${AWS_ACCESS_KEY_ID:}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:}
   # Local development settings (used only when needed)
   local:
     endpoint: ${AWS_LOCAL_ENDPOINT:}

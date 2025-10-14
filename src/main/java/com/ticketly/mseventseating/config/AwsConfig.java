@@ -23,17 +23,24 @@ public class AwsConfig {
     @Value("${aws.region}")
     private String region;
 
+    // Credentials from environment variables
+    @Value("${aws.credentials.access-key:#{null}}")
+    private String accessKeyId;
+
+    @Value("${aws.credentials.secret-key:#{null}}")
+    private String secretAccessKey;
+
     // Credentials for local development
     @Value("${aws.local.access-key:test}")
-    private String accessKey;
+    private String localAccessKey;
 
     @Value("${aws.local.secret-key:test}")
-    private String secretKey;
+    private String localSecretKey;
 
     /**
      * Configures the S3Client bean.
      * In a 'dev' or 'test' profile, it points to LocalStack.
-     * In any other profile (like 'prod'), it uses default AWS credentials and endpoints.
+     * In any other profile (like 'prod'), it uses AWS credentials from environment variables.
      */
     @Bean
     public S3Client s3Client() {
@@ -41,11 +48,17 @@ public class AwsConfig {
                 .region(Region.of(region));
 
         if (localEndpoint != null && !localEndpoint.isBlank()) {
+            // For local development with LocalStack
             builder.endpointOverride(URI.create(localEndpoint))
                     .forcePathStyle(true)
                     .credentialsProvider(StaticCredentialsProvider.create(
-                            AwsBasicCredentials.create(accessKey, secretKey)));
+                            AwsBasicCredentials.create(localAccessKey, localSecretKey)));
+        } else if (accessKeyId != null && secretAccessKey != null) {
+            // For production with explicit credentials
+            builder.credentialsProvider(StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(accessKeyId, secretAccessKey)));
         }
+        // If no credentials provided, fall back to default AWS credential provider chain
 
         return builder.build();
     }
@@ -60,6 +73,7 @@ public class AwsConfig {
                 .region(Region.of(region));
 
         if (localEndpoint != null && !localEndpoint.isBlank()) {
+            // For local development with LocalStack
             S3Configuration s3Configuration = S3Configuration.builder()
                     .pathStyleAccessEnabled(true)
                     .build();
@@ -67,8 +81,18 @@ public class AwsConfig {
             builder.endpointOverride(URI.create(localEndpoint))
                     .serviceConfiguration(s3Configuration)
                     .credentialsProvider(StaticCredentialsProvider.create(
-                            AwsBasicCredentials.create(accessKey, secretKey)));
+                            AwsBasicCredentials.create(localAccessKey, localSecretKey)));
+        } else if (accessKeyId != null && secretAccessKey != null) {
+            // For production with explicit credentials
+            S3Configuration s3Configuration = S3Configuration.builder()
+                    .pathStyleAccessEnabled(false)
+                    .build();
+
+            builder.serviceConfiguration(s3Configuration)
+                    .credentialsProvider(StaticCredentialsProvider.create(
+                            AwsBasicCredentials.create(accessKeyId, secretAccessKey)));
         }
+        // If no credentials provided, fall back to default AWS credential provider chain
 
         return builder.build();
     }
