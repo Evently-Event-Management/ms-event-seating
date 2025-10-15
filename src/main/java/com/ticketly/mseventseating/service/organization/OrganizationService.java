@@ -1,5 +1,6 @@
 package com.ticketly.mseventseating.service.organization;
 
+import com.ticketly.mseventseating.dto.organization.OrganizationPageResponse;
 import com.ticketly.mseventseating.dto.organization.OrganizationRequest;
 import com.ticketly.mseventseating.dto.organization.OrganizationResponse;
 import com.ticketly.mseventseating.exception.BadRequestException;
@@ -12,6 +13,8 @@ import com.ticketly.mseventseating.service.storage.S3StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -193,6 +196,33 @@ public class OrganizationService {
         organizationRepository.delete(organization);
         ownershipService.evictOrganizationCacheById(id);
         log.info("Organization deleted. ID: {}, Owner: {}", id, userId);
+    }
+
+    /**
+     * Get all organizations with pagination support (admin access)
+     *
+     * @param pageable pagination information
+     * @return paginated organization response
+     */
+    @Transactional(readOnly = true)
+    public OrganizationPageResponse getAllOrganizationsPaginated(Pageable pageable) {
+        log.info("Fetching all organizations with pagination. Page: {}, Size: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
+        Page<Organization> organizationsPage = organizationRepository.findAll(pageable);
+
+        List<OrganizationResponse> organizationResponses = organizationsPage.getContent().stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+
+        return OrganizationPageResponse.builder()
+                .content(organizationResponses)
+                .pageNumber(organizationsPage.getNumber())
+                .pageSize(organizationsPage.getSize())
+                .totalElements(organizationsPage.getTotalElements())
+                .totalPages(organizationsPage.getTotalPages())
+                .last(organizationsPage.isLast())
+                .build();
     }
 
     /**

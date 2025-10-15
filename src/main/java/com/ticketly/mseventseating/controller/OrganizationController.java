@@ -2,6 +2,7 @@ package com.ticketly.mseventseating.controller;
 
 import com.ticketly.mseventseating.dto.organization.InviteStaffRequest;
 import com.ticketly.mseventseating.dto.organization.OrganizationMemberResponse;
+import com.ticketly.mseventseating.dto.organization.OrganizationPageResponse;
 import com.ticketly.mseventseating.dto.organization.OrganizationRequest;
 import com.ticketly.mseventseating.dto.organization.OrganizationResponse;
 import com.ticketly.mseventseating.dto.organization.UpdateMemberStatusRequest;
@@ -10,6 +11,9 @@ import com.ticketly.mseventseating.service.organization.OrganizationStaffService
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -197,5 +201,26 @@ public class OrganizationController {
         OrganizationMemberResponse updatedMember = organizationStaffService.updateMemberStatus(
                 organizationId, userId, request, ownerUserId);
         return ResponseEntity.ok(updatedMember);
+    }
+
+    /**
+     * Admin: Get all organizations with pagination support.
+     */
+    @GetMapping("/admin/all")
+    @PreAuthorize("hasRole('organization_admin')")
+    public ResponseEntity<OrganizationPageResponse> getAllOrganizations(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection) {
+
+        log.info("Admin fetching all organizations with pagination. Page: {}, Size: {}", page, size);
+
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("desc") ?
+                Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        return ResponseEntity.ok(organizationService.getAllOrganizationsPaginated(pageable));
     }
 }
