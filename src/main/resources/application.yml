@@ -5,6 +5,24 @@ server:
   tomcat:
     max-http-form-post-size: ${MAX_HTTP_FORM_POST_SIZE:50MB}
 
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+      group:
+        readiness:
+          include: db,redis,diskSpace
+        liveness:
+          include: ping
+
 spring:
   application:
     name: ms-event-seating

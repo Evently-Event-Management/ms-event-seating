@@ -23,6 +23,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/v1/public/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/actuator/health/**").permitAll() // Explicitly allow all health endpoints
+                        .requestMatchers("/actuator/health/readiness").permitAll() // Explicitly allow readiness probe
+                        .requestMatchers("/actuator/health/liveness").permitAll() // Explicitly allow liveness probe
                         .requestMatchers("/health").permitAll() // Allow access to health endpoint without authentication
                         .anyRequest().authenticated()
                 )
