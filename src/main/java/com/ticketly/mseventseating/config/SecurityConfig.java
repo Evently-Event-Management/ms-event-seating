@@ -30,7 +30,6 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health/readiness").permitAll() // Explicitly allow readiness probe
                         .requestMatchers("/actuator/health/liveness").permitAll() // Explicitly allow liveness probe
                         .requestMatchers("/health").permitAll() // Allow access to health endpoint without
-                                                                // authentication
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
