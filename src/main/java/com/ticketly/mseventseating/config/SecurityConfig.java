@@ -2,7 +2,6 @@ package com.ticketly.mseventseating.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,35 +22,36 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults()) // Applies the `corsConfigurationSource` bean
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.OPTIONS).permitAll() // Allow preflight requests
                         .requestMatchers("/v1/public/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/actuator/health/**").permitAll() // Explicitly allow all health endpoints
                         .requestMatchers("/actuator/health/readiness").permitAll() // Explicitly allow readiness probe
                         .requestMatchers("/actuator/health/liveness").permitAll() // Explicitly allow liveness probe
-                        .requestMatchers("/health").permitAll() // Allow access to health endpoint without
-                        .anyRequest().authenticated())
+                        .requestMatchers("/health").permitAll() // Allow access to health endpoint without authentication
+                        .anyRequest().authenticated()
+                )
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                );
 
         return http.build();
     }
-    // @Bean
-    // public SecurityFilterChain debuggingFilterChain(HttpSecurity http) throws
-    // Exception {
-    // http
-    // // Apply the corsConfigurationSource bean
-    // .cors(Customizer.withDefaults())
-    // // Disable CSRF
-    // .csrf(AbstractHttpConfigurer::disable)
-    // // Temporarily permit absolutely all requests
-    // .authorizeHttpRequests(authorize -> authorize
-    // .anyRequest().permitAll()
-    // );
-    // return http.build();
-    // }
+//    @Bean
+//    public SecurityFilterChain debuggingFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                // Apply the corsConfigurationSource bean
+//                .cors(Customizer.withDefaults())
+//                // Disable CSRF
+//                .csrf(AbstractHttpConfigurer::disable)
+//                // Temporarily permit absolutely all requests
+//                .authorizeHttpRequests(authorize -> authorize
+//                        .anyRequest().permitAll()
+//                );
+//        return http.build();
+//    }
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
@@ -60,28 +60,25 @@ public class SecurityConfig {
         return jwtConverter;
     }
 
-    // @Bean
-    // public CorsConfigurationSource corsConfigurationSource() {
-    // CorsConfiguration configuration = new CorsConfiguration();
-    // // Define the allowed origins (your frontend URLs)
-    // configuration.setAllowedOrigins(List.of("http://localhost:8090"));
-    // // Define the allowed HTTP methods
-    // configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE",
-    // "OPTIONS", "PATCH"));
-    // // Define the allowed headers from the client
-    // configuration.setAllowedHeaders(List.of("*"));
-    // // Define the exposed headers (headers that browsers are allowed to access)
-    // configuration.setExposedHeaders(Arrays.asList("Authorization",
-    // "Content-Type"));
-    // // Allow credentials (e.g., cookies, authorization headers)
-    // configuration.setAllowCredentials(true);
-    // // Max age for CORS preflight requests caching (in seconds)
-    // configuration.setMaxAge(3600L);
-    //
-    // UrlBasedCorsConfigurationSource source = new
-    // UrlBasedCorsConfigurationSource();
-    // // Apply this configuration to all endpoints in your application
-    // source.registerCorsConfiguration("/**", configuration);
-    // return source;
-    // }
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        // Define the allowed origins (your frontend URLs)
+//        configuration.setAllowedOrigins(List.of("http://localhost:8090"));
+//        // Define the allowed HTTP methods
+//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+//        // Define the allowed headers from the client
+//        configuration.setAllowedHeaders(List.of("*"));
+//        // Define the exposed headers (headers that browsers are allowed to access)
+//        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+//        // Allow credentials (e.g., cookies, authorization headers)
+//        configuration.setAllowCredentials(true);
+//        // Max age for CORS preflight requests caching (in seconds)
+//        configuration.setMaxAge(3600L);
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        // Apply this configuration to all endpoints in your application
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
 }
