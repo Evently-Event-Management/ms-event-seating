@@ -6,6 +6,7 @@ import com.ticketly.mseventseating.exception.SchedulingException;
 import com.ticketly.mseventseating.model.*;
 import com.ticketly.mseventseating.repository.EventRepository;
 import com.ticketly.mseventseating.repository.EventSessionRepository;
+import com.ticketly.mseventseating.service.storage.S3StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.EventStatus;
@@ -27,6 +28,7 @@ public class EventLifecycleService {
     private final EventRepository eventRepository;
     private final EventSessionRepository eventSessionRepository;
     private final EventOwnershipService eventOwnershipService;
+    private final S3StorageService s3StorageService;
 
 
     /**
@@ -138,10 +140,26 @@ public class EventLifecycleService {
         // 3. If the check passes, find the event to delete.
         // We still need to fetch the event to perform the delete operation.
         Event event = findEventById(eventId);
+        
+        // 4. Delete cover photos from S3 storage before deleting the event
+        if (event.getCoverPhotos() != null && !event.getCoverPhotos().isEmpty()) {
+            log.info("Deleting {} cover photos from S3 for event {}", event.getCoverPhotos().size(), eventId);
+            for (EventCoverPhoto coverPhoto : event.getCoverPhotos()) {
+                try {
+                    // The photoUrl field contains the S3 key
+                    String s3Key = coverPhoto.getPhotoUrl();
+                    s3StorageService.deleteFile(s3Key);
+                    log.debug("Deleted cover photo with key: {}", s3Key);
+                } catch (Exception e) {
+                    // Log the error but continue with deletion process
+                    log.error("Failed to delete cover photo with key: {}", coverPhoto.getPhotoUrl(), e);
+                }
+            }
+        }
 
         log.debug("Deleting event {}: {}", eventId, event.getTitle());
         eventRepository.delete(event);
-        log.info("Event with ID {} has been successfully deleted", eventId);
+        log.info("Event with ID {} has been successfully deleted with its cover photos", eventId);
     }
 
     private Event findEventById(UUID eventId) {
