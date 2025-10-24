@@ -174,6 +174,21 @@ public class InternalEventController {
     }
 
     /**
+     * Verify if a user is the owner of a session
+     *
+     * @param sessionId the session ID to check
+     * @param userId    the user ID to verify as owner
+     * @return true if the user is the owner, false otherwise
+     */
+    @GetMapping("/sessions/verify-ownership")
+    public ResponseEntity<Boolean> verifySessionOwnership(
+            @RequestParam UUID sessionId,
+            @RequestParam String userId) {
+        boolean isOwner = sessionOwnershipService.isOwner(sessionId, userId);
+        return ResponseEntity.ok(isOwner);
+    }
+
+    /**
      * Verify which events from a batch are owned by a user
      * Returns a list of event IDs that the user owns
      *
